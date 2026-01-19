@@ -1,67 +1,134 @@
-# Shortcode Arcade: Classic Games
-
-A modular WordPress plugin for embedding classic multiplayer card, dice, and board games using shortcodes. Includes lobbies, room-based play, AI opponents, and a clean engine designed for extension.
-
----
-
-## Overview
-
-**Shortcode Arcade: Classic Games** brings traditional games to WordPress with a modern, shortcode-driven architecture. Site owners can embed individual games or a full arcade, while players can create or join rooms, play with friends, or face AI opponents.
-
-This repository contains the **open-core engine** and free games. Pro features and additional games are layered cleanly on top.
-
----
-
-## Core Features
-
-- **Shortcode-Based Embedding**  
-  Add games anywhere using simple, flexible shortcodes.
-
-- **Room-Based Multiplayer**  
-  Players create or join rooms using shareable room codes.
-
-- **Lobby System**  
-  Central lobby UI for creating rooms and joining games.
-
-- **AI Opponents**  
-  Built-in AI support with configurable difficulty levels.
-
-- **Guest Play**  
-  No user accounts required — session-based participation.
-
-- **Automatic Room Cleanup**  
-  Inactive rooms expire automatically to keep the system clean.
-
-- **Modular Game Engine**  
-  Games are isolated, self-contained, and easy to extend.
-
-- **Developer-Friendly Architecture**  
-  Clean contracts, traits, and registries designed for long-term maintenance.
-
----
-
-## Included Games
-
-> Game availability depends on version and license tier.
-
-- **Checkers** – Classic 2-player board game with AI support  
-- **War** – Automatic card game, idle-friendly  
-- *(Additional games may be included or added via extensions)*
-
----
-
-## Installation
-
-1. Upload the plugin folder to `/wp-content/plugins/`
-2. Activate **Shortcode Arcade: Classic Games** from the Plugins menu
-3. Configure global settings under **Games Arcade → Settings**
-4. Add games to pages using shortcodes
-
----
-
 ## Shortcodes
 
-### Full Arcade
-Displays the main lobby and game selector.
+Shortcode Arcade is built around flexible, composable shortcodes. Games, lobbies, rooms, and rules can be placed anywhere and wrapped in custom layouts.
+
+---
+
+### 🎮 Add Games to Any Page
+
+#### Single Game
+Embed a specific game directly on a page or post.
+
+```txt
+[sacga_game game="checkers"]
+```
+
+**Use cases**
+- Dedicated game pages
+- Landing pages
+- Custom layouts with surrounding content
+
+---
+
+#### Full Arcade
+Displays the full arcade lobby with game selection and room creation.
+
 ```txt
 [classic_games_arcade]
+```
+
+**Use cases**
+- Main arcade page
+- Community hub
+- Central lobby experience
+
+---
+
+## 📘 Rules Shortcodes
+
+Rules are pulled directly from each game’s PHP definition to ensure a single source of truth.
+
+---
+
+### Master Rules Page
+Displays **all game rules** in an accordion layout grouped by game type (Board, Card, Dice).
+
+```txt
+[sacga_rules]
+```
+
+**Features**
+- Accordion layout with collapsible panels
+- Expand All / Collapse All controls
+- Grouped by game type with color-coded headers
+- Displays player count and AI availability
+- Ideal for a dedicated Rules or Help page
+
+---
+
+### Single Game Rules
+Displays rules for a specific game.
+
+```txt
+[sacga_rules game="checkers"]
+```
+
+#### Attributes
+
+| Attribute | Default | Options | Description |
+|---------|--------|--------|-------------|
+| `game` | required | Any game ID | Game to display rules for |
+| `layout` | `sections` | `sections`, `compact` | Full rules or condensed view |
+| `show_title` | `true` | `true`, `false` | Show or hide the game title |
+
+#### Examples
+```txt
+[sacga_rules game="rummy"]
+[sacga_rules game="checkers" layout="compact"]
+[sacga_rules game="war" show_title="false"]
+```
+
+---
+
+### Available Game IDs
+
+```txt
+checkers, chess, fourfall, backgammon,
+hearts, spades, euchre, cribbage,
+diamonds, rummy, war, pig, overcut
+```
+
+---
+
+## 🏟️ Available Rooms Shortcode
+
+### `[sacga_available_rooms]`
+Displays a frontend-facing list of joinable game rooms. This shortcode is intentionally separate from the arcade to allow flexible placement.
+
+```txt
+[sacga_available_rooms]
+```
+
+#### Usage Examples
+```txt
+[sacga_available_rooms]
+[sacga_available_rooms game="checkers"]
+[sacga_available_rooms limit="20"]
+[sacga_available_rooms refresh="30"]
+[sacga_available_rooms show_players="false"]
+```
+
+#### Features
+- Modern card-based UI with gradient headers
+- Displays game name, room code, status, and available seats
+- One-click **Join Room** links
+- Friendly empty-state messaging
+- Optional AJAX auto-refresh
+- Theme-agnostic CSS using custom properties
+- Automatic dark-mode support
+- Mobile-first responsive design
+- Staggered animations as rooms appear
+
+#### Room Visibility Rules
+- Shows rooms with `lobby` and `active` status only
+- Excludes full rooms
+- Excludes expired rooms
+
+---
+
+## Developer Notes
+
+- Rules are sourced directly from each game’s PHP definition
+- No duplicated documentation or hard-coded rule text
+- Shortcodes are designed to be wrapped in custom HTML or theme layouts
+- Admin UI remains intentionally minimal and factual
