@@ -1,0 +1,305 @@
+.sacga-game-war {
+    --war-green: #2e4a31;
+    --war-dark: #1c1f1b;
+    --war-olive: #4f5f3a;
+    --war-khaki: #d8c59a;
+    --war-gold: #f2c15f;
+    --war-red: #a6432b;
+    --war-panel: rgba(22, 25, 20, 0.85);
+    --war-border: rgba(242, 193, 95, 0.35);
+    color: #f5f1e0;
+    font-family: inherit;
+}
+
+.sacga-game-war .war-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.sacga-game-war .war-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.sacga-game-war .war-subtitle {
+    color: rgba(245, 241, 224, 0.8);
+    font-size: 0.95rem;
+}
+
+.sacga-game-war .war-status {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    background: var(--war-panel);
+    border: 1px solid var(--war-border);
+    border-radius: 12px;
+}
+
+.sacga-game-war .war-status-line {
+    font-weight: 600;
+}
+
+.sacga-game-war .war-summary {
+    font-size: 0.9rem;
+    color: rgba(245, 241, 224, 0.8);
+}
+
+.sacga-game-war .war-status-message {
+    font-size: 0.95rem;
+    color: var(--war-khaki);
+}
+
+.sacga-game-war .war-table {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 16px;
+    background-color: #273528;
+    background-image:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%),
+        repeating-linear-gradient(45deg, rgba(44, 67, 43, 0.6) 0 20px, rgba(30, 45, 32, 0.6) 20px 40px),
+        repeating-linear-gradient(-45deg, rgba(61, 77, 48, 0.5) 0 28px, rgba(24, 36, 26, 0.6) 28px 56px);
+    border-radius: 16px;
+    border: 2px solid rgba(245, 241, 224, 0.1);
+    min-height: clamp(280px, 48vh, 520px);
+}
+
+.sacga-game-war .war-seat {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(18, 22, 18, 0.8);
+    border-radius: 12px;
+    border: 1px solid rgba(245, 241, 224, 0.1);
+}
+
+.sacga-game-war .war-seat-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sacga-game-war .war-seat-name {
+    font-weight: 700;
+}
+
+.sacga-game-war .war-ai {
+    background: var(--war-gold);
+    color: #1b1b1b;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 999px;
+    margin-left: 6px;
+}
+
+.sacga-game-war .war-seat-count {
+    font-size: 0.85rem;
+    color: rgba(245, 241, 224, 0.75);
+}
+
+.sacga-game-war .war-seat-stacks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.sacga-game-war .sacga-card {
+    width: 80px;
+    height: 120px;
+}
+
+.sacga-game-war .war-stack-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(245, 241, 224, 0.6);
+    margin-bottom: 6px;
+}
+
+.sacga-game-war .war-card-stack {
+    position: relative;
+    min-height: 80px;
+    min-width: 80px;
+    display: flex;
+    align-items: flex-start;
+    overflow: visible;
+}
+
+.sacga-game-war .war-card-stack .sacga-card {
+    position: relative;
+    margin-left: -60px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+.sacga-game-war .war-card-stack .sacga-card:first-child {
+    margin-left: 0;
+}
+
+.sacga-game-war .war-card-stack .sacga-card:nth-child(1) { z-index: 6; }
+.sacga-game-war .war-card-stack .sacga-card:nth-child(2) { z-index: 5; }
+.sacga-game-war .war-card-stack .sacga-card:nth-child(3) { z-index: 4; }
+.sacga-game-war .war-card-stack .sacga-card:nth-child(4) { z-index: 3; }
+.sacga-game-war .war-card-stack .sacga-card:nth-child(5) { z-index: 2; }
+
+.sacga-game-war .war-stack-empty {
+    font-size: 0.8rem;
+    color: rgba(245, 241, 224, 0.5);
+    padding-top: 12px;
+}
+
+.sacga-game-war .war-battle-area {
+    background: rgba(18, 22, 18, 0.9);
+    border-radius: 12px;
+    border: 1px solid var(--war-border);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+}
+
+.sacga-game-war .war-battle-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(245, 241, 224, 0.7);
+}
+
+.sacga-game-war .war-badge {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 8px;
+    border-radius: 999px;
+}
+
+.sacga-game-war .war-pot {
+    color: var(--war-gold);
+}
+
+.sacga-game-war .war-alert {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: var(--war-gold);
+    text-shadow: 0 0 12px rgba(242, 193, 95, 0.4);
+}
+
+.sacga-game-war .war-battle-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    width: 100%;
+}
+
+.sacga-game-war .war-battle-cards .sacga-card {
+    width: 80px;
+    height: 120px;
+}
+
+.sacga-game-war .war-battle-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.sacga-game-war .war-battle-label {
+    font-size: 0.85rem;
+    color: rgba(245, 241, 224, 0.7);
+}
+
+.sacga-game-war .war-card-placeholder {
+    height: 120px;
+    width: 80px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px dashed rgba(245, 241, 224, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(245, 241, 224, 0.5);
+}
+
+.sacga-game-war .war-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.sacga-game-war .war-waiting,
+.sacga-game-war .war-gameover {
+    font-size: 0.9rem;
+    color: rgba(245, 241, 224, 0.75);
+}
+
+.sacga-game-war .war-seat-winner {
+    border-color: rgba(242, 193, 95, 0.8);
+    box-shadow: 0 0 18px rgba(242, 193, 95, 0.3);
+}
+
+.sacga-game-war.war-animating .war-battle-card {
+    animation: war-flip 0.6s ease;
+}
+
+.sacga-game-war.war-was-war .war-alert {
+    animation: war-pulse 1s ease-in-out;
+}
+
+@keyframes war-flip {
+    0% { transform: translateY(10px) scale(0.96); opacity: 0.4; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes war-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@media (min-width: 900px) {
+    .sacga-game-war .war-table {
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 1.2fr) minmax(0, 1fr);
+        align-items: center;
+    }
+
+    .sacga-game-war .war-seat-opponent {
+        align-self: start;
+    }
+
+    .sacga-game-war .war-seat-player {
+        align-self: end;
+    }
+}
+
+@media (max-width: 800px) {
+    .sacga-game-war .war-table {
+        grid-template-columns: 1fr;
+    }
+
+    .sacga-game-war .war-battle-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .sacga-game-war .war-controls {
+        align-items: stretch;
+    }
+
+    .sacga-game-war .war-controls .sacga-btn {
+        width: 100%;
+    }
+}

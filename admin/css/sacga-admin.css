@@ -1,0 +1,1039 @@
+/**
+ * Classic Games Arcade - Modern Admin Styles
+ * Tabbed interface with banner and copyright
+ */
+
+/* ============================================
+   CSS Custom Properties (Design Tokens)
+   ============================================ */
+:root {
+    --sacga-primary: #6366f1;
+    --sacga-primary-dark: #4f46e5;
+    --sacga-primary-light: #818cf8;
+    --sacga-secondary: #8b5cf6;
+    --sacga-accent: #10b981;
+    --sacga-accent-light: #34d399;
+    --sacga-warning: #f59e0b;
+    --sacga-error: #ef4444;
+
+    --sacga-gray-50: #f9fafb;
+    --sacga-gray-100: #f3f4f6;
+    --sacga-gray-200: #e5e7eb;
+    --sacga-gray-300: #d1d5db;
+    --sacga-gray-400: #9ca3af;
+    --sacga-gray-500: #6b7280;
+    --sacga-gray-600: #4b5563;
+    --sacga-gray-700: #374151;
+    --sacga-gray-800: #1f2937;
+    --sacga-gray-900: #111827;
+
+    --sacga-radius-sm: 6px;
+    --sacga-radius-md: 10px;
+    --sacga-radius-lg: 16px;
+    --sacga-radius-xl: 24px;
+
+    --sacga-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --sacga-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --sacga-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --sacga-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    --sacga-transition: all 0.2s ease;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+.sacga-admin.sacga-modern {
+    max-width: 1400px;
+    margin: 0;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.sacga-admin.sacga-modern * {
+    box-sizing: border-box;
+}
+
+/* ============================================
+   Banner Header
+   ============================================ */
+.sacga-banner-header {
+    margin: -20px -20px 0 -20px;
+    overflow: hidden;
+    border-radius: var(--sacga-radius-lg) var(--sacga-radius-lg) 0 0;
+    background: linear-gradient(135deg, var(--sacga-primary) 0%, var(--sacga-secondary) 100%);
+}
+
+.sacga-banner-image {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+/* ============================================
+   Header Meta (Version & License)
+   ============================================ */
+.sacga-header-meta {
+    display: flex;
+    gap: 12px;
+    padding: 20px 0;
+    flex-wrap: wrap;
+}
+
+.sacga-version-badge,
+.sacga-license-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--sacga-radius-xl);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.sacga-version-badge {
+    background: linear-gradient(135deg, var(--sacga-primary) 0%, var(--sacga-secondary) 100%);
+    color: white;
+}
+
+.sacga-version-badge .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.sacga-license-badge {
+    background: var(--sacga-gray-100);
+    color: var(--sacga-gray-700);
+}
+
+.sacga-license-badge.sacga-pro {
+    background: linear-gradient(135deg, var(--sacga-warning) 0%, #d97706 100%);
+    color: white;
+}
+
+.sacga-license-badge .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* ============================================
+   Tab Navigation
+   ============================================ */
+.sacga-tab-nav {
+    display: flex;
+    gap: 4px;
+    background: var(--sacga-gray-100);
+    padding: 6px;
+    border-radius: var(--sacga-radius-lg);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.sacga-tab-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--sacga-radius-md);
+    text-decoration: none;
+    color: var(--sacga-gray-600);
+    font-weight: 500;
+    font-size: 14px;
+    transition: var(--sacga-transition);
+    background: transparent;
+}
+
+.sacga-tab-link:hover {
+    background: white;
+    color: var(--sacga-primary);
+    box-shadow: var(--sacga-shadow-sm);
+}
+
+.sacga-tab-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--sacga-primary-light);
+}
+
+.sacga-tab-link.sacga-tab-active {
+    background: white;
+    color: var(--sacga-primary);
+    box-shadow: var(--sacga-shadow-md);
+}
+
+.sacga-tab-link .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* ============================================
+   Tab Content
+   ============================================ */
+.sacga-tab-content {
+    background: white;
+    border-radius: var(--sacga-radius-lg);
+    padding: 30px;
+    box-shadow: var(--sacga-shadow-md);
+    border: 1px solid var(--sacga-gray-200);
+    min-height: 400px;
+}
+
+/* ============================================
+   Stats Grid
+   ============================================ */
+.sacga-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.sacga-stat-card {
+    background: var(--sacga-gray-50);
+    border-radius: var(--sacga-radius-lg);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid var(--sacga-gray-200);
+    transition: var(--sacga-transition);
+}
+
+.sacga-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sacga-shadow-lg);
+    border-color: var(--sacga-primary-light);
+}
+
+.sacga-stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--sacga-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sacga-stat-games .sacga-stat-icon {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.sacga-stat-rooms .sacga-stat-icon {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+}
+
+.sacga-stat-played .sacga-stat-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.sacga-stat-license .sacga-stat-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.sacga-stat-icon .dashicons {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: white;
+}
+
+.sacga-stat-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sacga-stat-number {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--sacga-gray-900);
+    line-height: 1;
+}
+
+.sacga-stat-label {
+    font-size: 14px;
+    color: var(--sacga-gray-500);
+    font-weight: 500;
+}
+
+/* ============================================
+   Dashboard Grid
+   ============================================ */
+.sacga-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 24px;
+}
+
+/* ============================================
+   Cards
+   ============================================ */
+.sacga-card {
+    background: var(--sacga-gray-50);
+    border-radius: var(--sacga-radius-lg);
+    border: 1px solid var(--sacga-gray-200);
+    overflow: hidden;
+}
+
+.sacga-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px;
+    background: white;
+    border-bottom: 1px solid var(--sacga-gray-200);
+}
+
+.sacga-card-header .dashicons {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    color: var(--sacga-primary);
+}
+
+.sacga-card-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--sacga-gray-900);
+}
+
+.sacga-card-body {
+    padding: 24px;
+}
+
+.sacga-card-body > p {
+    margin: 0 0 16px 0;
+    color: var(--sacga-gray-600);
+    font-size: 14px;
+}
+
+/* ============================================
+   Shortcode Examples (Dashboard)
+   ============================================ */
+.sacga-shortcode-examples {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sacga-shortcode-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: white;
+    border-radius: var(--sacga-radius-md);
+    border: 1px solid var(--sacga-gray-200);
+}
+
+.sacga-shortcode-item code {
+    background: var(--sacga-gray-900);
+    color: var(--sacga-accent);
+    padding: 8px 14px;
+    border-radius: var(--sacga-radius-sm);
+    font-size: 13px;
+    font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+}
+
+.sacga-shortcode-desc {
+    color: var(--sacga-gray-500);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* ============================================
+   Games List (Dashboard)
+   ============================================ */
+.sacga-games-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sacga-game-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: white;
+    border-radius: var(--sacga-radius-md);
+    border: 1px solid var(--sacga-gray-200);
+    transition: var(--sacga-transition);
+}
+
+.sacga-game-row:hover {
+    border-color: var(--sacga-primary-light);
+    box-shadow: var(--sacga-shadow-sm);
+}
+
+.sacga-game-name {
+    font-weight: 600;
+    color: var(--sacga-gray-900);
+    flex: 1;
+}
+
+.sacga-game-type {
+    background: var(--sacga-gray-200);
+    color: var(--sacga-gray-600);
+    padding: 4px 12px;
+    border-radius: var(--sacga-radius-xl);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.sacga-game-players {
+    color: var(--sacga-gray-500);
+    font-size: 13px;
+}
+
+/* ============================================
+   Badges
+   ============================================ */
+.sacga-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: var(--sacga-radius-xl);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sacga-badge-ai {
+    background: linear-gradient(135deg, var(--sacga-accent) 0%, #059669 100%);
+    color: white;
+}
+
+/* ============================================
+   Games Grid (Games Tab)
+   ============================================ */
+.sacga-section-header {
+    margin-bottom: 24px;
+}
+
+.sacga-section-header h2 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--sacga-gray-900);
+}
+
+.sacga-section-header p {
+    margin: 0;
+    color: var(--sacga-gray-500);
+    font-size: 15px;
+}
+
+.sacga-games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.sacga-game-card {
+    background: var(--sacga-gray-50);
+    border-radius: var(--sacga-radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--sacga-gray-200);
+    transition: var(--sacga-transition);
+}
+
+.sacga-game-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--sacga-shadow-xl);
+    border-color: var(--sacga-primary-light);
+}
+
+.sacga-game-card-header {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, var(--sacga-primary) 0%, var(--sacga-secondary) 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sacga-game-card-header h3 {
+    margin: 0;
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.sacga-type-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 6px 14px;
+    border-radius: var(--sacga-radius-xl);
+    font-size: 12px;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+}
+
+.sacga-game-card-body {
+    padding: 24px;
+    background: white;
+}
+
+.sacga-game-card-body > p {
+    margin: 0 0 16px 0;
+    color: var(--sacga-gray-600);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.sacga-game-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sacga-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--sacga-gray-600);
+}
+
+.sacga-meta-item .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--sacga-gray-400);
+}
+
+.sacga-game-card-footer {
+    padding: 16px 24px;
+    background: var(--sacga-gray-100);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid var(--sacga-gray-200);
+}
+
+.sacga-shortcode-display {
+    flex: 1;
+    background: var(--sacga-gray-900);
+    color: var(--sacga-accent);
+    padding: 10px 16px;
+    border-radius: var(--sacga-radius-sm);
+    font-size: 13px;
+    font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+}
+
+/* ============================================
+   Copy Button
+   ============================================ */
+.sacga-copy-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: var(--sacga-radius-md);
+    background: var(--sacga-primary);
+    color: white;
+    cursor: pointer;
+    transition: var(--sacga-transition);
+    flex-shrink: 0;
+}
+
+.sacga-copy-btn:hover {
+    background: var(--sacga-primary-dark);
+    transform: scale(1.05);
+}
+
+.sacga-copy-btn:active {
+    transform: scale(0.95);
+}
+
+.sacga-copy-btn.sacga-copied {
+    background: var(--sacga-accent);
+}
+
+.sacga-copy-btn .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* ============================================
+   Settings Tab
+   ============================================ */
+.sacga-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 24px;
+}
+
+.sacga-settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sacga-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sacga-form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--sacga-gray-800);
+    font-size: 14px;
+}
+
+.sacga-form-group label .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--sacga-primary);
+}
+
+.sacga-form-group select {
+    padding: 12px 16px;
+    border: 2px solid var(--sacga-gray-200);
+    border-radius: var(--sacga-radius-md);
+    font-size: 14px;
+    color: var(--sacga-gray-800);
+    background: white;
+    transition: var(--sacga-transition);
+    cursor: pointer;
+}
+
+.sacga-form-group select:focus {
+    outline: none;
+    border-color: var(--sacga-primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.sacga-field-desc {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: var(--sacga-gray-500);
+}
+
+.sacga-form-actions {
+    margin-top: 8px;
+}
+
+.sacga-save-btn,
+input[type="submit"].sacga-save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--sacga-primary) 0%, var(--sacga-secondary) 100%);
+    color: white;
+    border: none;
+    border-radius: var(--sacga-radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--sacga-transition);
+}
+
+.sacga-save-btn:hover,
+input[type="submit"].sacga-save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sacga-shadow-lg);
+    opacity: 0.95;
+}
+
+/* ============================================
+   Database Status
+   ============================================ */
+.sacga-db-status {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sacga-db-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: white;
+    border-radius: var(--sacga-radius-md);
+    border: 1px solid var(--sacga-gray-200);
+}
+
+.sacga-db-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sacga-db-indicator.sacga-status-ok {
+    background: var(--sacga-accent);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.sacga-db-indicator.sacga-status-error {
+    background: var(--sacga-error);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.sacga-db-label {
+    flex: 1;
+    font-weight: 500;
+    color: var(--sacga-gray-800);
+}
+
+.sacga-db-count {
+    color: var(--sacga-gray-500);
+    font-size: 13px;
+}
+
+/* ============================================
+   Shortcodes Tab
+   ============================================ */
+.sacga-global-shortcode {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, var(--sacga-primary) 0%, var(--sacga-secondary) 100%);
+    border-radius: var(--sacga-radius-lg);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.sacga-global-shortcode-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: white;
+}
+
+.sacga-global-shortcode-info .dashicons {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    opacity: 0.9;
+}
+
+.sacga-global-shortcode-info strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.sacga-global-shortcode-info span {
+    font-size: 14px;
+    opacity: 0.85;
+}
+
+.sacga-shortcode-copy-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sacga-global-shortcode .sacga-shortcode-copy-group code {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    padding: 12px 20px;
+    border-radius: var(--sacga-radius-md);
+    font-size: 14px;
+    font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+    backdrop-filter: blur(4px);
+}
+
+.sacga-global-shortcode .sacga-copy-btn {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.sacga-global-shortcode .sacga-copy-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   Shortcodes Table
+   ============================================ */
+.sacga-shortcodes-table-wrap {
+    background: var(--sacga-gray-50);
+    border-radius: var(--sacga-radius-lg);
+    border: 1px solid var(--sacga-gray-200);
+    overflow: hidden;
+}
+
+.sacga-shortcodes-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sacga-shortcodes-table thead {
+    background: white;
+}
+
+.sacga-shortcodes-table th {
+    padding: 16px 24px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--sacga-gray-800);
+    font-size: 14px;
+    border-bottom: 2px solid var(--sacga-gray-200);
+}
+
+.sacga-shortcodes-table tbody tr {
+    transition: var(--sacga-transition);
+}
+
+.sacga-shortcodes-table tbody tr:hover {
+    background: white;
+}
+
+.sacga-shortcodes-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--sacga-gray-200);
+}
+
+.sacga-shortcodes-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sacga-game-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sacga-shortcodes-table .sacga-shortcode-copy-group code {
+    background: var(--sacga-gray-900);
+    color: var(--sacga-accent);
+    padding: 8px 14px;
+    border-radius: var(--sacga-radius-sm);
+    font-size: 13px;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+.sacga-admin-footer {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--sacga-gray-200);
+}
+
+.sacga-copyright-image {
+    text-align: center;
+}
+
+.sacga-copyright-image img {
+    max-width: 300px;
+    height: auto;
+    border-radius: var(--sacga-radius-md);
+    opacity: 0.85;
+    transition: var(--sacga-transition);
+}
+
+.sacga-copyright-image img:hover {
+    opacity: 1;
+}
+
+/* ============================================
+   Responsive Styles
+   ============================================ */
+@media (max-width: 1024px) {
+    .sacga-admin.sacga-modern {
+        padding: 15px;
+    }
+
+    .sacga-banner-header {
+        margin: -15px -15px 0 -15px;
+    }
+
+    .sacga-banner-image {
+        max-height: 160px;
+    }
+
+    .sacga-tab-content {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 782px) {
+    .sacga-tab-nav {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .sacga-tab-link {
+        justify-content: flex-start;
+    }
+
+    .sacga-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sacga-dashboard-grid,
+    .sacga-settings-grid,
+    .sacga-games-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sacga-global-shortcode {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .sacga-global-shortcode-info {
+        flex-direction: column;
+    }
+
+    .sacga-game-card-footer {
+        flex-direction: column;
+    }
+
+    .sacga-shortcode-display {
+        width: 100%;
+        text-align: center;
+    }
+
+    .sacga-copy-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .sacga-admin.sacga-modern {
+        padding: 10px;
+    }
+
+    .sacga-banner-header {
+        margin: -10px -10px 0 -10px;
+    }
+
+    .sacga-banner-image {
+        max-height: 120px;
+    }
+
+    .sacga-header-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sacga-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sacga-stat-card {
+        padding: 18px;
+    }
+
+    .sacga-stat-number {
+        font-size: 26px;
+    }
+
+    .sacga-tab-content {
+        padding: 18px;
+    }
+
+    .sacga-card-body {
+        padding: 18px;
+    }
+
+    .sacga-shortcode-item {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .sacga-shortcodes-table th,
+    .sacga-shortcodes-table td {
+        padding: 12px 16px;
+    }
+
+    .sacga-shortcodes-table .sacga-shortcode-copy-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .sacga-shortcodes-table .sacga-shortcode-copy-group code {
+        width: 100%;
+        display: block;
+        text-align: center;
+    }
+
+    .sacga-shortcodes-table .sacga-copy-btn {
+        width: 100%;
+    }
+}
+
+/* ============================================
+   Animation Utilities
+   ============================================ */
+@keyframes sacga-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sacga-tab-content {
+    animation: sacga-fade-in 0.3s ease;
+}
+
+/* ============================================
+   Toast Notification (for copy feedback)
+   ============================================ */
+.sacga-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--sacga-gray-900);
+    color: white;
+    padding: 14px 24px;
+    border-radius: var(--sacga-radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: var(--sacga-shadow-xl);
+    z-index: 999999;
+    animation: sacga-toast-in 0.3s ease;
+}
+
+.sacga-toast.sacga-success {
+    background: var(--sacga-accent);
+}
+
+@keyframes sacga-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes sacga-toast-out {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}

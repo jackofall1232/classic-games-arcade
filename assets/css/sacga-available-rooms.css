@@ -1,0 +1,406 @@
+/**
+ * Classic Games Arcade - Available Rooms Shortcode Styles
+ * Theme-agnostic, mobile-first, beautiful by default
+ */
+
+/* ============================================
+   CSS Custom Properties
+   Inherits from core palette when available
+   ============================================ */
+.sacga-available-rooms {
+    --sacga-room-bg: var(--sacga-panel-bg, #ffffff);
+    --sacga-room-bg-alt: var(--sacga-panel-bg-alt, #f8fafc);
+    --sacga-room-border: var(--sacga-border-color, #e2e8f0);
+    --sacga-room-border-hover: var(--sacga-border-hover, #cbd5e1);
+    --sacga-room-accent: var(--sacga-accent, #6366f1);
+    --sacga-room-accent-hover: var(--sacga-accent-hover, #4f46e5);
+    --sacga-room-text: inherit;
+    --sacga-room-text-muted: var(--sacga-text-muted, #64748b);
+    --sacga-room-success: var(--sacga-success, #10b981);
+    --sacga-room-warning: var(--sacga-warning, #f59e0b);
+    --sacga-room-radius: var(--sacga-radius, 12px);
+    --sacga-room-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --sacga-room-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --sacga-room-transition: all 0.2s ease;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .sacga-available-rooms {
+        --sacga-room-bg: var(--sacga-panel-bg, #1e293b);
+        --sacga-room-bg-alt: var(--sacga-panel-bg-alt, #0f172a);
+        --sacga-room-border: var(--sacga-border-color, #334155);
+        --sacga-room-border-hover: var(--sacga-border-hover, #475569);
+        --sacga-room-text-muted: var(--sacga-text-muted, #94a3b8);
+    }
+}
+
+/* ============================================
+   Container
+   ============================================ */
+.sacga-available-rooms {
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.sacga-available-rooms *,
+.sacga-available-rooms *::before,
+.sacga-available-rooms *::after {
+    box-sizing: inherit;
+}
+
+/* ============================================
+   Empty State
+   ============================================ */
+.sacga-rooms-empty {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--sacga-room-bg);
+    border: 2px dashed var(--sacga-room-border);
+    border-radius: var(--sacga-room-radius);
+}
+
+.sacga-rooms-empty-icon {
+    margin-bottom: 16px;
+}
+
+.sacga-rooms-empty-icon .dashicons {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--sacga-room-border);
+}
+
+.sacga-rooms-empty-message {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--sacga-room-text);
+}
+
+.sacga-rooms-empty-hint {
+    margin: 0;
+    font-size: 14px;
+    color: var(--sacga-room-text-muted);
+}
+
+/* ============================================
+   Rooms Grid
+   ============================================ */
+.sacga-rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+/* ============================================
+   Room Card
+   ============================================ */
+.sacga-room-card {
+    background: var(--sacga-room-bg);
+    border: 1px solid var(--sacga-room-border);
+    border-radius: var(--sacga-room-radius);
+    box-shadow: var(--sacga-room-shadow);
+    transition: var(--sacga-room-transition);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.sacga-room-card:hover {
+    border-color: var(--sacga-room-border-hover);
+    box-shadow: var(--sacga-room-shadow-hover);
+    transform: translateY(-2px);
+}
+
+/* Room Header */
+.sacga-room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--sacga-room-accent) 0%, #8b5cf6 100%);
+    gap: 12px;
+}
+
+.sacga-room-game {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.sacga-room-type {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #ffffff;
+    text-transform: capitalize;
+    backdrop-filter: blur(4px);
+    white-space: nowrap;
+}
+
+/* Room Body */
+.sacga-room-body {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Room Code */
+.sacga-room-code {
+    text-align: center;
+    padding: 16px;
+    background: var(--sacga-room-bg-alt);
+    border-radius: 8px;
+    border: 1px solid var(--sacga-room-border);
+}
+
+.sacga-room-code-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--sacga-room-text-muted);
+    margin-bottom: 6px;
+}
+
+.sacga-room-code-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 800;
+    font-family: "SF Mono", Monaco, "Cascadia Code", Consolas, monospace;
+    letter-spacing: 4px;
+    color: var(--sacga-room-accent);
+}
+
+/* Room Info */
+.sacga-room-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.sacga-room-players,
+.sacga-room-seats,
+.sacga-room-created {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--sacga-room-text-muted);
+}
+
+.sacga-room-players .dashicons,
+.sacga-room-seats .dashicons,
+.sacga-room-created .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.sacga-room-seats {
+    color: var(--sacga-room-success);
+    font-weight: 500;
+}
+
+.sacga-room-seats.sacga-room-seats-low {
+    color: var(--sacga-room-warning);
+}
+
+/* Room Status */
+.sacga-room-status {
+    display: flex;
+    justify-content: center;
+}
+
+.sacga-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.sacga-status-badge .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+.sacga-status-lobby {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+}
+
+.sacga-status-active {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+}
+
+/* Room Footer */
+.sacga-room-footer {
+    padding: 16px 20px;
+    background: var(--sacga-room-bg-alt);
+    border-top: 1px solid var(--sacga-room-border);
+}
+
+/* Join Button */
+.sacga-btn-join {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--sacga-room-accent) 0%, #8b5cf6 100%);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--sacga-room-transition);
+}
+
+.sacga-btn-join:hover {
+    background: linear-gradient(135deg, var(--sacga-room-accent-hover) 0%, #7c3aed 100%);
+    transform: scale(1.02);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.sacga-btn-join:active {
+    transform: scale(0.98);
+}
+
+.sacga-btn-join .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* ============================================
+   Refresh Indicator
+   ============================================ */
+.sacga-rooms-refresh-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 12px;
+    background: var(--sacga-room-bg-alt);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--sacga-room-text-muted);
+}
+
+.sacga-rooms-refresh-indicator .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    animation: sacga-spin 2s linear infinite;
+}
+
+@keyframes sacga-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============================================
+   Loading State
+   ============================================ */
+.sacga-available-rooms.sacga-loading .sacga-rooms-grid {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.sacga-available-rooms.sacga-loading .sacga-rooms-refresh-indicator .dashicons {
+    animation-duration: 0.5s;
+}
+
+/* ============================================
+   Responsive Styles
+   ============================================ */
+@media (max-width: 640px) {
+    .sacga-rooms-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .sacga-room-header {
+        padding: 14px 16px;
+    }
+
+    .sacga-room-game {
+        font-size: 16px;
+    }
+
+    .sacga-room-body {
+        padding: 16px;
+    }
+
+    .sacga-room-code {
+        padding: 12px;
+    }
+
+    .sacga-room-code-value {
+        font-size: 24px;
+        letter-spacing: 3px;
+    }
+
+    .sacga-room-info {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .sacga-room-footer {
+        padding: 14px 16px;
+    }
+
+    .sacga-btn-join {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+}
+
+/* ============================================
+   Animation for new rooms
+   ============================================ */
+@keyframes sacga-room-appear {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sacga-room-card {
+    animation: sacga-room-appear 0.3s ease-out;
+}
+
+/* Stagger animation for multiple cards */
+.sacga-rooms-grid .sacga-room-card:nth-child(1) { animation-delay: 0s; }
+.sacga-rooms-grid .sacga-room-card:nth-child(2) { animation-delay: 0.05s; }
+.sacga-rooms-grid .sacga-room-card:nth-child(3) { animation-delay: 0.1s; }
+.sacga-rooms-grid .sacga-room-card:nth-child(4) { animation-delay: 0.15s; }
+.sacga-rooms-grid .sacga-room-card:nth-child(5) { animation-delay: 0.2s; }
+.sacga-rooms-grid .sacga-room-card:nth-child(6) { animation-delay: 0.25s; }

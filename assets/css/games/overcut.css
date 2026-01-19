@@ -1,0 +1,1610 @@
+/**
+ * Overcut Dice Game Styles
+ *
+ * Signature look: Deep violet/purple theme with gold accents
+ * A premium, distinctive appearance for this original game.
+ */
+
+/* ============================================
+   Color Variables (Overcut Signature Palette)
+   ============================================ */
+.overcut-game {
+    --overcut-primary: #5c3d99;
+    --overcut-primary-dark: #3d2766;
+    --overcut-primary-light: #8b6dc4;
+    --overcut-accent: #ffd700;
+    --overcut-accent-glow: rgba(255, 215, 0, 0.4);
+    --overcut-success: #22c55e;
+    --overcut-danger: #ef4444;
+    --overcut-neutral: #64748b;
+    --overcut-bg-dark: #1e1b2e;
+    --overcut-bg-card: #2d2640;
+    --overcut-text: #f1f5f9;
+    --overcut-text-muted: #94a3b8;
+}
+
+/* ============================================
+   Main Container
+   ============================================ */
+.overcut-game {
+    background: linear-gradient(135deg, var(--overcut-bg-dark) 0%, #2a1f4e 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: var(--overcut-text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 400px;
+    /* Consistent width during all animation steps - wide layout */
+    width: 100%;
+    min-width: 320px;
+    max-width: 800px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* Parent game board container - maintain consistent width */
+#sacga-game-board {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* All phase containers should fill width */
+.overcut-bidding,
+.overcut-rolling,
+.overcut-scoring,
+.overcut-rolloff,
+.overcut-ai-turn,
+.overcut-turn-advance,
+.overcut-game-over {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Ensure AI stages don't expand beyond container */
+.ai-stage {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* ============================================
+   Scoreboard
+   ============================================ */
+.overcut-scoreboard {
+    background: var(--overcut-bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(139, 109, 196, 0.3);
+}
+
+.overcut-target {
+    text-align: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.overcut-target .target-label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--overcut-text-muted);
+    margin-bottom: 4px;
+}
+
+.overcut-target .target-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--overcut-accent);
+    text-shadow: 0 0 20px var(--overcut-accent-glow);
+}
+
+.overcut-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.overcut-score-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.overcut-score-row .player-name {
+    flex: 0 0 100px;
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.overcut-score-row.mine .player-name {
+    color: var(--overcut-primary-light);
+}
+
+.overcut-score-row.opponent .player-name {
+    color: var(--overcut-text-muted);
+}
+
+.score-bar-container {
+    flex: 1;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.score-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s ease-out;
+}
+
+.overcut-score-row.mine .score-bar {
+    background: linear-gradient(90deg, var(--overcut-primary) 0%, var(--overcut-primary-light) 100%);
+    box-shadow: 0 0 10px rgba(139, 109, 196, 0.5);
+}
+
+.overcut-score-row.opponent .score-bar {
+    background: linear-gradient(90deg, #475569 0%, #64748b 100%);
+}
+
+.overcut-score-row .score-value {
+    flex: 0 0 50px;
+    text-align: right;
+    font-weight: 700;
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+}
+
+.overcut-score-row.mine .score-value {
+    color: var(--overcut-primary-light);
+}
+
+/* ============================================
+   Phase Titles
+   ============================================ */
+.phase-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--overcut-text);
+    margin: 0 0 20px 0;
+}
+
+/* ============================================
+   Rolloff Phase
+   ============================================ */
+.overcut-rolloff {
+    text-align: center;
+}
+
+.rolloff-instruction {
+    color: var(--overcut-text-muted);
+    margin-bottom: 24px;
+}
+
+.rolloff-tie-notice {
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid var(--overcut-accent);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    color: var(--overcut-accent);
+    font-weight: 500;
+}
+
+.rolloff-players {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.rolloff-player {
+    background: var(--overcut-bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    min-width: 200px;
+    border: 2px solid transparent;
+}
+
+.rolloff-player.mine {
+    border-color: var(--overcut-primary);
+}
+
+.rolloff-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.rolloff-player.mine .rolloff-label {
+    color: var(--overcut-primary-light);
+}
+
+.rolloff-player.opponent .rolloff-label {
+    color: var(--overcut-text-muted);
+}
+
+.rolloff-total {
+    display: block;
+    margin-top: 12px;
+    font-size: 16px;
+}
+
+.rolloff-total strong {
+    color: var(--overcut-accent);
+    font-size: 24px;
+}
+
+.rolloff-vs {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--overcut-text-muted);
+}
+
+.rolloff-waiting-text {
+    color: var(--overcut-text-muted);
+    font-style: italic;
+    padding: 20px;
+}
+
+.rolloff-winner {
+    margin-top: 24px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.05) 100%);
+    border-radius: 12px;
+    border: 1px solid var(--overcut-accent);
+}
+
+.rolloff-winner .winner-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--overcut-accent);
+}
+
+/* ============================================
+   Bidding Phase
+   ============================================ */
+.overcut-bidding {
+    text-align: center;
+}
+
+.bid-instruction {
+    color: var(--overcut-text-muted);
+    margin-bottom: 24px;
+}
+
+.bid-controls {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.bid-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.bid-slider-row .bid-min,
+.bid-slider-row .bid-max {
+    font-weight: 600;
+    color: var(--overcut-text-muted);
+    min-width: 24px;
+}
+
+.bid-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    background: linear-gradient(90deg, var(--overcut-primary-dark) 0%, var(--overcut-primary-light) 100%);
+    border-radius: 4px;
+    outline: none;
+}
+
+.bid-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    background: var(--overcut-accent);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 15px var(--overcut-accent-glow), 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s;
+}
+
+.bid-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.bid-slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    background: var(--overcut-accent);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 15px var(--overcut-accent-glow), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.bid-display {
+    background: var(--overcut-bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 2px solid var(--overcut-primary);
+}
+
+.bid-display .bid-label {
+    font-size: 14px;
+    color: var(--overcut-text-muted);
+    margin-right: 8px;
+}
+
+.bid-display .bid-value {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--overcut-accent);
+    text-shadow: 0 0 30px var(--overcut-accent-glow);
+}
+
+.bid-hint {
+    margin-bottom: 20px;
+}
+
+.bid-hint .hint-text {
+    font-size: 13px;
+    color: var(--overcut-text-muted);
+    font-style: italic;
+}
+
+/* ============================================
+   Rolling Phase
+   ============================================ */
+.overcut-rolling {
+    text-align: center;
+}
+
+.current-bid-display {
+    background: var(--overcut-bg-card);
+    border-radius: 8px;
+    padding: 12px 20px;
+    display: inline-block;
+    margin-bottom: 24px;
+}
+
+.current-bid-display .bid-amount {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--overcut-accent);
+    margin-left: 8px;
+}
+
+.dice-preview {
+    margin-bottom: 24px;
+}
+
+/* ============================================
+   Scoring Phase
+   ============================================ */
+.overcut-scoring {
+    text-align: center;
+}
+
+.result-banner {
+    padding: 16px 32px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    display: inline-block;
+}
+
+.result-banner .result-text {
+    font-size: 28px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Exact Hit - Gold glory */
+.result-banner.result-exact_hit {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4a 50%, #ffd700 100%);
+    box-shadow: 0 0 40px var(--overcut-accent-glow), 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: exactHitPulse 1s ease-in-out infinite;
+}
+
+.result-banner.result-exact_hit .result-text {
+    color: #1e1b2e;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+@keyframes exactHitPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+/* Overcut - Success */
+.result-banner.result-overcut {
+    background: linear-gradient(135deg, var(--overcut-success) 0%, #16a34a 100%);
+}
+
+.result-banner.result-overcut .result-text {
+    color: #fff;
+}
+
+/* Undercut - Danger */
+.result-banner.result-undercut {
+    background: linear-gradient(135deg, var(--overcut-danger) 0%, #dc2626 100%);
+}
+
+.result-banner.result-undercut .result-text {
+    color: #fff;
+}
+
+/* Null Roll - Neutral with warning */
+.result-banner.result-null_roll {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    animation: nullRollShake 0.5s ease-in-out;
+}
+
+.result-banner.result-null_roll .result-text {
+    color: #fff;
+}
+
+@keyframes nullRollShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.scoring-dice {
+    margin-bottom: 24px;
+}
+
+.scoring-comparison {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.comparison-item {
+    background: var(--overcut-bg-card);
+    border-radius: 12px;
+    padding: 16px 32px;
+    min-width: 100px;
+}
+
+.comparison-item .comparison-label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--overcut-text-muted);
+    margin-bottom: 4px;
+}
+
+.comparison-item .comparison-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--overcut-text);
+}
+
+.comparison-vs {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--overcut-text-muted);
+}
+
+.scoring-points {
+    background: var(--overcut-bg-card);
+    border-radius: 12px;
+    padding: 20px;
+    display: inline-block;
+    min-width: 250px;
+}
+
+.scoring-points.null-roll {
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid #f59e0b;
+}
+
+.scoring-points.null-roll p {
+    color: #fbbf24;
+    margin: 0;
+    font-weight: 500;
+}
+
+.points-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.points-row:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.points-row .points-label {
+    color: var(--overcut-text-muted);
+}
+
+.points-row .points-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--overcut-text-muted);
+}
+
+.points-row .points-value.positive {
+    color: var(--overcut-success);
+}
+
+.points-row.mine .points-value.positive {
+    color: var(--overcut-accent);
+    text-shadow: 0 0 10px var(--overcut-accent-glow);
+}
+
+/* ============================================
+   Game Over
+   ============================================ */
+.overcut-game-over {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.game-over-title {
+    font-size: 48px;
+    font-weight: 800;
+    margin: 0 0 16px 0;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.victory-title {
+    color: var(--overcut-accent);
+    text-shadow: 0 0 40px var(--overcut-accent-glow);
+    animation: victoryGlow 2s ease-in-out infinite;
+}
+
+@keyframes victoryGlow {
+    0%, 100% { text-shadow: 0 0 40px var(--overcut-accent-glow); }
+    50% { text-shadow: 0 0 60px var(--overcut-accent-glow), 0 0 80px var(--overcut-accent-glow); }
+}
+
+.defeat-title {
+    color: var(--overcut-text-muted);
+}
+
+.game-over-message {
+    font-size: 18px;
+    color: var(--overcut-text-muted);
+    margin-bottom: 32px;
+}
+
+.final-scores {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 24px;
+}
+
+.final-score {
+    background: var(--overcut-bg-card);
+    border-radius: 12px;
+    padding: 20px 32px;
+    min-width: 150px;
+}
+
+.final-score .final-label {
+    display: block;
+    font-size: 14px;
+    color: var(--overcut-text-muted);
+    margin-bottom: 8px;
+}
+
+.final-score .final-value {
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.final-score.mine .final-value {
+    color: var(--overcut-primary-light);
+}
+
+.final-score.opponent .final-value {
+    color: var(--overcut-text-muted);
+}
+
+.overcut-game-over.victory .final-score.mine {
+    border: 2px solid var(--overcut-accent);
+    box-shadow: 0 0 20px var(--overcut-accent-glow);
+}
+
+.rounds-played {
+    color: var(--overcut-text-muted);
+    font-size: 14px;
+}
+
+/* ============================================
+   Last Result Summary
+   ============================================ */
+.overcut-last-result {
+    background: var(--overcut-bg-card);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 20px;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.overcut-last-result .last-result-label {
+    color: var(--overcut-text-muted);
+}
+
+.overcut-last-result .exact-hit-badge {
+    background: var(--overcut-accent);
+    color: var(--overcut-bg-dark);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.overcut-btn {
+    background: linear-gradient(135deg, var(--overcut-primary) 0%, var(--overcut-primary-dark) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 40px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.overcut-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(92, 61, 153, 0.4);
+}
+
+.overcut-btn:active {
+    transform: translateY(0);
+}
+
+.overcut-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.overcut-btn-roll {
+    background: linear-gradient(135deg, var(--overcut-accent) 0%, #f59e0b 100%);
+    color: var(--overcut-bg-dark);
+}
+
+.overcut-btn-roll:hover {
+    box-shadow: 0 8px 30px var(--overcut-accent-glow);
+}
+
+.overcut-btn-roll.pulse {
+    animation: btnPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes btnPulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--overcut-accent-glow); }
+    50% { box-shadow: 0 0 0 15px rgba(255, 215, 0, 0); }
+}
+
+.overcut-btn-bid {
+    background: linear-gradient(135deg, var(--overcut-primary-light) 0%, var(--overcut-primary) 100%);
+}
+
+/* ============================================
+   Waiting States
+   ============================================ */
+.waiting-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px;
+    color: var(--overcut-text-muted);
+}
+
+.waiting-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(139, 109, 196, 0.3);
+    border-top-color: var(--overcut-primary-light);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   Overcut-specific Dice Styling
+   ============================================ */
+.overcut-game .sacga-dice-row {
+    justify-content: center;
+}
+
+.overcut-game .sacga-die {
+    background: linear-gradient(145deg, #ffffff 0%, #e8e8e8 100%);
+    border: 2px solid var(--overcut-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.overcut-game .sacga-die .die-face {
+    color: var(--overcut-primary-dark);
+    font-weight: 800;
+}
+
+.overcut-game .sacga-dice-large .sacga-die {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+}
+
+.overcut-game .sacga-dice-large .die-face {
+    font-size: 28px;
+}
+
+/* ============================================
+   Mobile Responsive
+   ============================================ */
+@media (max-width: 600px) {
+    .overcut-game {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .overcut-scoreboard {
+        padding: 16px;
+    }
+
+    .overcut-target .target-value {
+        font-size: 28px;
+    }
+
+    .overcut-score-row .player-name {
+        flex: 0 0 80px;
+        font-size: 13px;
+    }
+
+    .overcut-score-row .score-value {
+        flex: 0 0 40px;
+        font-size: 16px;
+    }
+
+    .rolloff-players {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .rolloff-player {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .rolloff-vs {
+        font-size: 18px;
+    }
+
+    .bid-display .bid-value {
+        font-size: 40px;
+    }
+
+    .overcut-btn {
+        padding: 14px 32px;
+        font-size: 16px;
+    }
+
+    .scoring-comparison {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .comparison-item {
+        padding: 12px 20px;
+    }
+
+    .comparison-item .comparison-value {
+        font-size: 28px;
+    }
+
+    .game-over-title {
+        font-size: 36px;
+    }
+
+    .final-scores {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .final-score {
+        min-width: unset;
+    }
+
+    .final-score .final-value {
+        font-size: 28px;
+    }
+
+    .overcut-game .sacga-dice-large .sacga-die {
+        width: 52px;
+        height: 52px;
+    }
+
+    .overcut-game .sacga-dice-large .die-face {
+        font-size: 24px;
+    }
+
+    .dice-tray {
+        gap: 8px;
+    }
+
+    .dice-slot {
+        width: 48px;
+        height: 48px;
+    }
+
+    .running-total .total-value {
+        font-size: 28px;
+    }
+
+    .overcut-action-feed {
+        margin-top: 16px;
+        padding: 12px;
+    }
+}
+
+/* ============================================
+   Dice Tray & Animation System
+   ============================================ */
+.dice-tray {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+}
+
+.dice-slot {
+    width: 64px;
+    height: 64px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px dashed rgba(139, 109, 196, 0.4);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.dice-slot.empty {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.dice-slot.revealing {
+    border-color: var(--overcut-accent);
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.dice-slot.revealed {
+    border: none;
+    background: transparent;
+}
+
+.dice-slot .sacga-die {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(145deg, #ffffff 0%, #e8e8e8 100%);
+    border: 2px solid var(--overcut-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dice-slot .die-face {
+    font-size: 32px;
+    color: var(--overcut-primary-dark);
+}
+
+/* Dice shake animation */
+.dice-slot.shake {
+    animation: diceShake 0.15s ease-in-out;
+}
+
+@keyframes diceShake {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-3px) rotate(-3deg); }
+    75% { transform: translateX(3px) rotate(3deg); }
+}
+
+/* Dice roll-in animation */
+.sacga-die.roll-in {
+    animation: diceRollIn 0.3s ease-out;
+}
+
+@keyframes diceRollIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-180deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* ============================================
+   Running Total Display
+   ============================================ */
+.running-total {
+    text-align: center;
+    margin: 16px 0;
+    padding: 12px 24px;
+    background: var(--overcut-bg-card);
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.running-total .total-label {
+    font-size: 14px;
+    color: var(--overcut-text-muted);
+    margin-right: 8px;
+}
+
+.running-total .total-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--overcut-accent);
+    font-variant-numeric: tabular-nums;
+    transition: transform 0.15s ease;
+}
+
+/* ============================================
+   Thinking Indicator (AI)
+   ============================================ */
+.opponent-turn-display {
+    text-align: center;
+    padding: 20px;
+}
+
+.thinking-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 30px;
+}
+
+.thinking-dots {
+    display: flex;
+    gap: 8px;
+}
+
+.thinking-dots span {
+    width: 12px;
+    height: 12px;
+    background: var(--overcut-primary-light);
+    border-radius: 50%;
+    animation: thinkingDot 1.4s ease-in-out infinite;
+}
+
+.thinking-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.thinking-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes thinkingDot {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.thinking-text {
+    color: var(--overcut-text-muted);
+    font-size: 16px;
+}
+
+.rolling-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    color: var(--overcut-text-muted);
+}
+
+/* ============================================
+   AI Turn Animation Stages
+   ============================================ */
+.overcut-ai-turn {
+    text-align: center;
+    padding: 20px;
+}
+
+.ai-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 30px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.ai-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--overcut-primary) 0%, var(--overcut-primary-dark) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--overcut-accent);
+    box-shadow: 0 0 30px var(--overcut-accent-glow);
+}
+
+.ai-icon {
+    font-size: 40px;
+}
+
+.ai-stage.thinking .ai-avatar {
+    animation: aiPulse 2s ease-in-out infinite;
+}
+
+@keyframes aiPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 30px var(--overcut-accent-glow);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 50px var(--overcut-accent-glow);
+    }
+}
+
+.thinking-indicator.large {
+    padding: 20px;
+}
+
+.thinking-indicator.large .thinking-dots span {
+    width: 16px;
+    height: 16px;
+}
+
+.thinking-indicator.large .thinking-text {
+    font-size: 18px;
+}
+
+.ai-bid-announcement {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.ai-bid-announcement .ai-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--overcut-text);
+}
+
+.ai-bid-announcement .bid-label {
+    font-size: 14px;
+    color: var(--overcut-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.ai-bid-announcement .bid-value {
+    font-size: 64px;
+    font-weight: 700;
+    color: var(--overcut-accent);
+    text-shadow: 0 0 30px var(--overcut-accent-glow);
+    line-height: 1;
+}
+
+.ai-bid-announcement .bid-value.pop-in {
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    70% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.ai-rolling-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding: 20px;
+    color: var(--overcut-text-muted);
+    font-size: 18px;
+}
+
+.ai-rolling-indicator .waiting-spinner {
+    width: 40px;
+    height: 40px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   Turn Indicators
+   ============================================ */
+.overcut-turn-advance {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.turn-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 30px;
+    border-radius: 16px;
+    animation: turnIndicatorIn 0.4s ease-out;
+}
+
+.turn-indicator.your-turn {
+    background: linear-gradient(135deg, rgba(92, 61, 153, 0.3) 0%, rgba(139, 109, 196, 0.2) 100%);
+    border: 2px solid var(--overcut-primary-light);
+    box-shadow: 0 0 30px rgba(139, 109, 196, 0.3);
+}
+
+.turn-indicator.opponent-turn {
+    background: linear-gradient(135deg, rgba(100, 116, 139, 0.2) 0%, rgba(71, 85, 105, 0.2) 100%);
+    border: 2px solid var(--overcut-neutral);
+}
+
+.turn-icon {
+    font-size: 48px;
+    animation: turnIconPop 0.5s ease-out;
+}
+
+.turn-text {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--overcut-text);
+}
+
+.your-turn .turn-text {
+    color: var(--overcut-accent);
+    text-shadow: 0 0 20px var(--overcut-accent-glow);
+}
+
+.turn-subtitle {
+    font-size: 16px;
+    color: var(--overcut-text-muted);
+    margin-top: 4px;
+}
+
+@keyframes turnIndicatorIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes turnIconPop {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* AI Turn Start Stage */
+.ai-stage.turn-start {
+    padding: 40px;
+}
+
+.ai-stage.turn-start .turn-indicator {
+    animation: turnIndicatorIn 0.4s ease-out;
+}
+
+/* ============================================
+   Action Feed
+   ============================================ */
+.overcut-action-feed {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border-left: 3px solid var(--overcut-primary);
+    max-height: 60px;
+    overflow: hidden;
+}
+
+.feed-items {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.feed-item {
+    font-size: 13px;
+    color: var(--overcut-text-muted);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    animation: feedItemIn 0.3s ease-out;
+}
+
+.feed-item:last-child {
+    border-bottom: none;
+    color: var(--overcut-text);
+    font-weight: 500;
+}
+
+@keyframes feedItemIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ============================================
+   Active Player Indicator
+   ============================================ */
+.overcut-score-row.active {
+    position: relative;
+}
+
+.overcut-score-row.active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    background: var(--overcut-accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--overcut-accent-glow);
+    animation: activePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes activePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.overcut-score-row.active .player-name {
+    color: var(--overcut-accent) !important;
+}
+
+/* ============================================
+   Score Update Animation
+   ============================================ */
+.score-value.updating {
+    animation: scoreFlash 0.3s ease-out;
+}
+
+@keyframes scoreFlash {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: var(--overcut-accent); }
+    100% { transform: scale(1); }
+}
+
+/* ============================================
+   Result Animation
+   ============================================ */
+.animate-in {
+    animation: resultSlideIn 0.4s ease-out;
+}
+
+@keyframes resultSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   Rolling Announcement
+   ============================================ */
+.rolling-announcement {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.rolling-announcement .roller-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--overcut-primary-light);
+}
+
+.rolling-announcement .rolling-label {
+    font-size: 16px;
+    color: var(--overcut-text-muted);
+    animation: rollingPulse 1s ease-in-out infinite;
+}
+
+@keyframes rollingPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ============================================
+   Roller Info (in scoring)
+   ============================================ */
+.roller-info {
+    margin-bottom: 16px;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    display: inline-block;
+    font-size: 14px;
+    color: var(--overcut-text-muted);
+}
+
+/* ============================================
+   Rolloff Dice Area
+   ============================================ */
+.rolloff-dice-area {
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* Rolloff Dice Slots (for animation) */
+.rolloff-dice-slots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.rolloff-dice-slots .dice-slot {
+    width: 52px;
+    height: 52px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px dashed rgba(139, 109, 196, 0.4);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.rolloff-dice-slots .dice-slot.empty {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.rolloff-dice-slots .dice-slot.revealing {
+    border-color: var(--overcut-accent);
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.rolloff-dice-slots .dice-slot.revealed {
+    border: none;
+    background: transparent;
+}
+
+.rolloff-dice-slots .sacga-die {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(145deg, #ffffff 0%, #e8e8e8 100%);
+    border: 2px solid var(--overcut-primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+
+.rolloff-dice-slots .die-face {
+    font-size: 28px;
+    color: var(--overcut-primary-dark);
+}
+
+/* Dice Row for inline dice display */
+.dice-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.dice-row .sacga-die {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(145deg, #ffffff 0%, #e8e8e8 100%);
+    border: 2px solid var(--overcut-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.dice-row .die-face {
+    font-size: 32px;
+    color: var(--overcut-primary-dark);
+}
+
+.scoring-dice .dice-row .sacga-die {
+    width: 64px;
+    height: 64px;
+}
+
+.scoring-dice .dice-row .die-face {
+    font-size: 36px;
+}
+
+.waiting-text {
+    color: var(--overcut-text-muted);
+    font-style: italic;
+    padding: 20px;
+}
+
+.waiting-indicator {
+    padding: 20px;
+}
+/* ============================================
+   Bid Confirmation Animation (Human Turn)
+   ============================================ */
+.bid-confirmation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px;
+    background: linear-gradient(135deg, rgba(92, 61, 153, 0.2) 0%, rgba(139, 109, 196, 0.1) 100%);
+    border-radius: 16px;
+    border: 2px solid var(--overcut-primary-light);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.confirmation-icon {
+    font-size: 56px;
+    color: var(--overcut-success);
+    animation: confirmIconPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes confirmIconPop {
+    0% {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.2) rotate(10deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.confirmation-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--overcut-text);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.confirmation-value {
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--overcut-accent);
+    text-shadow: 0 0 40px var(--overcut-accent-glow);
+    line-height: 1;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s backwards;
+}
+
+.confirmation-hint {
+    font-size: 14px;
+    color: var(--overcut-text-muted);
+    margin-top: 8px;
+}
+
+/* ============================================
+   Rolling Announcement Animation (Human Turn)
+   ============================================ */
+.rolling-announcement.animate-in {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.rolling-icon {
+    font-size: 48px;
+    animation: rollingSpin 1s ease-in-out infinite;
+}
+
+@keyframes rollingSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.rolling-text {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--overcut-primary-light);
+    animation: rollingPulse 1s ease-in-out infinite;
+}

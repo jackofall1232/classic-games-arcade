@@ -1,0 +1,592 @@
+/**
+ * Card Game Base Styles
+ */
+
+/* Card styles */
+.sacga-card {
+    display: inline-block;
+    width: 80px;
+    height: 112px;
+    border-radius: 8px;
+    border: 2px solid #333;
+    background: white;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.sacga-card:hover:not(.disabled):not(.sacga-card-back) {
+    transform: translateY(-8px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.sacga-card.selected {
+    transform: translateY(-12px);
+    border-color: #0073aa;
+    box-shadow: 0 6px 12px rgba(0,115,170,0.4);
+}
+
+.sacga-card.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sacga-card.sacga-card-small {
+    width: 60px;
+    height: 84px;
+}
+
+.sacga-card.sacga-card-large {
+    width: 100px;
+    height: 140px;
+}
+
+/* Card backs */
+.sacga-card-back {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #4a5568;
+}
+
+
+
+/* Card suits */
+.sacga-card.hearts,
+.sacga-card.diamonds {
+    color: #d32f2f;
+}
+
+.sacga-card.clubs,
+.sacga-card.spades {
+    color: #000;
+}
+
+.sacga-card.joker {
+    color: #7b1fa2; /* Purple for jokers */
+    background: linear-gradient(135deg, #fff 0%, #f3e5f5 100%);
+}
+
+/* Card elements */
+.sacga-card-corner {
+    position: absolute;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.sacga-card-corner-tl {
+    top: 6px;
+    left: 6px;
+}
+
+.sacga-card-corner-br {
+    bottom: 6px;
+    right: 6px;
+    transform: rotate(180deg);
+}
+
+.sacga-card-suit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+    opacity: 0.2;
+}
+
+.sacga-card-rank {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+    font-weight: bold;
+}
+
+/* Hand layouts */
+.sacga-hand {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 16px;
+}
+
+/* Opponent hands */
+.sacga-opponent-hand {
+    display: flex;
+    gap: 6px;
+    position: relative;
+}
+
+.sacga-opponent-hand.vertical {
+    flex-direction: column;
+}
+
+.sacga-opponent-hand .sacga-card {
+    width: 50px;
+    height: 70px;
+}
+
+/* Trick display */
+.sacga-trick {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.sacga-trick-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.sacga-trick-card .sacga-card.winner {
+    border-color: #4caf50;
+    box-shadow: 0 0 16px rgba(76, 175, 80, 0.6);
+}
+
+.sacga-player-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+}
+
+/* Trump indicator */
+.sacga-trump-indicator {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: #f5f5f5;
+    border: 2px solid #ddd;
+    font-weight: 600;
+    margin: 8px;
+}
+
+.sacga-trump-indicator.hearts {
+    color: #d32f2f;
+    border-color: #d32f2f;
+}
+
+.sacga-trump-indicator.diamonds {
+    color: #d32f2f;
+    border-color: #d32f2f;
+}
+
+.sacga-trump-indicator.clubs {
+    color: #000;
+    border-color: #000;
+}
+
+.sacga-trump-indicator.spades {
+    color: #000;
+    border-color: #000;
+}
+
+/* Player info */
+.sacga-player-info {
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    margin: 0;
+    font-size: 13px;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.sacga-player-info.active {
+    border-color: #0073aa;
+    background: #e3f2fd;
+    font-weight: 600;
+}
+
+.sacga-player-info .name {
+    font-weight: 600;
+    margin-bottom: 2px;
+    font-size: 14px;
+}
+
+.sacga-player-info .ai-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    background: #666;
+    color: white;
+    border-radius: 3px;
+    font-size: 11px;
+    margin-left: 4px;
+}
+
+/* Scoreboard */
+.sacga-scoreboard {
+    margin: 16px 0;
+}
+
+.sacga-scoreboard table {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+.sacga-scoreboard th,
+.sacga-scoreboard td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    color: #1f2937;
+}
+
+.sacga-scoreboard th {
+    background: #f5f5f5;
+    font-weight: 600;
+    color: #111827;
+}
+
+.sacga-scoreboard tr.my-team {
+    background: #e3f2fd;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Bid buttons */
+.sacga-bid-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 16px;
+}
+
+.sacga-bid-btn {
+    padding: 12px 24px;
+    background: #0073aa;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.sacga-bid-btn:hover {
+    background: #005a87;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.sacga-bid-btn.pass {
+    background: #d32f2f;
+}
+
+.sacga-bid-btn.pass:hover {
+    background: #9a0007;
+}
+
+/* Table layout for card games */
+.sacga-table {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    min-height: 500px;
+    height: 70vh;
+    max-height: 700px;
+    margin: 0 auto;
+    background: #2e7d32;
+    border-radius: 16px;
+    border: 8px solid #1b5e20;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.sacga-table::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.sacga-table > * {
+    position: relative;
+    z-index: 1;
+}
+
+.sacga-table-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.sacga-seat-bottom,
+.sacga-seat-top,
+.sacga-seat-left,
+.sacga-seat-right {
+    position: absolute;
+    max-width: 200px;
+}
+
+.sacga-seat-bottom {
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.sacga-seat-top {
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.sacga-seat-left {
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.sacga-seat-right {
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Player's hand section (below table) */
+.my-hand-section {
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto 0;
+    padding: 0 16px;
+}
+
+.my-hand-preview {
+    margin: 16px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sacga-card {
+        width: 50px;
+        height: 70px;
+    }
+
+    .sacga-card-corner {
+        font-size: 11px;
+    }
+
+    .sacga-card-suit {
+        font-size: 28px;
+    }
+
+    .sacga-table {
+        min-height: 400px;
+        height: 60vh;
+        max-height: 500px;
+        border-width: 4px;
+    }
+
+    .sacga-seat-bottom {
+        bottom: 70px;
+        max-width: 150px;
+    }
+
+    .sacga-seat-top {
+        top: 8px;
+        max-width: 150px;
+    }
+
+    .sacga-seat-left {
+        left: 8px;
+        max-width: 120px;
+    }
+
+    .sacga-seat-right {
+        right: 8px;
+        max-width: 120px;
+    }
+
+    .sacga-player-info {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    .sacga-player-info .name {
+        font-size: 12px;
+    }
+
+    .sacga-opponent-hand .sacga-card {
+        width: 40px;
+        height: 56px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sacga-card {
+        width: 45px;
+        height: 63px;
+    }
+
+    .sacga-card-corner {
+        font-size: 10px;
+        top: 4px;
+        left: 4px;
+    }
+
+    .sacga-card-suit {
+        font-size: 24px;
+    }
+
+    .sacga-table {
+        min-height: 350px;
+        height: 55vh;
+        max-height: 450px;
+    }
+
+    .sacga-opponent-hand .sacga-card {
+        width: 35px;
+        height: 49px;
+    }
+
+    .sacga-seat-bottom,
+    .sacga-seat-top,
+    .sacga-seat-left,
+    .sacga-seat-right {
+        max-width: 100px;
+    }
+
+    .sacga-player-info {
+        padding: 4px 6px;
+        font-size: 10px;
+    }
+
+    .sacga-player-info .name {
+        font-size: 11px;
+    }
+
+    .bid-tricks {
+        font-size: 9px;
+    }
+}
+
+/* ============================================
+   AI MOVE ANIMATIONS
+   ============================================ */
+
+/* Card play animation - card appears in trick area */
+@keyframes cardPlayIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) translateY(-20px);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1) translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.sacga-card-animating {
+    animation: cardPlayIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Highlight the card that was just played */
+@keyframes cardHighlight {
+    0%, 100% {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255,193,7,0.8), 0 0 40px rgba(255,193,7,0.4);
+    }
+}
+
+.sacga-card-just-played {
+    animation: cardHighlight 1s ease-in-out;
+}
+
+/* AI thinking indicator */
+@keyframes aiPulse {
+    0%, 100% {
+        background: rgba(0,0,0,0.3);
+        box-shadow: 0 0 0 rgba(52, 152, 219, 0);
+    }
+    50% {
+        background: rgba(52, 152, 219, 0.3);
+        box-shadow: 0 0 15px rgba(52, 152, 219, 0.6);
+    }
+}
+
+.sacga-player-info.ai-thinking {
+    animation: aiPulse 1.5s ease-in-out infinite;
+    position: relative;
+    padding-right: 30px !important; /* Make room for dots */
+}
+
+.sacga-player-info.ai-thinking::after {
+    content: '●●●';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #3498db;
+    animation: thinkingDots 1.4s infinite;
+    letter-spacing: 2px;
+}
+
+@keyframes thinkingDots {
+    0% { opacity: 0.3; }
+    33% { opacity: 0.6; }
+    66% { opacity: 1; }
+    100% { opacity: 0.3; }
+}
+
+/* Trick collection animation */
+@keyframes trickCollect {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8) rotate(5deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.3) translateY(50px);
+    }
+}
+
+.sacga-trick-collecting {
+    pointer-events: none;
+}
+
+.sacga-trick-collecting .sacga-card {
+    animation: trickCollect 0.5s ease-in forwards;
+}

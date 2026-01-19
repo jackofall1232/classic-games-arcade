@@ -1,0 +1,393 @@
+/**
+ * Hearts Game Styles
+ */
+
+/* Wrapper only holds CSS variables - no visual styling (matches Spades structure) */
+.sacga-game-hearts {
+    --hearts-felt-dark: #7f1d1d;
+    --hearts-felt-base: #991b1b;
+    --hearts-accent: #dc2626;
+    --hearts-panel: rgba(69, 10, 10, 0.75);
+    --hearts-panel-border: rgba(127, 29, 29, 0.55);
+}
+
+.sacga-game-hearts .hearts-header {
+    margin-bottom: 16px;
+}
+
+.sacga-game-hearts .hearts-title {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.sacga-game-hearts .hearts-subtitle {
+    font-size: 13px;
+    color: rgba(245, 238, 238, 0.75);
+}
+
+.sacga-game-hearts .hearts-status,
+.sacga-game-hearts .hearts-table-area,
+.sacga-game-hearts .hearts-scoreboard,
+.sacga-game-hearts .hearts-hand-area,
+.sacga-game-hearts .hearts-round-end {
+    background: var(--hearts-panel);
+    border: 1px solid var(--hearts-panel-border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.sacga-game-hearts .hearts-hand-area {
+    padding: 12px 16px;
+}
+
+.sacga-game-hearts .hearts-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 14px;
+}
+
+.sacga-game-hearts .hearts-phase-title {
+    font-weight: 600;
+    color: #fecaca;
+}
+
+.sacga-game-hearts .hearts-turn-indicator {
+    font-weight: 600;
+    color: rgba(245, 238, 238, 0.75);
+}
+
+.sacga-game-hearts .hearts-turn-indicator.is-active {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
+}
+
+.sacga-game-hearts .hearts-trick-status {
+    color: rgba(245, 238, 238, 0.65);
+}
+
+.sacga-game-hearts .pass-status {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.sacga-game-hearts .pass-entry {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.sacga-game-hearts .pass-entry.is-me {
+    border-color: rgba(220, 38, 38, 0.5);
+    box-shadow: 0 0 12px rgba(220, 38, 38, 0.25);
+}
+
+.sacga-game-hearts .pass-status-text {
+    color: rgba(245, 238, 238, 0.7);
+}
+
+/* Table styling - sacga-game-hearts is now on the table element itself */
+.hearts-table.sacga-game-hearts {
+    background: linear-gradient(#7f1d1d, #991b1b);
+    border-radius: 18px;
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.35);
+    border: 8px solid #7f1d1d;
+    margin-bottom: 0;
+    padding-bottom: 140px;
+}
+
+.hearts-table::before {
+    content: '♥';
+    font-size: min(40vw, 400px);
+    color: rgba(255, 255, 255, 0.08);
+    filter: blur(1px);
+    transform: rotate(-8deg);
+}
+
+/* Position player's hand on the table (like Spades) */
+.hearts-table.sacga-game-hearts + .my-hand-section {
+    position: relative;
+    margin-top: -150px;
+    z-index: 5;
+}
+
+/* Fan the cards like Spades */
+.hearts-table.sacga-game-hearts + .my-hand-section .sacga-hand-fanned {
+    gap: 0;
+    justify-content: center;
+}
+
+.hearts-table.sacga-game-hearts + .my-hand-section .sacga-hand-fanned .sacga-card {
+    margin-left: -50px;
+}
+
+.hearts-table.sacga-game-hearts + .my-hand-section .sacga-hand-fanned .sacga-card:first-child {
+    margin-left: 0;
+}
+
+.hearts-table.sacga-game-hearts + .my-hand-section .sacga-hand-fanned .sacga-card:hover {
+    z-index: 10;
+}
+
+.sacga-game-hearts .sacga-player-info {
+    background: rgba(69, 10, 10, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #f8f4f4;
+}
+
+.sacga-game-hearts .sacga-player-info.active {
+    border-color: rgba(220, 38, 38, 0.7);
+    box-shadow: 0 0 18px rgba(220, 38, 38, 0.5);
+    animation: hearts-active-glow 1.6s ease-in-out infinite;
+}
+
+.sacga-game-hearts .trick-empty {
+    color: rgba(245, 238, 238, 0.6);
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sacga-game-hearts .hearts-trick-empty {
+    content: '♥ Hearts Trump';
+}
+
+.sacga-game-hearts .hearts-trick-empty::before {
+    content: '♥ Hearts Trump';
+}
+
+.sacga-game-hearts .hearts-broken {
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: rgba(220, 38, 38, 0.2);
+    border: 1px solid rgba(220, 38, 38, 0.5);
+    border-radius: 999px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+}
+
+.sacga-game-hearts .sacga-play-area {
+    transition: box-shadow 0.3s ease;
+}
+
+.sacga-game-hearts .sacga-play-area.hearts-heart-played {
+    box-shadow: 0 0 18px rgba(220, 38, 38, 0.35);
+}
+
+.sacga-game-hearts .sacga-play-area.hearts-heart-played .sacga-card.hearts {
+    animation: hearts-heart-pulse 0.8s ease-in-out;
+}
+
+.sacga-game-hearts .sacga-card-animating {
+    animation: hearts-card-play 0.6s ease;
+}
+
+.sacga-game-hearts .sacga-trick-card .sacga-card {
+    animation: hearts-card-play 0.5s ease;
+}
+
+.sacga-game-hearts .sacga-card-just-played {
+    box-shadow: 0 0 18px rgba(220, 38, 38, 0.6);
+}
+
+.sacga-game-hearts .sacga-trick-collecting .sacga-trick-card {
+    animation: hearts-trick-collect 0.5s ease-in forwards;
+}
+
+.sacga-game-hearts .hearts-hand-area .sacga-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.sacga-game-hearts .hearts-hand-area .sacga-card:not(.disabled):hover {
+    transform: translateY(-6px) rotate(-1deg);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.25);
+}
+
+.sacga-game-hearts .hearts-hand-area .sacga-card.disabled {
+    opacity: 0.4;
+    filter: grayscale(0.15);
+    cursor: not-allowed;
+}
+
+.sacga-game-hearts .hearts-hand-area.hearts-invalid-play {
+    animation: hearts-invalid-shake 0.35s ease;
+    background: rgba(220, 38, 38, 0.12);
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.35);
+}
+
+.sacga-game-hearts .sacga-opponent-hand {
+    gap: 0;
+}
+
+.sacga-game-hearts .sacga-opponent-hand:not(.vertical) .sacga-card {
+    margin-left: -40px;
+}
+
+.sacga-game-hearts .sacga-opponent-hand:not(.vertical) .sacga-card:first-child {
+    margin-left: 0;
+}
+
+.sacga-game-hearts .sacga-opponent-hand.vertical .sacga-card {
+    margin-top: -55px;
+}
+
+.sacga-game-hearts .sacga-opponent-hand.vertical .sacga-card:first-child {
+    margin-top: 0;
+}
+
+/* Scoreboard is now sibling to table, not nested */
+.hearts-scoreboard table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+/* Header row has light background - use dark text */
+.hearts-scoreboard th {
+    text-align: left;
+    font-weight: 600;
+    padding: 10px 12px;
+    color: #111827;
+}
+
+/* Default body rows are on dark panel - use light text */
+.hearts-scoreboard td {
+    padding: 10px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Player's row has light gradient background - use dark text */
+.hearts-scoreboard tr.is-me td {
+    color: #111827;
+    font-weight: 600;
+}
+
+/* Current turn row has red background - use white text */
+.hearts-scoreboard tr.is-current {
+    background: rgba(220, 38, 38, 0.18);
+    box-shadow: inset 0 0 0 1px rgba(220, 38, 38, 0.35);
+}
+
+.hearts-scoreboard tr.is-current td {
+    color: #ffffff;
+}
+
+.hearts-round-end h2 {
+    margin-top: 0;
+    color: #fff;
+}
+
+.shoot-moon-banner,
+.game-winner {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(220, 38, 38, 0.18);
+    border: 1px solid rgba(220, 38, 38, 0.45);
+    text-align: center;
+    font-weight: 600;
+}
+
+@keyframes hearts-card-play {
+    from {
+        transform: translateY(18px) rotateX(6deg) scale(0.96);
+        opacity: 0.6;
+    }
+    to {
+        transform: translateY(0) rotateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes hearts-heart-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 rgba(220, 38, 38, 0.0);
+    }
+    50% {
+        box-shadow: 0 0 16px rgba(220, 38, 38, 0.45);
+    }
+}
+
+@keyframes hearts-active-glow {
+    0%,
+    100% {
+        box-shadow: 0 0 12px rgba(220, 38, 38, 0.35);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(220, 38, 38, 0.55);
+    }
+}
+
+@keyframes hearts-trick-collect {
+    to {
+        transform: translateY(-12px) scale(0.85);
+        opacity: 0;
+    }
+}
+
+@keyframes hearts-invalid-shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-6px);
+    }
+    75% {
+        transform: translateX(6px);
+    }
+}
+
+@media (max-width: 900px) {
+    .sacga-game-hearts {
+        padding: 20px;
+    }
+
+    .sacga-game-hearts .hearts-status {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sacga-game-hearts .hearts-scoreboard table,
+    .sacga-game-hearts .hearts-scoreboard tr,
+    .sacga-game-hearts .hearts-scoreboard td,
+    .sacga-game-hearts .hearts-scoreboard th {
+        display: block;
+        width: 100%;
+    }
+
+    .sacga-game-hearts .hearts-scoreboard tr {
+        margin-bottom: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .sacga-game-hearts .hearts-scoreboard th {
+        display: none;
+    }
+
+    .sacga-game-hearts .hearts-scoreboard td {
+        border-top: none;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .sacga-game-hearts .hearts-scoreboard td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: rgba(245, 238, 238, 0.7);
+    }
+}

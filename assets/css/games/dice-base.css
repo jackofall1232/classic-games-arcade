@@ -1,0 +1,476 @@
+/**
+ * Classic Games Arcade – Dice Styles (Enhanced)
+ * Shared styling for all dice-based games (Pig, High/Low, Greed, Yacht, etc.)
+ */
+
+/* Dice container row */
+.sacga-dice-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 15px 0;
+    flex-wrap: wrap;
+    perspective: 1000px;
+}
+
+/* Individual die */
+.sacga-die {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(145deg, #ffffff 0%, #f8f8f8 50%, #e8e8e8 100%);
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 20px;
+    cursor: default;
+    box-shadow:
+        0 8px 16px rgba(0, 0, 0, 0.15),
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 2px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    transform-style: preserve-3d;
+    transform: translateZ(0) rotateX(5deg) rotateY(-5deg);
+    position: relative;
+}
+
+/* Pip dot container */
+.sacga-die .die-face {
+    font-size: 0;
+    line-height: 1;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2px;
+    padding: 8px;
+    position: relative;
+    color: transparent;
+    overflow: hidden;
+}
+
+/* Individual pip dots - base style */
+.sacga-die .die-face::before,
+.sacga-die .die-face::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle at 30% 30%, #2a2a2a, #000000);
+    border-radius: 50%;
+    position: absolute;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Value 1 - center pip */
+.sacga-die[data-value="1"] .die-face::before {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Value 2 - diagonal pips */
+.sacga-die[data-value="2"] .die-face::before {
+    top: 25%;
+    left: 25%;
+}
+.sacga-die[data-value="2"] .die-face::after {
+    bottom: 25%;
+    right: 25%;
+}
+
+/* Value 3 - diagonal pips + center */
+.sacga-die[data-value="3"] .die-face::before {
+    top: 25%;
+    left: 25%;
+}
+.sacga-die[data-value="3"] .die-face::after {
+    bottom: 25%;
+    right: 25%;
+}
+.sacga-die[data-value="3"] .die-face {
+    position: relative;
+}
+.sacga-die[data-value="3"] .die-face:nth-child(1)::after {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle at 30% 30%, #2a2a2a, #000000);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Value 4 - four corners */
+.sacga-die[data-value="4"] .die-face::before,
+.sacga-die[data-value="4"] .die-face::after {
+    content: '';
+}
+.sacga-die[data-value="4"] .die-face::before {
+    width: 10px;
+    height: 10px;
+    top: 25%;
+    left: 25%;
+    box-shadow:
+        0 0 0 0 #000,
+        24px 0 0 0 radial-gradient(circle at 30% 30%, #2a2a2a, #000000),
+        0 24px 0 0 radial-gradient(circle at 30% 30%, #2a2a2a, #000000),
+        24px 24px 0 0 radial-gradient(circle at 30% 30%, #2a2a2a, #000000);
+}
+.sacga-die[data-value="4"] .die-face::after {
+    width: 10px;
+    height: 10px;
+    top: 25%;
+    right: 25%;
+}
+.sacga-die[data-value="4"] .die-face {
+    background-image:
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px);
+    background-size: 10px 10px;
+    background-position:
+        25% 25%,
+        75% 25%,
+        25% 75%,
+        75% 75%;
+    background-repeat: no-repeat;
+}
+
+/* Value 5 - four corners + center */
+.sacga-die[data-value="5"] .die-face {
+    background-image:
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px);
+    background-size: 10px 10px;
+    background-position:
+        25% 25%,
+        75% 25%,
+        50% 50%,
+        25% 75%,
+        75% 75%;
+    background-repeat: no-repeat;
+}
+
+/* Value 6 - two columns of three */
+.sacga-die[data-value="6"] .die-face {
+    background-image:
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px),
+        radial-gradient(circle, #000 4px, transparent 4px);
+    background-size: 10px 10px;
+    background-position:
+        25% 20%,
+        25% 50%,
+        25% 80%,
+        75% 20%,
+        75% 50%,
+        75% 80%;
+    background-repeat: no-repeat;
+}
+
+/* Hover effect (non-disabled) */
+.sacga-die:not(.disabled):hover {
+    transform: translateY(-4px) rotateX(8deg) rotateY(-8deg) scale(1.05);
+    box-shadow:
+        0 12px 24px rgba(0, 0, 0, 0.2),
+        0 4px 8px rgba(0, 0, 0, 0.15),
+        inset 0 1px 3px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Selectable dice */
+.sacga-die.selectable {
+    cursor: pointer;
+    background: linear-gradient(145deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
+    box-shadow:
+        0 8px 16px rgba(25, 118, 210, 0.2),
+        0 2px 4px rgba(25, 118, 210, 0.15),
+        inset 0 1px 2px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 4px rgba(25, 118, 210, 0.1),
+        0 0 0 2px rgba(25, 118, 210, 0.3);
+    animation: pulse-selectable 2s ease-in-out infinite;
+}
+
+@keyframes pulse-selectable {
+    0%, 100% {
+        box-shadow:
+            0 8px 16px rgba(25, 118, 210, 0.2),
+            0 2px 4px rgba(25, 118, 210, 0.15),
+            inset 0 1px 2px rgba(255, 255, 255, 0.8),
+            inset 0 -2px 4px rgba(25, 118, 210, 0.1),
+            0 0 0 2px rgba(25, 118, 210, 0.3);
+    }
+    50% {
+        box-shadow:
+            0 8px 16px rgba(25, 118, 210, 0.3),
+            0 2px 4px rgba(25, 118, 210, 0.25),
+            inset 0 1px 2px rgba(255, 255, 255, 0.9),
+            inset 0 -2px 4px rgba(25, 118, 210, 0.15),
+            0 0 0 3px rgba(25, 118, 210, 0.5);
+    }
+}
+
+.sacga-die.selectable:hover {
+    background: linear-gradient(145deg, #bbdefb 0%, #90caf9 50%, #64b5f6 100%);
+    box-shadow:
+        0 12px 24px rgba(25, 118, 210, 0.3),
+        0 4px 8px rgba(25, 118, 210, 0.2),
+        inset 0 1px 3px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 4px rgba(25, 118, 210, 0.15),
+        0 0 0 3px rgba(25, 118, 210, 0.5);
+}
+
+/* Selected dice */
+.sacga-die.selected {
+    background: linear-gradient(145deg, #c8e6c9 0%, #a5d6a7 50%, #81c784 100%);
+    box-shadow:
+        0 8px 20px rgba(56, 142, 60, 0.3),
+        0 2px 6px rgba(56, 142, 60, 0.2),
+        inset 0 1px 3px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 4px rgba(56, 142, 60, 0.15),
+        0 0 0 3px rgba(76, 175, 80, 0.4),
+        0 0 20px rgba(76, 175, 80, 0.2);
+    transform: translateZ(0) rotateX(5deg) rotateY(-5deg) scale(1.08);
+}
+
+/* Locked dice (cannot be re-rolled) */
+.sacga-die.locked {
+    background: linear-gradient(145deg, #e0e0e0 0%, #bdbdbd 50%, #9e9e9e 100%);
+    opacity: 0.7;
+    box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.1),
+        0 1px 2px rgba(0, 0, 0, 0.08),
+        inset 0 1px 2px rgba(255, 255, 255, 0.5),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateZ(0) scale(0.95);
+}
+
+.sacga-die.locked .die-face {
+    opacity: 0.5;
+}
+
+/* Disabled dice */
+.sacga-die.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(0.8);
+    transform: translateZ(0) scale(0.9);
+}
+
+/* Size variants - Small */
+.sacga-dice-small .sacga-die {
+    width: 44px;
+    height: 44px;
+}
+
+.sacga-dice-small .sacga-die .die-face {
+    padding: 6px;
+}
+
+.sacga-dice-small .sacga-die[data-value="1"] .die-face::before,
+.sacga-dice-small .sacga-die[data-value="2"] .die-face::before,
+.sacga-dice-small .sacga-die[data-value="2"] .die-face::after,
+.sacga-dice-small .sacga-die[data-value="3"] .die-face::before,
+.sacga-dice-small .sacga-die[data-value="3"] .die-face::after {
+    width: 7px;
+    height: 7px;
+}
+
+.sacga-dice-small .sacga-die[data-value="4"] .die-face,
+.sacga-dice-small .sacga-die[data-value="5"] .die-face,
+.sacga-dice-small .sacga-die[data-value="6"] .die-face {
+    background-size: 7px 7px;
+}
+
+/* Size variants - Large */
+.sacga-dice-large .sacga-die {
+    width: 80px;
+    height: 80px;
+}
+
+.sacga-dice-large .sacga-die .die-face {
+    padding: 10px;
+}
+
+.sacga-dice-large .sacga-die[data-value="1"] .die-face::before,
+.sacga-dice-large .sacga-die[data-value="2"] .die-face::before,
+.sacga-dice-large .sacga-die[data-value="2"] .die-face::after,
+.sacga-dice-large .sacga-die[data-value="3"] .die-face::before,
+.sacga-dice-large .sacga-die[data-value="3"] .die-face::after {
+    width: 13px;
+    height: 13px;
+}
+
+.sacga-dice-large .sacga-die[data-value="4"] .die-face,
+.sacga-dice-large .sacga-die[data-value="5"] .die-face,
+.sacga-dice-large .sacga-die[data-value="6"] .die-face {
+    background-size: 13px 13px;
+}
+
+/* Rolling animation - Enhanced 3D tumbling effect */
+@keyframes dice-roll {
+    0% {
+        transform: translateZ(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1);
+    }
+    15% {
+        transform: translateZ(30px) rotateX(180deg) rotateY(90deg) rotateZ(45deg) scale(1.15);
+    }
+    30% {
+        transform: translateZ(50px) rotateX(270deg) rotateY(180deg) rotateZ(90deg) scale(1.2);
+    }
+    45% {
+        transform: translateZ(40px) rotateX(360deg) rotateY(270deg) rotateZ(135deg) scale(1.1);
+    }
+    60% {
+        transform: translateZ(30px) rotateX(450deg) rotateY(360deg) rotateZ(180deg) scale(1.15);
+    }
+    75% {
+        transform: translateZ(20px) rotateX(540deg) rotateY(450deg) rotateZ(225deg) scale(1.08);
+    }
+    90% {
+        transform: translateZ(10px) rotateX(630deg) rotateY(540deg) rotateZ(270deg) scale(1.02);
+    }
+    100% {
+        transform: translateZ(0) rotateX(720deg) rotateY(720deg) rotateZ(360deg) scale(1);
+    }
+}
+
+.sacga-die.rolling {
+    animation: dice-roll 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 8px 16px rgba(0, 0, 0, 0.2),
+        inset 0 1px 3px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Fallback for non-standard dice (values other than 1-6) - show numbers */
+.sacga-die:not([data-value="1"]):not([data-value="2"]):not([data-value="3"]):not([data-value="4"]):not([data-value="5"]):not([data-value="6"]) .die-face {
+    font-size: 24px;
+    color: #000;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.sacga-die:not([data-value="1"]):not([data-value="2"]):not([data-value="3"]):not([data-value="4"]):not([data-value="5"]):not([data-value="6"]) .die-face::before,
+.sacga-die:not([data-value="1"]):not([data-value="2"]):not([data-value="3"]):not([data-value="4"]):not([data-value="5"]):not([data-value="6"]) .die-face::after {
+    display: none;
+}
+
+/* Optional: Red dice variant (can be added with .die-red class) */
+.sacga-die.die-red {
+    background: linear-gradient(145deg, #ff6b6b 0%, #ee5a52 50%, #e53935 100%);
+}
+
+.sacga-die.die-red .die-face::before,
+.sacga-die.die-red .die-face::after,
+.sacga-die.die-red[data-value="4"] .die-face,
+.sacga-die.die-red[data-value="5"] .die-face,
+.sacga-die.die-red[data-value="6"] .die-face {
+    background-image: radial-gradient(circle, #fff 4px, transparent 4px);
+}
+
+.sacga-die.die-red[data-value="1"] .die-face::before,
+.sacga-die.die-red[data-value="2"] .die-face::before,
+.sacga-die.die-red[data-value="2"] .die-face::after,
+.sacga-die.die-red[data-value="3"] .die-face::before,
+.sacga-die.die-red[data-value="3"] .die-face::after {
+    background: radial-gradient(circle at 30% 30%, #ffffff, #f0f0f0);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+    .sacga-dice-row {
+        gap: 10px;
+    }
+
+    .sacga-die {
+        width: 50px;
+        height: 50px;
+    }
+
+    .sacga-die .die-face {
+        padding: 6px;
+    }
+
+    .sacga-die[data-value="1"] .die-face::before,
+    .sacga-die[data-value="2"] .die-face::before,
+    .sacga-die[data-value="2"] .die-face::after,
+    .sacga-die[data-value="3"] .die-face::before,
+    .sacga-die[data-value="3"] .die-face::after {
+        width: 8px;
+        height: 8px;
+    }
+
+    .sacga-die[data-value="4"] .die-face,
+    .sacga-die[data-value="5"] .die-face,
+    .sacga-die[data-value="6"] .die-face {
+        background-size: 8px 8px;
+    }
+
+    .sacga-dice-small .sacga-die {
+        width: 36px;
+        height: 36px;
+    }
+
+    .sacga-dice-small .sacga-die .die-face {
+        padding: 5px;
+    }
+
+    .sacga-dice-small .sacga-die[data-value="1"] .die-face::before,
+    .sacga-dice-small .sacga-die[data-value="2"] .die-face::before,
+    .sacga-dice-small .sacga-die[data-value="2"] .die-face::after,
+    .sacga-dice-small .sacga-die[data-value="3"] .die-face::before,
+    .sacga-dice-small .sacga-die[data-value="3"] .die-face::after {
+        width: 6px;
+        height: 6px;
+    }
+
+    .sacga-dice-small .sacga-die[data-value="4"] .die-face,
+    .sacga-dice-small .sacga-die[data-value="5"] .die-face,
+    .sacga-dice-small .sacga-die[data-value="6"] .die-face {
+        background-size: 6px 6px;
+    }
+
+    .sacga-dice-large .sacga-die {
+        width: 64px;
+        height: 64px;
+    }
+
+    .sacga-dice-large .sacga-die .die-face {
+        padding: 8px;
+    }
+
+    .sacga-dice-large .sacga-die[data-value="1"] .die-face::before,
+    .sacga-dice-large .sacga-die[data-value="2"] .die-face::before,
+    .sacga-dice-large .sacga-die[data-value="2"] .die-face::after,
+    .sacga-dice-large .sacga-die[data-value="3"] .die-face::before,
+    .sacga-dice-large .sacga-die[data-value="3"] .die-face::after {
+        width: 11px;
+        height: 11px;
+    }
+
+    .sacga-dice-large .sacga-die[data-value="4"] .die-face,
+    .sacga-dice-large .sacga-die[data-value="5"] .die-face,
+    .sacga-dice-large .sacga-die[data-value="6"] .die-face {
+        background-size: 11px 11px;
+    }
+}

@@ -1,0 +1,351 @@
+/**
+ * Diamonds Game Styles
+ *
+ * Theme: Rich red felt with white accents
+ * Diamond suit emphasized as trump (but penalty)
+ */
+
+/* Table theming */
+.sacga-game-diamonds .diamonds-table {
+    margin-bottom: 20px;
+    background: linear-gradient(145deg, #b11226 0%, #8a0e1e 100%);
+}
+
+.diamonds-table::before {
+    content: '\2666';
+    font-size: min(40vw, 400px);
+    color: rgba(255, 255, 255, 0.08);
+    filter: blur(1px);
+}
+
+/* Override table center for red theme */
+.sacga-game-diamonds .sacga-table-center {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.sacga-game-diamonds .diamonds-scoreboard {
+    margin-top: 20px;
+}
+
+.sacga-game-diamonds .diamonds-bidding {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Card fanning */
+.sacga-game-diamonds .sacga-hand-fanned {
+    gap: 0;
+    justify-content: center;
+}
+
+.sacga-game-diamonds .sacga-hand-fanned .sacga-card {
+    margin-left: -50px;
+}
+
+.sacga-game-diamonds .sacga-hand-fanned .sacga-card:first-child {
+    margin-left: 0;
+}
+
+.sacga-game-diamonds .sacga-hand-fanned .sacga-card:hover {
+    z-index: 10;
+}
+
+/* Opponent hands */
+.sacga-game-diamonds .sacga-opponent-hand {
+    gap: 0;
+}
+
+.sacga-game-diamonds .sacga-opponent-hand:not(.vertical) .sacga-card {
+    margin-left: -40px;
+}
+
+.sacga-game-diamonds .sacga-opponent-hand:not(.vertical) .sacga-card:first-child {
+    margin-left: 0;
+}
+
+.sacga-game-diamonds .sacga-opponent-hand.vertical .sacga-card {
+    margin-top: -55px;
+}
+
+.sacga-game-diamonds .sacga-opponent-hand.vertical .sacga-card:first-child {
+    margin-top: 0;
+}
+
+/* Bidding status */
+.sacga-game-diamonds .bid-status {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.sacga-game-diamonds .bid-entry {
+    padding: 12px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.sacga-game-diamonds .bid-entry.my-team {
+    border-color: #b11226;
+    background: #fce4ec;
+}
+
+.sacga-game-diamonds .bid-entry.is-me {
+    font-weight: 600;
+}
+
+.sacga-game-diamonds .player-name {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.sacga-game-diamonds .player-bid {
+    display: block;
+    font-size: 18px;
+    color: #b11226;
+}
+
+.sacga-game-diamonds .sacga-bid-area {
+    margin-top: 24px;
+}
+
+/* Bid buttons with diamond theme */
+.sacga-game-diamonds .sacga-bid-btn {
+    background: #b11226;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    margin: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.sacga-game-diamonds .sacga-bid-btn:hover {
+    background: #d32f2f;
+    transform: translateY(-1px);
+}
+
+.sacga-game-diamonds .sacga-bid-btn.pass {
+    background: #757575;
+}
+
+.sacga-game-diamonds .sacga-bid-btn.pass:hover {
+    background: #9e9e9e;
+}
+
+/* Penalty tracker (diamonds + jokers) */
+.sacga-game-diamonds .penalty-tracker {
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.sacga-game-diamonds .tracker-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 0;
+    font-weight: 600;
+}
+
+.sacga-game-diamonds .tracker-icon {
+    font-size: 16px;
+    width: 24px;
+}
+
+.sacga-game-diamonds .diamonds-row .tracker-icon {
+    color: #b11226;
+}
+
+.sacga-game-diamonds .jokers-row .tracker-icon {
+    font-size: 14px;
+}
+
+.sacga-game-diamonds .tracker-sep {
+    color: #999;
+    font-weight: normal;
+}
+
+.sacga-game-diamonds .tracker-team {
+    min-width: 20px;
+}
+
+.sacga-game-diamonds .tracker-team.my-team {
+    color: #b11226;
+}
+
+.sacga-game-diamonds .tracker-team.opp-team {
+    color: #333;
+}
+
+.sacga-game-diamonds .soft-moon-alert {
+    margin-top: 8px;
+    padding: 4px 12px;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #333;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 14px;
+    animation: pulse 1.5s infinite;
+}
+
+.sacga-game-diamonds .soft-moon-warning {
+    margin-top: 8px;
+    padding: 4px 12px;
+    background: #fff3cd;
+    color: #856404;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Trick area */
+.sacga-game-diamonds .trick-empty {
+    padding: 24px;
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+/* Round end */
+.sacga-game-diamonds .diamonds-round-end {
+    text-align: center;
+    padding: 32px 20px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.sacga-game-diamonds .round-details {
+    text-align: left;
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.sacga-game-diamonds .round-details h4 {
+    margin: 0 0 12px 0;
+    text-align: center;
+}
+
+.sacga-game-diamonds .team-details {
+    margin-bottom: 12px;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+    border-left: 4px solid #ddd;
+}
+
+.sacga-game-diamonds .team-details.my-team {
+    border-left-color: #b11226;
+}
+
+.sacga-game-diamonds .team-details ul {
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+    list-style: none;
+}
+
+.sacga-game-diamonds .team-details li {
+    padding: 2px 0;
+}
+
+.sacga-game-diamonds .team-details li.penalty {
+    color: #c62828;
+}
+
+.sacga-game-diamonds .team-details li.bonus {
+    color: #2e7d32;
+}
+
+.sacga-game-diamonds .team-details li.total {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #eee;
+}
+
+.sacga-game-diamonds .bid-tricks {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* Position player's hand on the table */
+.sacga-game-diamonds .diamonds-table {
+    margin-bottom: 0;
+    padding-bottom: 140px;
+}
+
+.sacga-game-diamonds .my-hand-section {
+    position: relative;
+    margin-top: -150px;
+    z-index: 5;
+}
+
+/* Scoreboard styling */
+.sacga-game-diamonds .sacga-scoreboard table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sacga-game-diamonds .sacga-scoreboard th,
+.sacga-game-diamonds .sacga-scoreboard td {
+    padding: 8px 12px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.sacga-game-diamonds .sacga-scoreboard th {
+    background: #f5f5f5;
+    font-weight: 600;
+}
+
+.sacga-game-diamonds .sacga-scoreboard tr.my-team {
+    background: #fce4ec;
+}
+
+/* Diamond suit highlight on cards */
+.sacga-game-diamonds .sacga-card[data-suit="diamonds"] {
+    box-shadow: 0 0 0 2px rgba(177, 18, 38, 0.3);
+}
+
+/* Warning indicator for diamond-heavy hands */
+.sacga-game-diamonds .diamond-warning {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #ff5722;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 14px;
+    line-height: 24px;
+    text-align: center;
+}
+
+/* Joker card styling */
+.sacga-game-diamonds .sacga-card[data-suit="joker"] {
+    box-shadow: 0 0 0 2px rgba(128, 0, 128, 0.4);
+    background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+}
+
+.sacga-game-diamonds .sacga-card[data-suit="joker"]::after {
+    content: '🃏';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 32px;
+}

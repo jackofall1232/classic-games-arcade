@@ -1,0 +1,245 @@
+/**
+ * Pig Dice Game Styles
+ * Scoped to Pig game only.
+ */
+:where(.pig-game, .sacga-game-pig .pig-game) {
+    --pig-primary: #f2a8b7;
+    --pig-primary-dark: #e38ea1;
+    --pig-accent: #d86a78;
+    --pig-cream: #fff4e6;
+    --pig-cream-dark: #ffe3cc;
+    --pig-brown: #b38b6d;
+    --pig-text: #5c3c2f;
+    --pig-muted: #8a6a5a;
+    --pig-shadow: 0 12px 30px rgba(216, 106, 120, 0.18);
+    --pig-card-shadow: 0 8px 20px rgba(120, 74, 62, 0.15);
+    --pig-glow: 0 0 18px rgba(216, 106, 120, 0.35);
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 1100px; /* alignwide */
+    margin: 0 auto;
+    padding: 28px;
+    border-radius: 24px;
+    background: linear-gradient(150deg, #fff7ef 0%, #ffeaf0 55%, #fff4e6 100%);
+    color: var(--pig-text);
+    box-shadow: var(--pig-shadow);
+}
+
+/* =========================
+   HEADER
+   ========================= */
+.pig-header {
+    text-align: center;
+    padding: 18px 20px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: var(--pig-card-shadow);
+}
+
+.pig-header h2 {
+    margin: 0 0 6px;
+    font-size: 32px;
+    color: var(--pig-accent);
+}
+
+.pig-header p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--pig-muted);
+}
+
+/* =========================
+   STATUS / DICE
+   ========================= */
+.pig-status {
+    padding: 18px 20px;
+    border-radius: 20px;
+    background: var(--pig-cream);
+    box-shadow: var(--pig-card-shadow);
+    display: grid;
+    gap: 12px;
+    text-align: center;
+}
+
+.pig-status p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.pig-status strong {
+    font-size: 22px;
+    color: var(--pig-accent);
+}
+
+.pig-last-action {
+    font-size: 15px;
+    color: var(--pig-text);
+}
+
+.pig-last-roll {
+    display: flex;
+    justify-content: center;
+}
+
+.pig-last-roll .sacga-dice-row {
+    gap: 12px;
+}
+
+.pig-last-roll .sacga-die {
+    background: linear-gradient(145deg, #fff 0%, #ffe3d4 100%);
+    border: 2px solid var(--pig-primary-dark);
+    border-radius: 16px;
+    box-shadow: 0 8px 18px rgba(188, 120, 123, 0.25);
+}
+
+.pig-last-roll .die-face {
+    color: var(--pig-accent);
+    font-weight: 700;
+}
+
+/* Dice animation */
+.pig-roll-animate .sacga-die {
+    animation: pigDiceBounce 0.45s ease-out,
+               pigDiceSpin 0.55s ease-in-out,
+               pigDiceShake 0.2s ease-in-out;
+}
+
+.pig-bust .sacga-die {
+    animation: pigBustShake 0.18s ease-in-out 2;
+    background: linear-gradient(145deg, #ffe3e7 0%, #ffd1d8 100%);
+    border-color: var(--pig-accent);
+    box-shadow: 0 0 18px rgba(216, 106, 120, 0.45);
+}
+
+/* =========================
+   SCOREBOARD
+   ========================= */
+.pig-scoreboard-panel {
+    background: #fff;
+    border-radius: 22px;
+    padding: 20px;
+    box-shadow: var(--pig-card-shadow);
+    display: grid;
+    gap: 16px;
+}
+
+.pig-scoreboard-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--pig-accent);
+}
+
+.pig-scores {
+    display: grid;
+    gap: 12px;
+}
+
+.pig-score {
+    position: relative;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: var(--pig-cream);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+}
+
+.pig-score.is-current {
+    border: 2px solid var(--pig-primary-dark);
+    box-shadow: var(--pig-glow);
+    background: #fff;
+}
+
+.pig-score-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--pig-accent);
+}
+
+/* =========================
+   ACTIONS
+   ========================= */
+.pig-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+.pig-actions .sacga-btn {
+    min-width: 180px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+.pig-actions .sacga-btn-primary {
+    background: linear-gradient(135deg, var(--pig-primary), var(--pig-accent));
+    color: #fff;
+}
+
+/* =========================
+   DESKTOP WIDE LAYOUT
+   ========================= */
+@media (min-width: 900px) {
+    :where(.pig-game, .sacga-game-pig .pig-game) {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        grid-template-areas:
+            "header header"
+            "status scoreboard"
+            "actions scoreboard";
+        align-items: start;
+    }
+
+    .pig-header { grid-area: header; }
+    .pig-status { grid-area: status; }
+    .pig-actions { grid-area: actions; align-self: center; }
+    .pig-scoreboard { grid-area: scoreboard; }
+}
+
+/* =========================
+   MOBILE STACK
+   ========================= */
+@media (max-width: 720px) {
+    :where(.pig-game, .sacga-game-pig .pig-game) {
+        padding: 20px;
+    }
+
+    .pig-actions,
+    .pig-actions .sacga-btn {
+        width: 100%;
+    }
+
+    .pig-score {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================
+   ANIMATIONS
+   ========================= */
+@keyframes pigDiceBounce {
+    0% { transform: scale(0.85); }
+    60% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pigDiceSpin {
+    0% { transform: rotate(-12deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@keyframes pigDiceShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+}
+
+@keyframes pigBustShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px) rotate(-3deg); }
+    80% { transform: translateX(4px) rotate(3deg); }
+}

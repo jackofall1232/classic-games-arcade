@@ -1,0 +1,352 @@
+/**
+ * Rummy Game Styles
+ */
+
+.rummy-game {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.rummy-header {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 2px solid #dee2e6;
+}
+
+.rummy-header h3 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+}
+
+.rummy-rules {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.score-display {
+    font-size: 14px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #dee2e6;
+}
+
+.score-display span {
+    margin-right: 15px;
+    padding: 3px 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+}
+
+.score-display .my-score {
+    background: #d4edda;
+    font-weight: bold;
+}
+
+.rummy-table {
+    background: #27ae60;
+    border-radius: 12px;
+    padding: 30px;
+    min-height: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rummy-center {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    margin-bottom: 30px;
+}
+
+.deck-area,
+.discard-area {
+    text-align: center;
+}
+
+.deck-pile,
+.discard-pile {
+    width: 120px;
+    height: 168px;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.deck-pile:hover,
+.discard-pile:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.deck-pile .card-back {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.deck-count {
+    font-size: 24px;
+}
+
+.empty-pile {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+}
+
+.deck-label {
+    margin-top: 10px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.turn-indicator {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.other-players {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.player-info {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.player-info.current-turn {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+.player-name {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.player-cards {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.player-melds {
+    font-size: 12px;
+    color: #28a745;
+    margin-top: 3px;
+}
+
+.my-hand-section {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.my-hand-section h4 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+}
+
+.sacga-game-rummy .sacga-hand-fanned {
+    gap: 0;
+    justify-content: center;
+}
+
+.sacga-game-rummy .sacga-hand-fanned .sacga-card {
+    margin-left: -40px;
+}
+
+.sacga-game-rummy .sacga-hand-fanned .sacga-card:first-child {
+    margin-left: 0;
+}
+
+.sacga-game-rummy .sacga-hand-fanned .sacga-card:hover {
+    z-index: 10;
+}
+
+.rummy-actions {
+    margin-top: 20px;
+    text-align: center;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.rummy-actions button {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sacga-btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.sacga-btn-primary:hover:not(:disabled) {
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sacga-btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.sacga-btn-success:hover:not(:disabled) {
+    background: #1e7e34;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.my-melds-section {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.my-melds-section h4 {
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+}
+
+.melds-display {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.meld {
+    background: #e8f5e9;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    gap: 5px;
+    border: 2px solid #4caf50;
+}
+
+.round-end-section {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.round-end-section h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.score-table {
+    margin: 25px 0;
+}
+
+.score-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.score-table th {
+    background: #007bff;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.score-table td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.score-table tr:hover {
+    background: #f8f9fa;
+}
+
+.score-table tr.is-me {
+    background: #d4edda;
+    font-weight: bold;
+}
+
+.game-over {
+    background: #d4edda;
+    border: 2px solid #28a745;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.game-over h2 {
+    color: #155724;
+    margin: 0 0 10px 0;
+}
+
+.next-round {
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .rummy-center {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .other-players {
+        grid-template-columns: 1fr;
+    }
+
+    .rummy-actions {
+        flex-direction: column;
+    }
+
+    .rummy-actions button {
+        width: 100%;
+    }
+}

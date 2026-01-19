@@ -1,0 +1,56 @@
+/**
+ * Euchre Game Styles
+ */
+.euchre-table::before {
+    content: '';
+    width: 60%;
+    height: 60%;
+    background-image: url('/assets/images/euchre-jacks-fan.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.08;
+    filter: blur(1px);
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+}
+
+.sacga-game-euchre .sacga-hand-fanned {
+    gap: 0;
+    justify-content: center;
+}
+
+.sacga-game-euchre .sacga-hand-fanned .sacga-card {
+    margin-left: -42px;
+}
+
+.sacga-game-euchre .sacga-hand-fanned .sacga-card:first-child {
+    margin-left: 0;
+}
+
+.sacga-game-euchre .sacga-hand-fanned .sacga-card:hover {
+    z-index: 10;
+}
+
+.sacga-game-euchre .sacga-opponent-hand {
+    gap: 0;
+}
+
+.sacga-game-euchre .sacga-opponent-hand:not(.vertical) .sacga-card {
+    margin-left: -32px;
+}
+
+.sacga-game-euchre .sacga-opponent-hand:not(.vertical) .sacga-card:first-child {
+    margin-left: 0;
+}
+
+.sacga-game-euchre .sacga-opponent-hand.vertical .sacga-card {
+    margin-top: -45px;
+}
+
+.sacga-game-euchre .sacga-opponent-hand.vertical .sacga-card:first-child {
+    margin-top: 0;
+}

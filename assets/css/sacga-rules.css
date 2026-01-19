@@ -1,0 +1,839 @@
+/**
+ * Classic Games Arcade - Rules Shortcode & Modal Styles
+ * Pro-quality, theme-safe, responsive design
+ * Version: 1.0.0
+ */
+
+/* ============================================
+   CSS Custom Properties - Rules Theme
+   ============================================ */
+:root {
+    --sacga-rules-bg: #ffffff;
+    --sacga-rules-border: rgba(0, 0, 0, 0.1);
+    --sacga-rules-heading: inherit;
+    --sacga-rules-text: inherit;
+    --sacga-rules-accent: var(--sacga-primary, #2563eb);
+    --sacga-rules-section-bg: #f9fafb;
+    --sacga-rules-max-width: 800px;
+}
+
+/* ============================================
+   Rules Shortcode - Base Container
+   ============================================ */
+.sacga-game-rules {
+    max-width: var(--sacga-rules-max-width);
+    margin: 0 auto;
+    padding: var(--sacga-space-xl, 2rem);
+    background: var(--sacga-rules-bg);
+    border: 1px solid var(--sacga-rules-border);
+    border-radius: var(--sacga-radius-lg, 0.75rem);
+    font-family: inherit;
+    line-height: 1.7;
+    color: var(--sacga-rules-text);
+}
+
+/* ============================================
+   Rules Title
+   ============================================ */
+.sacga-rules-title {
+    margin: 0 0 var(--sacga-space-xl, 2rem) 0;
+    padding-bottom: var(--sacga-space-md, 1rem);
+    border-bottom: 2px solid var(--sacga-rules-accent);
+    font-size: var(--sacga-text-2xl, 1.5rem);
+    font-weight: 700;
+    color: var(--sacga-rules-heading);
+    text-align: center;
+}
+
+/* ============================================
+   Rules Body
+   ============================================ */
+.sacga-rules-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sacga-space-lg, 1.5rem);
+}
+
+/* ============================================
+   Rules Sections
+   ============================================ */
+.sacga-rules-section {
+    padding: var(--sacga-space-lg, 1.5rem);
+    background: var(--sacga-rules-section-bg);
+    border-radius: var(--sacga-radius-md, 0.5rem);
+    border-left: 4px solid var(--sacga-rules-accent);
+}
+
+.sacga-rules-heading {
+    margin: 0 0 var(--sacga-space-md, 1rem) 0;
+    font-size: var(--sacga-text-lg, 1.125rem);
+    font-weight: 600;
+    color: var(--sacga-rules-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sacga-rules-content {
+    font-size: var(--sacga-text-base, 1rem);
+    color: var(--sacga-rules-text);
+}
+
+.sacga-rules-content p {
+    margin: 0;
+    line-height: 1.7;
+}
+
+.sacga-rules-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sacga-rules-list li {
+    position: relative;
+    padding-left: var(--sacga-space-lg, 1.5rem);
+    margin-bottom: var(--sacga-space-sm, 0.5rem);
+    line-height: 1.6;
+}
+
+.sacga-rules-list li:last-child {
+    margin-bottom: 0;
+}
+
+.sacga-rules-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.6em;
+    width: 6px;
+    height: 6px;
+    background: var(--sacga-rules-accent);
+    border-radius: 50%;
+}
+
+/* ============================================
+   Section-Specific Accents
+   ============================================ */
+.sacga-rules-section-objective {
+    border-left-color: #10b981;
+}
+.sacga-rules-section-objective .sacga-rules-heading {
+    color: #10b981;
+}
+
+.sacga-rules-section-setup {
+    border-left-color: #8b5cf6;
+}
+.sacga-rules-section-setup .sacga-rules-heading {
+    color: #8b5cf6;
+}
+
+.sacga-rules-section-gameplay {
+    border-left-color: var(--sacga-rules-accent);
+}
+
+.sacga-rules-section-winning {
+    border-left-color: #f59e0b;
+}
+.sacga-rules-section-winning .sacga-rules-heading {
+    color: #f59e0b;
+}
+
+.sacga-rules-section-notes {
+    border-left-color: #6b7280;
+    background: #f3f4f6;
+}
+.sacga-rules-section-notes .sacga-rules-heading {
+    color: #6b7280;
+}
+
+/* ============================================
+   Compact Layout
+   ============================================ */
+.sacga-rules-compact {
+    padding: var(--sacga-space-md, 1rem) var(--sacga-space-lg, 1.5rem);
+    background: var(--sacga-rules-section-bg);
+    border-left: 4px solid var(--sacga-rules-accent);
+}
+
+.sacga-rules-compact .sacga-rules-title {
+    margin-bottom: var(--sacga-space-md, 1rem);
+    padding-bottom: var(--sacga-space-sm, 0.5rem);
+    font-size: var(--sacga-text-lg, 1.125rem);
+    text-align: left;
+}
+
+.sacga-rules-compact .sacga-rules-body {
+    font-size: var(--sacga-text-sm, 0.875rem);
+    line-height: 1.6;
+}
+
+/* ============================================
+   Error States
+   ============================================ */
+.sacga-rules-error {
+    padding: var(--sacga-space-lg, 1.5rem);
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: var(--sacga-radius-md, 0.5rem);
+    color: #dc2626;
+    text-align: center;
+    font-weight: 500;
+}
+
+.sacga-rules-empty {
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+}
+
+/* ============================================
+   Rules Button (for lobby/room integration)
+   ============================================ */
+.sacga-rules-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sacga-space-sm, 0.5rem);
+    padding: var(--sacga-space-sm, 0.5rem) var(--sacga-space-md, 1rem);
+    background: transparent;
+    color: var(--sacga-neutral-600, #4b5563);
+    border: 2px solid var(--sacga-neutral-300, #d1d5db);
+    border-radius: var(--sacga-radius-md, 0.5rem);
+    font-size: var(--sacga-text-sm, 0.875rem);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 150ms ease-in-out;
+}
+
+.sacga-rules-btn:hover {
+    background: var(--sacga-neutral-100, #f6f2e9);
+    border-color: var(--sacga-rules-accent);
+    color: var(--sacga-rules-accent);
+}
+
+.sacga-rules-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+.sacga-rules-btn .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* ============================================
+   Modal Overlay
+   ============================================ */
+.sacga-rules-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sacga-space-md, 1rem);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 200ms ease-in-out, visibility 200ms ease-in-out;
+}
+
+.sacga-rules-overlay.sacga-rules-overlay-active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ============================================
+   Modal Container
+   ============================================ */
+.sacga-rules-modal {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    max-height: calc(100vh - 4rem);
+    background: var(--sacga-rules-bg);
+    border-radius: var(--sacga-radius-xl, 1rem);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(20px) scale(0.95);
+    transition: transform 200ms ease-out;
+    overflow: hidden;
+}
+
+.sacga-rules-overlay-active .sacga-rules-modal {
+    transform: translateY(0) scale(1);
+}
+
+/* ============================================
+   Modal Header
+   ============================================ */
+.sacga-rules-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sacga-space-lg, 1.5rem) var(--sacga-space-xl, 2rem);
+    border-bottom: 1px solid var(--sacga-rules-border);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.sacga-rules-modal-title {
+    margin: 0;
+    font-size: var(--sacga-text-xl, 1.25rem);
+    font-weight: 700;
+    color: var(--sacga-neutral-900, #111827);
+}
+
+.sacga-rules-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: var(--sacga-radius-full, 9999px);
+    color: var(--sacga-neutral-600, #4b5563);
+    cursor: pointer;
+    transition: all 150ms ease-in-out;
+}
+
+.sacga-rules-close:hover {
+    background: var(--sacga-neutral-200, #e8e2d3);
+    color: var(--sacga-neutral-900, #111827);
+}
+
+.sacga-rules-close:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+}
+
+.sacga-rules-close .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+/* ============================================
+   Modal Body
+   ============================================ */
+.sacga-rules-modal-body {
+    flex: 1;
+    padding: var(--sacga-space-xl, 2rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* Scrollbar styling */
+.sacga-rules-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sacga-rules-modal-body::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.sacga-rules-modal-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.sacga-rules-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Modal content inherits section styles */
+.sacga-rules-modal-body .sacga-rules-section {
+    margin-bottom: var(--sacga-space-lg, 1.5rem);
+}
+
+.sacga-rules-modal-body .sacga-rules-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Modal headings adjusted for smaller context */
+.sacga-rules-modal-body .sacga-rules-heading {
+    font-size: var(--sacga-text-base, 1rem);
+}
+
+/* ============================================
+   Body scroll lock (when modal is open)
+   ============================================ */
+body.sacga-rules-modal-open {
+    overflow: hidden;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+/* Mobile */
+@media (max-width: 639px) {
+    .sacga-game-rules {
+        padding: var(--sacga-space-lg, 1.5rem) var(--sacga-space-md, 1rem);
+        border-radius: var(--sacga-radius-md, 0.5rem);
+    }
+
+    .sacga-rules-title {
+        font-size: var(--sacga-text-xl, 1.25rem);
+    }
+
+    .sacga-rules-section {
+        padding: var(--sacga-space-md, 1rem);
+    }
+
+    .sacga-rules-heading {
+        font-size: var(--sacga-text-base, 1rem);
+    }
+
+    .sacga-rules-overlay {
+        padding: var(--sacga-space-sm, 0.5rem);
+    }
+
+    .sacga-rules-modal {
+        max-height: calc(100vh - 2rem);
+        border-radius: var(--sacga-radius-lg, 0.75rem);
+    }
+
+    .sacga-rules-modal-header {
+        padding: var(--sacga-space-md, 1rem) var(--sacga-space-lg, 1.5rem);
+    }
+
+    .sacga-rules-modal-title {
+        font-size: var(--sacga-text-lg, 1.125rem);
+    }
+
+    .sacga-rules-modal-body {
+        padding: var(--sacga-space-lg, 1.5rem);
+    }
+}
+
+/* Tablet */
+@media (min-width: 640px) and (max-width: 1023px) {
+    .sacga-rules-modal {
+        max-width: 600px;
+    }
+}
+
+/* ============================================
+   Accessibility
+   ============================================ */
+
+/* Focus visible for keyboard navigation */
+.sacga-rules-btn:focus-visible,
+.sacga-rules-close:focus-visible {
+    outline: 2px solid var(--sacga-rules-accent);
+    outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .sacga-rules-overlay,
+    .sacga-rules-modal,
+    .sacga-rules-btn,
+    .sacga-rules-close {
+        transition: none;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .sacga-game-rules {
+        border-width: 2px;
+    }
+
+    .sacga-rules-section {
+        border-left-width: 6px;
+    }
+
+    .sacga-rules-modal {
+        border: 2px solid currentColor;
+    }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+@media print {
+    .sacga-rules-overlay,
+    .sacga-rules-modal,
+    .sacga-rules-btn {
+        display: none !important;
+    }
+
+    .sacga-game-rules {
+        box-shadow: none;
+        border: 1px solid #000;
+        max-width: 100%;
+        padding: 1rem;
+    }
+
+    .sacga-rules-section {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+
+/* ============================================
+   Lobby/Room Rules Button Container
+   ============================================ */
+.sacga-rules-btn-container {
+    position: absolute;
+    top: var(--sacga-space-md, 1rem);
+    right: var(--sacga-space-md, 1rem);
+    z-index: 10;
+}
+
+/* Position adjustment for header with gradient */
+.sacga-game-header .sacga-rules-btn-container {
+    top: auto;
+    bottom: var(--sacga-space-md, 1rem);
+}
+
+/* Light button variant for dark backgrounds */
+.sacga-rules-btn-light {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--sacga-neutral-700, #374151);
+}
+
+.sacga-rules-btn-light:hover {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: var(--sacga-rules-accent);
+}
+
+/* ============================================
+   Master Rules Page - Accordion Style
+   ============================================ */
+.sacga-rules-master {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: var(--sacga-space-lg, 1.5rem);
+}
+
+.sacga-rules-master-header {
+    text-align: center;
+    margin-bottom: var(--sacga-space-xl, 2rem);
+    padding-bottom: var(--sacga-space-lg, 1.5rem);
+    border-bottom: 2px solid var(--sacga-rules-border);
+}
+
+.sacga-rules-master-title {
+    margin: 0 0 var(--sacga-space-sm, 0.5rem) 0;
+    font-size: var(--sacga-text-3xl, 1.875rem);
+    font-weight: 700;
+    color: var(--sacga-rules-heading);
+}
+
+.sacga-rules-master-desc {
+    margin: 0 0 var(--sacga-space-lg, 1.5rem) 0;
+    font-size: var(--sacga-text-base, 1rem);
+    color: #6b7280;
+}
+
+.sacga-rules-actions {
+    display: flex;
+    gap: var(--sacga-space-sm, 0.5rem);
+    justify-content: center;
+}
+
+.sacga-rules-actions .sacga-btn {
+    padding: var(--sacga-space-sm, 0.5rem) var(--sacga-space-md, 1rem);
+    font-size: var(--sacga-text-sm, 0.875rem);
+}
+
+/* Game Type Sections */
+.sacga-rules-type-section {
+    margin-bottom: var(--sacga-space-xl, 2rem);
+}
+
+.sacga-rules-type-heading {
+    display: flex;
+    align-items: center;
+    gap: var(--sacga-space-sm, 0.5rem);
+    margin: 0 0 var(--sacga-space-md, 1rem) 0;
+    padding: var(--sacga-space-md, 1rem);
+    background: linear-gradient(135deg, var(--sacga-rules-accent) 0%, #1d4ed8 100%);
+    color: #fff;
+    font-size: var(--sacga-text-lg, 1.125rem);
+    font-weight: 600;
+    border-radius: var(--sacga-radius-lg, 0.75rem);
+}
+
+.sacga-rules-type-heading .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.sacga-rules-type-count {
+    font-weight: 400;
+    opacity: 0.8;
+    font-size: var(--sacga-text-sm, 0.875rem);
+}
+
+/* Accordion Container */
+.sacga-rules-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sacga-space-sm, 0.5rem);
+}
+
+/* Accordion Panel */
+.sacga-rules-panel {
+    background: var(--sacga-rules-bg);
+    border: 1px solid var(--sacga-rules-border);
+    border-radius: var(--sacga-radius-md, 0.5rem);
+    overflow: hidden;
+    transition: box-shadow 150ms ease-in-out;
+}
+
+.sacga-rules-panel:hover {
+    box-shadow: var(--sacga-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+}
+
+.sacga-rules-panel[open] {
+    border-color: var(--sacga-rules-accent);
+    box-shadow: var(--sacga-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+}
+
+/* Panel Header (Summary) */
+.sacga-rules-panel-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sacga-space-md, 1rem);
+    padding: var(--sacga-space-md, 1rem) var(--sacga-space-lg, 1.5rem);
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    background: var(--sacga-rules-section-bg);
+    transition: background 150ms ease-in-out;
+}
+
+.sacga-rules-panel-header::-webkit-details-marker {
+    display: none;
+}
+
+.sacga-rules-panel-header:hover {
+    background: #e5e7eb;
+}
+
+.sacga-rules-panel[open] .sacga-rules-panel-header {
+    background: var(--sacga-rules-accent);
+    color: #fff;
+    border-bottom: 1px solid var(--sacga-rules-border);
+}
+
+.sacga-rules-panel-title {
+    flex: 1;
+    font-size: var(--sacga-text-base, 1rem);
+    font-weight: 600;
+}
+
+.sacga-rules-panel-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--sacga-space-md, 1rem);
+    font-size: var(--sacga-text-sm, 0.875rem);
+    color: #6b7280;
+}
+
+.sacga-rules-panel[open] .sacga-rules-panel-meta {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.sacga-rules-players,
+.sacga-rules-ai {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.sacga-rules-players .dashicons,
+.sacga-rules-ai .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Panel Icon (Arrow) */
+.sacga-rules-panel-icon {
+    width: 20px;
+    height: 20px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.sacga-rules-panel-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: translate(-50%, -70%) rotate(45deg);
+    transition: transform 200ms ease-in-out;
+}
+
+.sacga-rules-panel[open] .sacga-rules-panel-icon::before {
+    transform: translate(-50%, -30%) rotate(-135deg);
+}
+
+/* Panel Content */
+.sacga-rules-panel-content {
+    padding: var(--sacga-space-lg, 1.5rem);
+    animation: sacga-accordion-open 200ms ease-out;
+}
+
+@keyframes sacga-accordion-open {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Rules sections inside accordion */
+.sacga-rules-panel-content .sacga-rules-section {
+    margin-bottom: var(--sacga-space-md, 1rem);
+    padding: var(--sacga-space-md, 1rem);
+    background: var(--sacga-rules-section-bg);
+    border-radius: var(--sacga-radius-sm, 0.375rem);
+    border-left: 3px solid var(--sacga-rules-accent);
+}
+
+.sacga-rules-panel-content .sacga-rules-section:last-child {
+    margin-bottom: 0;
+}
+
+.sacga-rules-panel-content .sacga-rules-heading {
+    margin: 0 0 var(--sacga-space-sm, 0.5rem) 0;
+    font-size: var(--sacga-text-sm, 0.875rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--sacga-rules-accent);
+}
+
+.sacga-rules-panel-content .sacga-rules-content {
+    font-size: var(--sacga-text-sm, 0.875rem);
+    line-height: 1.6;
+}
+
+.sacga-rules-panel-content .sacga-rules-content p {
+    margin: 0;
+}
+
+.sacga-rules-panel-content .sacga-rules-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sacga-rules-panel-content .sacga-rules-list li {
+    position: relative;
+    padding-left: var(--sacga-space-md, 1rem);
+    margin-bottom: 0.25rem;
+}
+
+.sacga-rules-panel-content .sacga-rules-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--sacga-rules-accent);
+    font-weight: bold;
+}
+
+/* Section-specific colors in accordion */
+.sacga-rules-panel-content .sacga-rules-section-objective {
+    border-left-color: #10b981;
+}
+.sacga-rules-panel-content .sacga-rules-section-objective .sacga-rules-heading {
+    color: #10b981;
+}
+
+.sacga-rules-panel-content .sacga-rules-section-setup {
+    border-left-color: #8b5cf6;
+}
+.sacga-rules-panel-content .sacga-rules-section-setup .sacga-rules-heading {
+    color: #8b5cf6;
+}
+
+.sacga-rules-panel-content .sacga-rules-section-winning {
+    border-left-color: #f59e0b;
+}
+.sacga-rules-panel-content .sacga-rules-section-winning .sacga-rules-heading {
+    color: #f59e0b;
+}
+
+.sacga-rules-panel-content .sacga-rules-section-notes {
+    border-left-color: #6b7280;
+    background: #f3f4f6;
+}
+.sacga-rules-panel-content .sacga-rules-section-notes .sacga-rules-heading {
+    color: #6b7280;
+}
+
+/* Mobile adjustments for accordion */
+@media (max-width: 639px) {
+    .sacga-rules-master {
+        padding: var(--sacga-space-md, 1rem);
+    }
+
+    .sacga-rules-master-title {
+        font-size: var(--sacga-text-2xl, 1.5rem);
+    }
+
+    .sacga-rules-actions {
+        flex-direction: column;
+    }
+
+    .sacga-rules-actions .sacga-btn {
+        width: 100%;
+    }
+
+    .sacga-rules-type-heading {
+        font-size: var(--sacga-text-base, 1rem);
+        padding: var(--sacga-space-sm, 0.5rem) var(--sacga-space-md, 1rem);
+    }
+
+    .sacga-rules-panel-header {
+        padding: var(--sacga-space-sm, 0.5rem) var(--sacga-space-md, 1rem);
+        flex-wrap: wrap;
+    }
+
+    .sacga-rules-panel-title {
+        flex: 1 1 100%;
+        order: 1;
+    }
+
+    .sacga-rules-panel-meta {
+        order: 2;
+        flex: 1;
+    }
+
+    .sacga-rules-panel-icon {
+        order: 3;
+    }
+
+    .sacga-rules-panel-content {
+        padding: var(--sacga-space-md, 1rem);
+    }
+
+    .sacga-rules-panel-content .sacga-rules-section {
+        padding: var(--sacga-space-sm, 0.5rem);
+    }
+}

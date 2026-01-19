@@ -1,0 +1,140 @@
+/**
+ * Spades Game Styles
+ */
+.sacga-game-spades .spades-table {
+    margin-bottom: 20px;
+}
+
+.spades-table::before {
+    content: '♠';
+    font-size: min(40vw, 400px);
+    color: rgba(255, 255, 255, 0.07);
+    filter: blur(1px);
+}
+
+.sacga-game-spades .spades-scoreboard {
+    margin-top: 20px;
+}
+
+.sacga-game-spades .spades-bidding {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.sacga-game-spades .sacga-hand-fanned {
+    gap: 0;
+    justify-content: center;
+}
+
+.sacga-game-spades .sacga-hand-fanned .sacga-card {
+    margin-left: -50px;
+}
+
+.sacga-game-spades .sacga-hand-fanned .sacga-card:first-child {
+    margin-left: 0;
+}
+
+.sacga-game-spades .sacga-hand-fanned .sacga-card:hover {
+    z-index: 10;
+}
+
+.sacga-game-spades .sacga-opponent-hand {
+    gap: 0;
+}
+
+.sacga-game-spades .sacga-opponent-hand:not(.vertical) .sacga-card {
+    margin-left: -40px;
+}
+
+.sacga-game-spades .sacga-opponent-hand:not(.vertical) .sacga-card:first-child {
+    margin-left: 0;
+}
+
+.sacga-game-spades .sacga-opponent-hand.vertical .sacga-card {
+    margin-top: -55px;
+}
+
+.sacga-game-spades .sacga-opponent-hand.vertical .sacga-card:first-child {
+    margin-top: 0;
+}
+
+.sacga-game-spades .bid-status {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.sacga-game-spades .bid-entry {
+    padding: 12px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.sacga-game-spades .bid-entry.my-team {
+    border-color: #0073aa;
+    background: #e3f2fd;
+}
+
+.sacga-game-spades .bid-entry.is-me {
+    font-weight: 600;
+}
+
+.sacga-game-spades .player-name {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.sacga-game-spades .player-bid {
+    display: block;
+    font-size: 18px;
+    color: #0073aa;
+}
+
+.sacga-game-spades .sacga-bid-area {
+    margin-top: 24px;
+}
+
+.sacga-game-spades .spades-broken {
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.sacga-game-spades .trick-empty {
+    padding: 24px;
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.sacga-game-spades .spades-round-end {
+    text-align: center;
+    padding: 32px 20px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.sacga-game-spades .bid-tricks {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* Position player's hand on the table */
+.sacga-game-spades .spades-table {
+    margin-bottom: 0;
+    padding-bottom: 140px;
+}
+
+.sacga-game-spades .my-hand-section {
+    position: relative;
+    margin-top: -150px;
+    z-index: 5;
+}
