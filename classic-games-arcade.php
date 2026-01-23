@@ -467,9 +467,9 @@ final class SACGA_Classic_Games_Arcade {
             $wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN `state_version` int(11) NOT NULL DEFAULT 1 AFTER `room_id`" );
         }
 
-        // Migration 3: Add 'current_turn' column if missing
+        // Migration 3: Add 'current_turn' column if missing (nullable for Turn Gate support)
         if ( ! in_array( 'current_turn', $columns, true ) ) {
-            $wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN `current_turn` int(11) NOT NULL DEFAULT 0 AFTER `state_version`" );
+            $wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN `current_turn` int(11) DEFAULT NULL AFTER `state_version`" );
             $wpdb->query( "ALTER TABLE {$table_name} ADD KEY `current_turn` (`current_turn`)" );
         }
 
@@ -494,6 +494,25 @@ final class SACGA_Classic_Games_Arcade {
 
             if ( ! in_array( 'last_seen', $player_columns, true ) ) {
                 $wpdb->query( "ALTER TABLE {$players_table} ADD COLUMN `last_seen` int(11) DEFAULT NULL AFTER `connected`" );
+            }
+        }
+
+        // Migration 5: Make current_turn nullable for Turn Gate support
+        // The Turn Gate engine correctly sets current_turn to NULL during gate phases
+        // (awaiting_gate = 'start_game', 'next_turn', etc.)
+        $columns = $wpdb->get_col( "SHOW COLUMNS FROM {$table_name}" );
+        if ( in_array( 'current_turn', $columns, true ) ) {
+            // Check if column is currently NOT NULL
+            $column_info = $wpdb->get_row(
+                $wpdb->prepare(
+                    "SELECT IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = 'current_turn'",
+                    DB_NAME,
+                    $table_name
+                )
+            );
+
+            if ( $column_info && $column_info->IS_NULLABLE === 'NO' ) {
+                $wpdb->query( "ALTER TABLE {$table_name} MODIFY COLUMN `current_turn` int(11) DEFAULT NULL" );
             }
         }
 
@@ -558,7 +577,7 @@ final class SACGA_Classic_Games_Arcade {
   id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   room_id bigint(20) unsigned NOT NULL,
   state_version int(11) NOT NULL DEFAULT 1,
-  current_turn int(11) NOT NULL DEFAULT 0,
+  current_turn int(11) DEFAULT NULL,
   game_data longtext NOT NULL,
   etag varchar(32) NOT NULL,
   updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
