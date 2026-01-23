@@ -618,57 +618,133 @@ class SACGA_Game_Overcut extends SACGA_Game_Contract {
     }
 
     /**
-     * Calculate AI bid
+     * Calculate AI bid using probability-weighted selection
+     *
+     * Uses a bell-curve-like weighting centered around the expected roll value (21),
+     * with the center shifting based on score differential to create risk adjustment.
+     *
+     * - When losing: center shifts up (riskier, aiming for higher rolls)
+     * - When winning: center shifts down (safer, more conservative bids)
+     * - Bids near center are most likely; extreme bids are rare but possible
+     *
+     * @param array  $state       Current game state.
+     * @param int    $player_seat AI player's seat position.
+     * @param string $difficulty  Difficulty level (reserved for future decay_factor tuning).
+     * @return int Selected bid between MIN_BID and MAX_BID.
      */
     private function ai_calculate_bid( array $state, int $player_seat, string $difficulty ): int {
-        $my_score = $state['scores'][ $player_seat ];
+        $my_score  = $state['scores'][ $player_seat ];
         $opp_score = $state['scores'][ $player_seat === 0 ? 1 : 0 ];
-        $target = $state['target_score'];
-        $points_needed = $target - $my_score;
-        $opp_points_needed = $target - $opp_score;
 
-        // Expected value of 6d6 is 21
-        $expected_roll = 21;
+        // Calculate dynamic center based on score differential
+        $score_delta = $my_score - $opp_score;
+        $center      = $this->ai_calculate_bid_center( $score_delta );
 
-        switch ( $difficulty ) {
-            case 'expert':
-                // Smart bidding based on game state
-                if ( $points_needed <= self::MAX_BID ) {
-                    // Can potentially win - bid exactly what we need for exact hit
-                    if ( $points_needed >= self::MIN_BID ) {
-                        // But consider opponent's position
-                        if ( $opp_points_needed <= 15 ) {
-                            // Opponent close to winning - take risks
-                            return min( self::MAX_BID, max( self::MIN_BID, $points_needed ) );
-                        }
-                    }
-                }
+        // Generate weights for all valid bids
+        $weights = $this->ai_generate_bid_weights( $center );
 
-                // Bid conservatively when leading, aggressively when trailing
-                $score_diff = $my_score - $opp_score;
-                if ( $score_diff > 50 ) {
-                    // Leading big - bid conservatively (lower bids = less risk)
-                    return wp_rand( 15, 19 );
-                } elseif ( $score_diff < -50 ) {
-                    // Trailing big - bid aggressively for exact hits
-                    return wp_rand( 20, 24 );
-                }
+        // Select bid using weighted random choice
+        return $this->ai_weighted_random_bid( $weights );
+    }
 
-                // Balanced play - aim near expected value
-                return wp_rand( 19, 23 );
+    /**
+     * Calculate the dynamic bid center based on score differential
+     *
+     * The baseline center is 21 (expected value of 6d6). When the AI is losing,
+     * the center shifts upward to favor riskier bids. When winning, it shifts
+     * downward for more conservative play.
+     *
+     * Shift rules:
+     * - Threshold: ±25 points before adjustment begins
+     * - Step size: 0.5 per 25-point threshold unit
+     * - Max shift: 3 points (center range: 18 to 24)
+     *
+     * Examples:
+     * - Losing by 25: center = 21.5
+     * - Losing by 50: center = 22.0
+     * - Winning by 25: center = 20.5
+     * - Winning by 50: center = 20.0
+     *
+     * @param int $score_delta AI score minus opponent score.
+     * @return float Dynamic center for bid weighting.
+     */
+    private function ai_calculate_bid_center( int $score_delta ): float {
+        $baseline_center = 21.0;
+        $threshold       = 25;    // Score difference before adjustment kicks in
+        $step_size       = 0.5;   // Center shift per threshold unit
+        $max_shift       = 3.0;   // Maximum center displacement
 
-            case 'intermediate':
-                // Some strategy, some randomness
-                if ( $opp_points_needed <= 20 && $points_needed > 30 ) {
-                    // Opponent close - take risks
-                    return wp_rand( 20, 26 );
-                }
-                return wp_rand( 17, 24 );
-
-            default: // beginner
-                // Random bid weighted toward middle
-                return wp_rand( self::MIN_BID + 5, self::MAX_BID - 5 );
+        if ( abs( $score_delta ) < $threshold ) {
+            return $baseline_center;
         }
+
+        // Calculate shift magnitude: 0.5 per 25 points of deficit/lead
+        $steps_beyond = floor( abs( $score_delta ) / $threshold );
+        $shift        = min( $steps_beyond * $step_size, $max_shift );
+
+        // Losing (negative delta): shift center up (riskier bids)
+        // Winning (positive delta): shift center down (safer bids)
+        if ( $score_delta < 0 ) {
+            return $baseline_center + $shift;
+        } else {
+            return $baseline_center - $shift;
+        }
+    }
+
+    /**
+     * Generate bid weights based on distance from center
+     *
+     * Creates a symmetric, monotonically decreasing weight distribution
+     * where bids closer to center have higher probability of selection.
+     *
+     * Formula: weight = max(1, base_weight - (distance * decay_factor))
+     *
+     * With base_weight=100 and decay_factor=5:
+     * - Distance 0 (at center): weight = 100
+     * - Distance 5: weight = 75
+     * - Distance 10: weight = 50
+     * - Distance 15+: weight approaches minimum of 1
+     *
+     * @param float $center The dynamic center for weighting.
+     * @return array Associative array of bid => weight.
+     */
+    private function ai_generate_bid_weights( float $center ): array {
+        $weights      = [];
+        $base_weight  = 100;
+        $decay_factor = 5;  // Weight reduction per unit distance from center
+
+        for ( $bid = self::MIN_BID; $bid <= self::MAX_BID; $bid++ ) {
+            $distance        = abs( $bid - $center );
+            $weight          = max( 1, $base_weight - ( $distance * $decay_factor ) );
+            $weights[ $bid ] = (int) $weight;
+        }
+
+        return $weights;
+    }
+
+    /**
+     * Select a bid using weighted random choice
+     *
+     * Performs a weighted random selection where each bid's probability
+     * is proportional to its weight relative to the total.
+     *
+     * @param array $weights Associative array of bid => weight.
+     * @return int Selected bid.
+     */
+    private function ai_weighted_random_bid( array $weights ): int {
+        $total_weight = array_sum( $weights );
+        $random_value = wp_rand( 1, $total_weight );
+
+        $cumulative = 0;
+        foreach ( $weights as $bid => $weight ) {
+            $cumulative += $weight;
+            if ( $random_value <= $cumulative ) {
+                return $bid;
+            }
+        }
+
+        // Fallback to expected value (should never reach here)
+        return 21;
     }
 
     /**
