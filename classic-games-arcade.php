@@ -84,6 +84,9 @@ final class SACGA_Classic_Games_Arcade {
         add_action( 'sacga_cleanup_expired_rooms', [ $this, 'cleanup_expired_rooms' ] );
         add_action( 'admin_notices', [ $this, 'check_tables_admin_notice' ] );
         add_filter( 'cron_schedules', [ $this, 'add_cron_schedules' ] );
+
+        // Clear arcade URL cache when posts are saved (might contain shortcode)
+        add_action( 'save_post', [ $this, 'clear_arcade_url_cache' ] );
     }
 
     /**
@@ -170,6 +173,7 @@ final class SACGA_Classic_Games_Arcade {
             'userId'       => get_current_user_id(),
             'guestToken'   => $guest_data['token'] ?? null,
             'guestId'      => $guest_data['guest_id'] ?? null,
+            'arcadeUrl'    => $this->get_arcade_page_url(),
         ] );
     }
 
@@ -651,6 +655,65 @@ final class SACGA_Classic_Games_Arcade {
 
     public function get_room_manager() {
         return $this->room_manager;
+    }
+
+    /**
+     * Get the arcade page URL
+     *
+     * Finds the permalink of the page containing the [classic_games_arcade] shortcode.
+     * Uses transient caching to avoid repeated database queries.
+     *
+     * @return string|null The arcade page URL, or null if not found.
+     */
+    public function get_arcade_page_url(): ?string {
+        global $post;
+
+        // If current page has the arcade shortcode, use its permalink
+        if ( $post && has_shortcode( $post->post_content, 'classic_games_arcade' ) ) {
+            return get_permalink( $post->ID );
+        }
+
+        // Check transient cache
+        $cached_url = get_transient( 'sacga_arcade_page_url' );
+        if ( false !== $cached_url ) {
+            // Empty string means no arcade page found (cached negative result)
+            return '' === $cached_url ? null : $cached_url;
+        }
+
+        // Search for a page with the arcade shortcode
+        $arcade_page = get_posts( [
+            'post_type'      => [ 'page', 'post' ],
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            's'              => '[classic_games_arcade',
+            'orderby'        => 'date',
+            'order'          => 'ASC',
+        ] );
+
+        // Verify the shortcode exists in the content
+        $arcade_url = null;
+        if ( ! empty( $arcade_page ) ) {
+            foreach ( $arcade_page as $page ) {
+                if ( has_shortcode( $page->post_content, 'classic_games_arcade' ) ) {
+                    $arcade_url = get_permalink( $page->ID );
+                    break;
+                }
+            }
+        }
+
+        // Cache the result (or empty string for not found) for 1 hour
+        set_transient( 'sacga_arcade_page_url', $arcade_url ?? '', HOUR_IN_SECONDS );
+
+        return $arcade_url;
+    }
+
+    /**
+     * Clear the arcade page URL cache
+     *
+     * Should be called when pages are updated that might contain the shortcode.
+     */
+    public function clear_arcade_url_cache(): void {
+        delete_transient( 'sacga_arcade_page_url' );
     }
 }
 

@@ -105,12 +105,30 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    cursor: pointer;
 }
 
 .sacga-room-card:hover {
     border-color: var(--sacga-room-border-hover);
     box-shadow: var(--sacga-room-shadow-hover);
     transform: translateY(-2px);
+}
+
+/* Full room - visual indicator but still clickable (server validates) */
+.sacga-room-card.sacga-room-full {
+    opacity: 0.7;
+}
+
+.sacga-room-card.sacga-room-full .sacga-room-seats {
+    color: var(--sacga-room-text-muted);
+}
+
+.sacga-room-card.sacga-room-full .sacga-btn-join {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
+
+.sacga-room-card.sacga-room-full:hover {
+    opacity: 0.85;
 }
 
 /* Room Header */
