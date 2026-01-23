@@ -38,6 +38,65 @@
             if (this.containers.length > 0) {
                 this.startRefresh();
             }
+
+            // Bind click handler for room cards using event delegation
+            this.bindRoomClickHandler();
+        },
+
+        /**
+         * Bind click handler for room cards
+         * Uses event delegation to handle dynamically added rooms
+         */
+        bindRoomClickHandler: function() {
+            var self = this;
+
+            // Delegate click events on room cards
+            $(document).on('click', '.sacga-available-rooms .sacga-room-card', function(e) {
+                // Don't trigger if clicking on the join button link (let it handle naturally)
+                if ($(e.target).closest('.sacga-btn-join').length) {
+                    // Prevent default link behavior and use our join flow instead
+                    e.preventDefault();
+                }
+
+                var $card = $(this);
+                var roomCode = $card.data('room-code');
+                var gameId = $card.data('game-id');
+
+                if (!roomCode || !gameId) {
+                    return;
+                }
+
+                self.joinRoom(roomCode, gameId);
+            });
+        },
+
+        /**
+         * Join a room using the existing SACGA engine
+         * @param {string} roomCode - The room code to join
+         * @param {string} gameId - The game ID
+         */
+        joinRoom: function(roomCode, gameId) {
+            // Check if SACGA engine is available and initialized
+            if (typeof window.SACGA !== 'undefined' && window.SACGA.joinRoom) {
+                // Set the game ID if different from current
+                if (window.SACGA.gameId !== gameId) {
+                    // Navigate to the game page with room code
+                    var url = new URL(window.location.href);
+                    url.searchParams.set('game', gameId);
+                    url.searchParams.set('room', roomCode.toUpperCase());
+                    window.location.href = url.toString();
+                    return;
+                }
+
+                // Use existing join flow
+                window.SACGA.joinRoom(roomCode.toUpperCase());
+            } else {
+                // SACGA engine not available - use URL navigation
+                var url = new URL(window.location.href);
+                url.searchParams.set('game', gameId);
+                url.searchParams.set('room', roomCode.toUpperCase());
+                window.location.href = url.toString();
+            }
         },
 
         /**
@@ -156,8 +215,10 @@
             var seatsAvailable = room.max_players - room.player_count;
             var joinUrl = this.buildJoinUrl(currentPage, room.game_id, room.room_code);
             var seatsClass = seatsAvailable <= 1 ? 'sacga-room-seats-low' : '';
+            var isFull = room.is_full || seatsAvailable <= 0;
+            var fullClass = isFull ? ' sacga-room-full' : '';
 
-            return '<div class="sacga-room-card sacga-room-status-' + room.status + '">' +
+            return '<div class="sacga-room-card sacga-room-status-' + room.status + fullClass + '" data-room-code="' + this.escapeHtml(room.room_code) + '" data-game-id="' + this.escapeHtml(room.game_id) + '">' +
                 '<div class="sacga-room-header">' +
                 '<span class="sacga-room-game">' + this.escapeHtml(room.game_name) + '</span>' +
                 (room.game_type ? '<span class="sacga-room-type sacga-room-type-' + room.game_type + '">' + this.capitalize(room.game_type) + '</span>' : '') +

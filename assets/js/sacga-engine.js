@@ -372,10 +372,16 @@
 
         backToArcade: function() {
             this.stopPolling();
-            const url = new URL(window.location.href);
-            url.searchParams.delete('game');
-            url.searchParams.delete('room');
-            window.location.href = url.toString();
+            // Use the arcade URL from config if available (set by PHP)
+            if (this.config.arcadeUrl) {
+                window.location.href = this.config.arcadeUrl;
+            } else {
+                // Fallback: remove game/room params from current URL
+                const url = new URL(window.location.href);
+                url.searchParams.delete('game');
+                url.searchParams.delete('room');
+                window.location.href = url.toString();
+            }
         },
 
         copyRoomCode: function() {

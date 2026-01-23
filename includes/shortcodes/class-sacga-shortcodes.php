@@ -319,8 +319,9 @@ class SACGA_Shortcodes {
                             'game' => $room['game_id'],
                             'room' => $room['room_code'],
                         ], get_permalink() );
+                        $is_full = $seats_available <= 0;
                     ?>
-                        <div class="sacga-room-card sacga-room-status-<?php echo esc_attr( $room['status'] ); ?>">
+                        <div class="sacga-room-card sacga-room-status-<?php echo esc_attr( $room['status'] ); ?><?php echo $is_full ? ' sacga-room-full' : ''; ?>" data-room-code="<?php echo esc_attr( $room['room_code'] ); ?>" data-game-id="<?php echo esc_attr( $room['game_id'] ); ?>">
                             <div class="sacga-room-header">
                                 <span class="sacga-room-game"><?php echo esc_html( $game_name ); ?></span>
                                 <?php if ( $game_type ) : ?>
@@ -467,14 +468,18 @@ class SACGA_Shortcodes {
             $game_obj = $registry->get( $room['game_id'] );
             $meta = $game_obj ? $game_obj->register_game() : null;
 
+            $max_players = $meta ? (int) $meta['max_players'] : 4;
+            $player_count = (int) $room['player_count'];
+
             $result[] = [
                 'room_code'     => $room['room_code'],
                 'game_id'       => $room['game_id'],
                 'game_name'     => $meta ? $meta['name'] : ucfirst( $room['game_id'] ),
                 'game_type'     => $meta ? $meta['type'] : '',
                 'status'        => $room['status'],
-                'player_count'  => (int) $room['player_count'],
-                'max_players'   => $meta ? (int) $meta['max_players'] : 4,
+                'player_count'  => $player_count,
+                'max_players'   => $max_players,
+                'is_full'       => $player_count >= $max_players,
                 'created_at'    => $room['created_at'],
                 'created_ago'   => human_time_diff( strtotime( $room['created_at'] ) ),
             ];
