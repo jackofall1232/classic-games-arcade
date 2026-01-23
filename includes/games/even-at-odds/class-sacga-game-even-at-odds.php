@@ -82,7 +82,7 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 
 		return [
 			'phase'         => self::PHASE_WAITING,
-			'current_turn'  => null, // Always null - gate-based flow
+			'current_turn'  => -1, // -1 during gate phases (DB column may not allow NULL)
 			'round'         => 0,
 			'players'       => $player_data,
 			'scores'        => $scores,
