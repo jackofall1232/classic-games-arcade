@@ -100,6 +100,7 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 			'awaiting_gate' => null,
 			'gate'          => null,
 			'move_history'  => [],
+			'simultaneous'  => false, // True during phases where all players act simultaneously
 		];
 	}
 
@@ -238,6 +239,7 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 		$state['game_started'] = true;
 		$state['round']        = 1;
 		$state['phase']        = self::PHASE_BIDDING;
+		$state['simultaneous'] = true; // All players bid simultaneously
 
 		// Reset bids for new round
 		$state['bids'] = [];
@@ -273,7 +275,10 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 		}
 
 		if ( $all_bid ) {
-			// All bids collected - flip coins and open resolve gate
+			// All bids collected - end simultaneous phase
+			$state['simultaneous'] = false;
+
+			// Flip coins and open resolve gate
 			$state = $this->flip_all_coins( $state );
 
 			// Open gate for players to see result before continuing
@@ -373,6 +378,7 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 	private function apply_next_round( array $state ): array {
 		$state['round'] = $this->get_gate_data( $state, 'next_round', $state['round'] + 1 );
 		$state['phase'] = self::PHASE_BIDDING;
+		$state['simultaneous'] = true; // All players bid simultaneously
 
 		// Reset for new round
 		$state['bids']   = [];

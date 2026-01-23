@@ -472,7 +472,10 @@ class SACGA_REST_Controller {
         $is_simultaneous_phase = isset( $current['state']['phase'] ) &&
             in_array( $current['state']['phase'], [ 'passing', 'discard', 'rolloff' ], true );
 
-        if ( ! $is_gate_action && ! $is_simultaneous_phase && $current['state']['current_turn'] !== $player_seat ) {
+        // Check for explicit simultaneous flag (e.g., Even at Odds bidding)
+        $is_simultaneous_action = ! empty( $current['state']['simultaneous'] );
+
+        if ( ! $is_gate_action && ! $is_simultaneous_phase && ! $is_simultaneous_action && $current['state']['current_turn'] !== $player_seat ) {
             error_log( sprintf(
                 '[REST] Turn check failed: phase=%s, is_simultaneous=%s, current_turn=%s, player_seat=%d',
                 $current['state']['phase'] ?? 'null',

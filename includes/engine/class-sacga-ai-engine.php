@@ -89,6 +89,24 @@ class SACGA_AI_Engine {
             return false; // All AI have rolled
         }
 
+        // Special handling for simultaneous action games (e.g., Even at Odds bidding)
+        if ( ! empty( $state['simultaneous'] ) ) {
+            foreach ( $room['players'] as $player ) {
+                if ( ! $player['is_ai'] ) {
+                    continue;
+                }
+
+                $seat = (int) $player['seat_position'];
+                $bid = $state['bids'][ $seat ] ?? null;
+
+                // If this AI hasn't bid yet, return true
+                if ( $bid === null ) {
+                    return true;
+                }
+            }
+            return false; // All AI have bid
+        }
+
         // Check if trick is complete - need to process resolution
         if ( ! empty( $state['trick_complete'] ) ) {
             return true; // AI engine needs to run to resolve trick
@@ -259,6 +277,38 @@ class SACGA_AI_Engine {
 
                 // Skip if this AI already rolled
                 if ( ! $waiting ) {
+                    continue;
+                }
+
+                $difficulty = $player['ai_difficulty'] ?? 'beginner';
+                $move = $game->ai_move( $state, $seat, $difficulty );
+
+                if ( ! empty( $move ) ) {
+                    $result = $state_manager->apply_move( $room_id, $seat, $move );
+                    if ( ! is_wp_error( $result ) ) {
+                        // Refresh state after move
+                        $state_data = $state_manager->get( $room_id );
+                        $state = $state_data['state'];
+                    }
+                }
+            }
+
+            return $state_manager->get( $room_id ) ?: [];
+        }
+
+        // Special handling for simultaneous action games (e.g., Even at Odds bidding)
+        if ( ! empty( $state['simultaneous'] ) ) {
+            // Process all AI players in simultaneous phase
+            foreach ( $room['players'] as $player ) {
+                if ( ! $player['is_ai'] ) {
+                    continue;
+                }
+
+                $seat = (int) $player['seat_position'];
+                $bid = $state['bids'][ $seat ] ?? null;
+
+                // Skip if this AI already bid
+                if ( $bid !== null ) {
                     continue;
                 }
 
