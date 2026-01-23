@@ -444,7 +444,7 @@ class SACGA_Admin {
                 <p><?php echo esc_html__( 'Developer reference. Copy-paste shortcodes for available games.', 'shortcode-arcade' ); ?></p>
             </div>
 
-            <!-- Global Shortcode -->
+            <!-- Global Shortcodes -->
             <div class="sacga-global-shortcode">
                 <div class="sacga-global-shortcode-info">
                     <span class="dashicons dashicons-grid-view"></span>
@@ -458,6 +458,67 @@ class SACGA_Admin {
                     <button type="button" class="sacga-copy-btn" data-shortcode="[classic_games_arcade]" title="<?php echo esc_attr__( 'Copy shortcode', 'shortcode-arcade' ); ?>">
                         <span class="dashicons dashicons-clipboard"></span>
                     </button>
+                </div>
+            </div>
+
+            <div class="sacga-global-shortcode">
+                <div class="sacga-global-shortcode-info">
+                    <span class="dashicons dashicons-groups"></span>
+                    <div>
+                        <strong><?php echo esc_html__( 'Available Rooms', 'shortcode-arcade' ); ?></strong>
+                        <span><?php echo esc_html__( 'Display joinable game rooms', 'shortcode-arcade' ); ?></span>
+                    </div>
+                </div>
+                <div class="sacga-shortcode-copy-group">
+                    <code>[sacga_available_rooms]</code>
+                    <button type="button" class="sacga-copy-btn" data-shortcode="[sacga_available_rooms]" title="<?php echo esc_attr__( 'Copy shortcode', 'shortcode-arcade' ); ?>">
+                        <span class="dashicons dashicons-clipboard"></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Available Rooms Attributes -->
+            <div class="sacga-shortcode-attributes">
+                <h3><?php echo esc_html__( 'Available Rooms Attributes', 'shortcode-arcade' ); ?></h3>
+                <table class="sacga-attributes-table">
+                    <thead>
+                        <tr>
+                            <th><?php echo esc_html__( 'Attribute', 'shortcode-arcade' ); ?></th>
+                            <th><?php echo esc_html__( 'Default', 'shortcode-arcade' ); ?></th>
+                            <th><?php echo esc_html__( 'Description', 'shortcode-arcade' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>game</code></td>
+                            <td><em><?php echo esc_html__( '(all)', 'shortcode-arcade' ); ?></em></td>
+                            <td><?php echo esc_html__( 'Filter rooms by game ID (e.g., "checkers")', 'shortcode-arcade' ); ?></td>
+                        </tr>
+                        <tr>
+                            <td><code>limit</code></td>
+                            <td><code>10</code></td>
+                            <td><?php echo esc_html__( 'Maximum number of rooms to display', 'shortcode-arcade' ); ?></td>
+                        </tr>
+                        <tr>
+                            <td><code>show_players</code></td>
+                            <td><code>true</code></td>
+                            <td><?php echo esc_html__( 'Show player count in room cards', 'shortcode-arcade' ); ?></td>
+                        </tr>
+                        <tr>
+                            <td><code>show_created</code></td>
+                            <td><code>true</code></td>
+                            <td><?php echo esc_html__( 'Show room creation time', 'shortcode-arcade' ); ?></td>
+                        </tr>
+                        <tr>
+                            <td><code>refresh</code></td>
+                            <td><code>0</code></td>
+                            <td><?php echo esc_html__( 'Auto-refresh interval in seconds (0 = disabled)', 'shortcode-arcade' ); ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="sacga-shortcode-example">
+                    <strong><?php echo esc_html__( 'Example:', 'shortcode-arcade' ); ?></strong>
+                    <code>[sacga_available_rooms game="checkers" limit="5" refresh="30"]</code>
                 </div>
             </div>
 
