@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class SACGA_Game_OddManOut extends SACGA_Game_Contract {
+class SACGA_Game_Odd_Man_Out extends SACGA_Game_Contract {
 	use SACGA_Turn_Gate_Trait;
 
 	protected $id          = 'odd-man-out';

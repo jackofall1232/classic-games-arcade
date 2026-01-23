@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class SACGA_Game_EvenAtOdds extends SACGA_Game_Contract {
+class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 	use SACGA_Turn_Gate_Trait;
 
 	protected $id          = 'even-at-odds';
