@@ -97,21 +97,22 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 			'game_over'     => false,
 			'winners'       => null,
 			'game_started'  => false,
-			'awaiting_gate' => null,
-			'gate'          => null,
+			// Gate is open from the start - set directly to avoid reference issues
+			'awaiting_gate' => 'start_game',
+			'gate'          => [
+				'type'       => 'start_game',
+				'next_round' => 1,
+			],
 			'move_history'  => [],
 			'simultaneous'  => false, // True during phases where all players act simultaneously
 		];
 	}
 
 	/**
-	 * Deal or setup - open start gate
+	 * Deal or setup - gate is already open from init_state
 	 */
 	public function deal_or_setup( array $state ): array {
-		// Open start game gate
-		$this->open_gate( $state, 'start_game', [
-			'next_round' => 1,
-		] );
+		// Gate is set directly in init_state to avoid reference issues with open_gate
 		return $state;
 	}
 
