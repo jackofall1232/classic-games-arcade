@@ -114,6 +114,23 @@ class SACGA_REST_Controller {
             'callback'            => [ $this, 'list_games' ],
             'permission_callback' => '__return_true',
         ] );
+
+        // Rejoin check (for auto-rejoin after browser refresh/disconnect)
+        register_rest_route( self::NAMESPACE, '/rejoin-check', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [ $this, 'rejoin_check' ],
+            'permission_callback' => '__return_true',
+            'args'                => [
+                'client_id' => [
+                    'required' => true,
+                    'type'     => 'string',
+                ],
+                'game_id' => [
+                    'required' => true,
+                    'type'     => 'string',
+                ],
+            ],
+        ] );
     }
 
     /**
@@ -207,6 +224,12 @@ class SACGA_REST_Controller {
         $room['game_meta'] = $game ? $game->register_game() : null;
 
         SACGA()->get_room_manager()->touch_room( (int) $room['id'] );
+
+        // Update last_seen for the polling player (heartbeat)
+        $player_id = $this->get_player_id_in_room( $room );
+        if ( $player_id ) {
+            SACGA()->get_room_manager()->touch_player( $player_id );
+        }
 
         return rest_ensure_response( $this->sanitize_room_for_response( $room ) );
     }
@@ -333,6 +356,12 @@ class SACGA_REST_Controller {
 
         $state_manager = new SACGA_Game_State();
         $player_seat = $this->get_player_seat( $room_code );
+
+        // Update last_seen for the polling player (heartbeat)
+        $player_id = $this->get_player_id_in_room( $room );
+        if ( $player_id ) {
+            SACGA()->get_room_manager()->touch_player( $player_id );
+        }
 
         // Check for move timeout (3 minutes = 180 seconds)
         if ( $room['status'] === 'active' ) {
@@ -543,14 +572,74 @@ class SACGA_REST_Controller {
     }
 
     /**
+     * Check if a client can rejoin a room (for auto-rejoin after disconnect)
+     */
+    public function rejoin_check( WP_REST_Request $request ) {
+        $client_id = sanitize_text_field( $request->get_param( 'client_id' ) );
+        $game_id = sanitize_text_field( $request->get_param( 'game_id' ) );
+
+        if ( empty( $client_id ) || empty( $game_id ) ) {
+            return rest_ensure_response( [ 'status' => 'none' ] );
+        }
+
+        // Find if this client has an active room
+        $player = SACGA()->get_room_manager()->find_player_by_client_id( $client_id, $game_id );
+
+        if ( ! $player ) {
+            return rest_ensure_response( [ 'status' => 'none' ] );
+        }
+
+        // Get the full room data
+        $room = SACGA()->get_room_manager()->get_room( $player['room_code'] );
+
+        if ( ! $room ) {
+            return rest_ensure_response( [ 'status' => 'none' ] );
+        }
+
+        // Rejoin the player (update connection status)
+        $rejoin_result = SACGA()->get_room_manager()->rejoin_room(
+            $player['room_code'],
+            (int) $player['id'],
+            $client_id
+        );
+
+        if ( is_wp_error( $rejoin_result ) ) {
+            return rest_ensure_response( [ 'status' => 'none' ] );
+        }
+
+        // Get game state if game is active
+        $game_state = null;
+        if ( $room['status'] === 'active' ) {
+            $state_manager = new SACGA_Game_State();
+            $game_state = $state_manager->get_public_state( (int) $room['id'], (int) $player['seat_position'] );
+        }
+
+        return rest_ensure_response( [
+            'status'      => 'found',
+            'room_code'   => $player['room_code'],
+            'seat'        => (int) $player['seat_position'],
+            'room_status' => $room['status'],
+            'room'        => $this->sanitize_room_for_response( $room ),
+            'game_state'  => $game_state,
+        ] );
+    }
+
+    /**
      * Get current player data
      */
     private function get_current_player_data( WP_REST_Request $request ): array {
+        // Get client_id from request header (persistent across sessions)
+        $client_id = $request->get_header( 'X-SACGA-Client-ID' );
+        if ( $client_id ) {
+            $client_id = sanitize_text_field( $client_id );
+        }
+
         if ( is_user_logged_in() ) {
             $user = wp_get_current_user();
             return [
                 'user_id'      => $user->ID,
                 'display_name' => $user->display_name,
+                'client_id'    => $client_id,
             ];
         }
 
@@ -566,6 +655,7 @@ class SACGA_REST_Controller {
         return [
             'guest_token'  => $guest_id,
             'display_name' => 'Guest',
+            'client_id'    => $client_id,
         ];
     }
 
@@ -607,6 +697,43 @@ class SACGA_REST_Controller {
 
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
             error_log( sprintf( '[SACGA] Player not found in room %s (guest_token: %s)', $room_code, $guest_token ? substr( $guest_token, 0, 8 ) . '...' : 'null' ) );
+        }
+
+        return null;
+    }
+
+    /**
+     * Get player's database ID in a room
+     */
+    private function get_player_id_in_room( array $room ): ?int {
+        if ( ! $room || empty( $room['players'] ) ) {
+            return null;
+        }
+
+        $user_id = get_current_user_id();
+
+        $guest_token = null;
+        if ( isset( $_COOKIE['sacga_guest_token'] ) ) {
+            $guest_token = sanitize_text_field( $_COOKIE['sacga_guest_token'] );
+        } elseif ( isset( $_SERVER['HTTP_X_SACGA_GUEST_TOKEN'] ) ) {
+            $guest_token = sanitize_text_field( $_SERVER['HTTP_X_SACGA_GUEST_TOKEN'] );
+        }
+
+        $guest_id = null;
+        if ( $guest_token ) {
+            $validated = SACGA()->validate_guest_token( $guest_token );
+            if ( ! is_wp_error( $validated ) ) {
+                $guest_id = $validated['guest_id'];
+            }
+        }
+
+        foreach ( $room['players'] as $player ) {
+            if ( $user_id && (int) $player['user_id'] === $user_id ) {
+                return (int) $player['id'];
+            }
+            if ( $guest_id && $player['guest_token'] === $guest_id ) {
+                return (int) $player['id'];
+            }
         }
 
         return null;

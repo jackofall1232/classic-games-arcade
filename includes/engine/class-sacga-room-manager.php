@@ -13,6 +13,7 @@ class SACGA_Room_Manager {
     const INACTIVITY_TIMEOUT_SECONDS = 480;
     const COMPLETED_CLEANUP_GRACE_SECONDS = 120;
     const HARD_CAP_SECONDS = 10800;
+    const DISCONNECT_GRACE_PERIOD_SECONDS = 90; // Time before disconnected player is removed
 
     /**
      * Ensure database tables exist before operations
@@ -49,6 +50,10 @@ class SACGA_Room_Manager {
 
     private function get_hard_cap_seconds(): int {
         return (int) apply_filters( 'sacga_room_hard_cap_seconds', self::HARD_CAP_SECONDS );
+    }
+
+    private function get_disconnect_grace_period(): int {
+        return (int) apply_filters( 'sacga_disconnect_grace_period_seconds', self::DISCONNECT_GRACE_PERIOD_SECONDS );
     }
 
     /**
@@ -175,10 +180,12 @@ class SACGA_Room_Manager {
             $room_id
         ), ARRAY_A );
 
-        // Cast is_ai to boolean for proper type handling
+        // Cast types for proper handling
         return array_map( function( $player ) {
             $player['is_ai'] = (bool) $player['is_ai'];
             $player['seat_position'] = (int) $player['seat_position'];
+            $player['connected'] = isset( $player['connected'] ) ? (bool) $player['connected'] : true;
+            $player['last_seen'] = isset( $player['last_seen'] ) ? (int) $player['last_seen'] : null;
             return $player;
         }, $players );
     }
@@ -202,6 +209,8 @@ class SACGA_Room_Manager {
         // Check if player already in room
         $existing = $this->find_player_in_room( $room, $player_data );
         if ( $existing ) {
+            // Update client_id and connection status for existing player
+            $this->update_player_connection( (int) $existing['id'], $player_data['client_id'] ?? null, true );
             return $existing;
         }
 
@@ -227,11 +236,14 @@ class SACGA_Room_Manager {
                 'room_id'       => $room['id'],
                 'user_id'       => $player_data['user_id'] ?? null,
                 'guest_token'   => $player_data['guest_token'] ?? null,
+                'client_id'     => $player_data['client_id'] ?? null,
+                'connected'     => 1,
+                'last_seen'     => time(),
                 'display_name'  => $player_data['display_name'] ?? 'Player',
                 'seat_position' => $seat,
                 'is_ai'         => 0,
             ],
-            [ '%d', '%d', '%s', '%s', '%d', '%d' ]
+            [ '%d', '%d', '%s', '%s', '%d', '%d', '%s', '%d', '%d' ]
         );
 
         if ( ! $inserted ) {
@@ -260,6 +272,187 @@ class SACGA_Room_Manager {
             }
         }
         return null;
+    }
+
+    /**
+     * Find player by client_id across all active rooms for a specific game
+     */
+    public function find_player_by_client_id( string $client_id, string $game_id ): ?array {
+        global $wpdb;
+
+        $result = $wpdb->get_row( $wpdb->prepare(
+            "SELECT p.*, r.room_code, r.status as room_status, r.game_id
+             FROM {$wpdb->prefix}sacga_room_players p
+             INNER JOIN {$wpdb->prefix}sacga_rooms r ON p.room_id = r.id
+             WHERE p.client_id = %s
+               AND r.game_id = %s
+               AND r.status IN ('lobby', 'active')
+             ORDER BY p.joined_at DESC
+             LIMIT 1",
+            $client_id,
+            $game_id
+        ), ARRAY_A );
+
+        if ( ! $result ) {
+            return null;
+        }
+
+        $result['seat_position'] = (int) $result['seat_position'];
+        $result['is_ai'] = (bool) $result['is_ai'];
+        $result['connected'] = (bool) $result['connected'];
+        $result['last_seen'] = (int) $result['last_seen'];
+
+        return $result;
+    }
+
+    /**
+     * Update player's connection status and client_id
+     */
+    public function update_player_connection( int $player_id, ?string $client_id, bool $connected ): void {
+        global $wpdb;
+
+        $data = [
+            'connected' => $connected ? 1 : 0,
+            'last_seen' => time(),
+        ];
+        $format = [ '%d', '%d' ];
+
+        if ( $client_id !== null ) {
+            $data['client_id'] = $client_id;
+            $format[] = '%s';
+        }
+
+        $wpdb->update(
+            $wpdb->prefix . 'sacga_room_players',
+            $data,
+            [ 'id' => $player_id ],
+            $format,
+            [ '%d' ]
+        );
+    }
+
+    /**
+     * Update last_seen timestamp for a player
+     */
+    public function touch_player( int $player_id ): void {
+        global $wpdb;
+
+        $wpdb->update(
+            $wpdb->prefix . 'sacga_room_players',
+            [
+                'connected' => 1,
+                'last_seen' => time(),
+            ],
+            [ 'id' => $player_id ],
+            [ '%d', '%d' ],
+            [ '%d' ]
+        );
+    }
+
+    /**
+     * Mark player as disconnected (for grace period handling)
+     */
+    public function mark_player_disconnected( int $player_id ): void {
+        global $wpdb;
+
+        $wpdb->update(
+            $wpdb->prefix . 'sacga_room_players',
+            [
+                'connected' => 0,
+                'last_seen' => time(),
+            ],
+            [ 'id' => $player_id ],
+            [ '%d', '%d' ],
+            [ '%d' ]
+        );
+    }
+
+    /**
+     * Rejoin a room (for auto-rejoin after disconnect)
+     * Returns player data if successfully rejoined, or WP_Error
+     */
+    public function rejoin_room( string $room_code, int $player_id, ?string $client_id = null ) {
+        global $wpdb;
+
+        $room = $this->get_room( $room_code );
+
+        if ( ! $room ) {
+            return new WP_Error( 'not_found', __( 'Room not found.', 'shortcode-arcade' ) );
+        }
+
+        // Find the player in this room
+        $player = null;
+        foreach ( $room['players'] as $p ) {
+            if ( (int) $p['id'] === $player_id ) {
+                $player = $p;
+                break;
+            }
+        }
+
+        if ( ! $player ) {
+            return new WP_Error( 'not_in_room', __( 'Player not found in room.', 'shortcode-arcade' ) );
+        }
+
+        // Update connection status
+        $this->update_player_connection( $player_id, $client_id, true );
+
+        $this->touch_room( (int) $room['id'] );
+
+        return [
+            'id'            => $player['id'],
+            'seat_position' => (int) $player['seat_position'],
+            'display_name'  => $player['display_name'],
+            'room_code'     => $room_code,
+            'room_status'   => $room['status'],
+        ];
+    }
+
+    /**
+     * Cleanup disconnected players whose grace period has expired
+     */
+    public function cleanup_disconnected_players(): int {
+        global $wpdb;
+
+        $grace_period = $this->get_disconnect_grace_period();
+        $cutoff_time = time() - $grace_period;
+
+        // Find disconnected players past grace period in non-completed rooms
+        $expired_players = $wpdb->get_results( $wpdb->prepare(
+            "SELECT p.id, p.room_id
+             FROM {$wpdb->prefix}sacga_room_players p
+             INNER JOIN {$wpdb->prefix}sacga_rooms r ON p.room_id = r.id
+             WHERE p.connected = 0
+               AND p.last_seen < %d
+               AND p.is_ai = 0
+               AND r.status IN ('lobby', 'active')",
+            $cutoff_time
+        ), ARRAY_A );
+
+        $count = 0;
+        foreach ( $expired_players as $player ) {
+            $wpdb->delete(
+                $wpdb->prefix . 'sacga_room_players',
+                [ 'id' => $player['id'] ],
+                [ '%d' ]
+            );
+            $count++;
+
+            // Check if room is now empty
+            $remaining = $wpdb->get_var( $wpdb->prepare(
+                "SELECT COUNT(*) FROM {$wpdb->prefix}sacga_room_players WHERE room_id = %d",
+                $player['room_id']
+            ) );
+
+            if ( $remaining == 0 ) {
+                $this->delete_room( (int) $player['room_id'] );
+            }
+        }
+
+        if ( $count > 0 && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( sprintf( '[SACGA] Cleaned up %d disconnected player(s) past grace period', $count ) );
+        }
+
+        return $count;
     }
 
     /**
@@ -475,6 +668,9 @@ class SACGA_Room_Manager {
     public function cleanup_expired_rooms(): int {
         global $wpdb;
 
+        // First, cleanup disconnected players past grace period
+        $this->cleanup_disconnected_players();
+
         $now = gmdate( 'Y-m-d H:i:s' );
         $hard_cap = gmdate( 'Y-m-d H:i:s', time() - $this->get_hard_cap_seconds() );
         $expired_rooms = $wpdb->get_col(
@@ -495,7 +691,7 @@ class SACGA_Room_Manager {
     /**
      * Delete room and related data
      */
-    private function delete_room( int $room_id ): void {
+    public function delete_room( int $room_id ): void {
         global $wpdb;
 
         $state_deleted = $wpdb->delete( $wpdb->prefix . 'sacga_game_state', [ 'room_id' => $room_id ], [ '%d' ] );

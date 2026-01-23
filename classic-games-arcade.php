@@ -434,7 +434,7 @@ final class SACGA_Classic_Games_Arcade {
 
         // Check if migration already completed (cached in WordPress options)
         $migration_version = get_option( 'sacga_schema_version', 0 );
-        $current_version = 3; // Increment this when adding new migrations
+        $current_version = 4; // Increment this when adding new migrations
 
         if ( $migration_version >= $current_version ) {
             return; // Already migrated to current version
@@ -471,6 +471,30 @@ final class SACGA_Classic_Games_Arcade {
         if ( ! in_array( 'current_turn', $columns, true ) ) {
             $wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN `current_turn` int(11) NOT NULL DEFAULT 0 AFTER `state_version`" );
             $wpdb->query( "ALTER TABLE {$table_name} ADD KEY `current_turn` (`current_turn`)" );
+        }
+
+        // Migration 4: Add client_id, connected, last_seen columns to room_players for auto-rejoin
+        $players_table = $wpdb->prefix . 'sacga_room_players';
+        $players_table_exists = $wpdb->get_var( $wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $wpdb->esc_like( $players_table )
+        ) );
+
+        if ( $players_table_exists ) {
+            $player_columns = $wpdb->get_col( "SHOW COLUMNS FROM {$players_table}" );
+
+            if ( ! in_array( 'client_id', $player_columns, true ) ) {
+                $wpdb->query( "ALTER TABLE {$players_table} ADD COLUMN `client_id` varchar(36) DEFAULT NULL AFTER `guest_token`" );
+                $wpdb->query( "ALTER TABLE {$players_table} ADD KEY `client_id` (`client_id`)" );
+            }
+
+            if ( ! in_array( 'connected', $player_columns, true ) ) {
+                $wpdb->query( "ALTER TABLE {$players_table} ADD COLUMN `connected` tinyint(1) NOT NULL DEFAULT 1 AFTER `client_id`" );
+            }
+
+            if ( ! in_array( 'last_seen', $player_columns, true ) ) {
+                $wpdb->query( "ALTER TABLE {$players_table} ADD COLUMN `last_seen` int(11) DEFAULT NULL AFTER `connected`" );
+            }
         }
 
         // Mark migration as complete
@@ -515,6 +539,9 @@ final class SACGA_Classic_Games_Arcade {
   room_id bigint(20) unsigned NOT NULL,
   user_id bigint(20) unsigned DEFAULT NULL,
   guest_token varchar(36) DEFAULT NULL,
+  client_id varchar(36) DEFAULT NULL,
+  connected tinyint(1) NOT NULL DEFAULT 1,
+  last_seen int(11) DEFAULT NULL,
   display_name varchar(100) NOT NULL,
   seat_position tinyint(3) unsigned NOT NULL,
   is_ai tinyint(1) NOT NULL DEFAULT 0,
@@ -523,7 +550,8 @@ final class SACGA_Classic_Games_Arcade {
   PRIMARY KEY  (id),
   KEY room_id (room_id),
   KEY user_id (user_id),
-  KEY guest_token (guest_token)
+  KEY guest_token (guest_token),
+  KEY client_id (client_id)
 ) $charset_collate;",
 
             'sacga_game_state' => "CREATE TABLE {$wpdb->prefix}sacga_game_state (
