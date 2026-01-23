@@ -764,6 +764,99 @@ input[type="submit"].sacga-save-btn:hover {
 }
 
 /* ============================================
+   Shortcode Attributes Table
+   ============================================ */
+.sacga-shortcode-attributes {
+    background: var(--sacga-gray-50);
+    border-radius: var(--sacga-radius-lg);
+    border: 1px solid var(--sacga-gray-200);
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.sacga-shortcode-attributes h3 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--sacga-gray-800);
+}
+
+.sacga-attributes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    background: white;
+    border-radius: var(--sacga-radius-md);
+    overflow: hidden;
+    border: 1px solid var(--sacga-gray-200);
+}
+
+.sacga-attributes-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--sacga-gray-700);
+    background: var(--sacga-gray-100);
+    border-bottom: 1px solid var(--sacga-gray-200);
+}
+
+.sacga-attributes-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--sacga-gray-600);
+    border-bottom: 1px solid var(--sacga-gray-100);
+    vertical-align: top;
+}
+
+.sacga-attributes-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.sacga-attributes-table tbody tr:hover {
+    background: var(--sacga-gray-50);
+}
+
+.sacga-attributes-table code {
+    background: var(--sacga-gray-900);
+    color: var(--sacga-accent);
+    padding: 3px 8px;
+    border-radius: var(--sacga-radius-sm);
+    font-size: 12px;
+    font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+}
+
+.sacga-attributes-table em {
+    color: var(--sacga-gray-400);
+    font-style: italic;
+}
+
+.sacga-shortcode-example {
+    background: white;
+    padding: 14px 18px;
+    border-radius: var(--sacga-radius-md);
+    border: 1px solid var(--sacga-gray-200);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.sacga-shortcode-example strong {
+    color: var(--sacga-gray-700);
+    font-size: 13px;
+}
+
+.sacga-shortcode-example code {
+    background: var(--sacga-gray-900);
+    color: var(--sacga-accent);
+    padding: 8px 14px;
+    border-radius: var(--sacga-radius-sm);
+    font-size: 13px;
+    font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+}
+
+/* ============================================
    Shortcodes Table
    ============================================ */
 .sacga-shortcodes-table-wrap {
