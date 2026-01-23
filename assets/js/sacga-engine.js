@@ -20,6 +20,7 @@
         animationSpeed: 1000, // ms per animation
         enableAnimations: true, // Can be disabled if causing issues
         guestTokenPromise: null,
+        clientId: null, // Persistent client ID for auto-rejoin
 
         init: function() {
             const container = $('#sacga-game-container');
@@ -27,6 +28,9 @@
 
             this.gameId = container.data('game-id');
             this.roomCode = container.data('room-code');
+
+            // Initialize persistent client ID for auto-rejoin
+            this.ensureClientId();
 
             // Ensure guest token exists (fallback if cookie failed)
             this.ensureGuestToken();
@@ -37,6 +41,9 @@
             if (initialRoomCode) {
                 this.roomCode = initialRoomCode;
                 this.joinRoom(initialRoomCode);
+            } else {
+                // No room code in URL - check for auto-rejoin
+                this.checkAutoRejoin();
             }
         },
 
@@ -49,6 +56,103 @@
                 return null;
             }
             return normalized;
+        },
+
+        /**
+         * Ensure persistent client ID exists for auto-rejoin functionality
+         * Uses localStorage to persist across browser sessions
+         */
+        ensureClientId: function() {
+            const storageKey = 'sacga_client_id';
+            let clientId = localStorage.getItem(storageKey);
+
+            if (!clientId) {
+                // Generate a new UUID for this client
+                if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                    clientId = crypto.randomUUID();
+                } else {
+                    // Fallback for older browsers
+                    clientId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        const r = Math.random() * 16 | 0;
+                        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                }
+                localStorage.setItem(storageKey, clientId);
+                if (console && console.debug) {
+                    console.debug('[SACGA] Generated new client ID:', clientId.substring(0, 8) + '...');
+                }
+            } else {
+                if (console && console.debug) {
+                    console.debug('[SACGA] Client ID loaded from storage:', clientId.substring(0, 8) + '...');
+                }
+            }
+
+            this.clientId = clientId;
+        },
+
+        /**
+         * Check if we can auto-rejoin a previous room
+         */
+        checkAutoRejoin: function() {
+            if (!this.clientId || !this.gameId) {
+                return;
+            }
+
+            if (console && console.debug) {
+                console.debug('[SACGA] Checking for auto-rejoin...');
+            }
+
+            $.ajax({
+                url: this.config.restUrl + 'rejoin-check',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    client_id: this.clientId,
+                    game_id: this.gameId
+                }),
+                headers: {
+                    'X-WP-Nonce': this.config.nonce,
+                    'X-SACGA-Client-ID': this.clientId
+                }
+            })
+            .done((response) => {
+                if (response.status === 'found' && response.room_code) {
+                    if (console && console.info) {
+                        console.info('[SACGA] Auto-rejoining room:', response.room_code);
+                    }
+
+                    this.roomCode = response.room_code;
+                    this.mySeat = response.seat;
+                    this.room = response.room;
+
+                    // Update URL to reflect the room
+                    this.updateURL();
+
+                    if (response.room_status === 'active' && response.game_state) {
+                        // Game is in progress - go directly to game view
+                        this.state = response.game_state;
+                        this.showGameView();
+                        this.startGamePolling();
+                    } else if (response.room_status === 'lobby') {
+                        // Game in lobby - show room view
+                        this.showRoomView();
+                        this.startRoomPolling();
+                    } else {
+                        // Room completed or other status
+                        this.showView('lobby');
+                    }
+                } else {
+                    if (console && console.debug) {
+                        console.debug('[SACGA] No room to rejoin');
+                    }
+                }
+            })
+            .fail(() => {
+                if (console && console.debug) {
+                    console.debug('[SACGA] Auto-rejoin check failed');
+                }
+            });
         },
 
         /**
@@ -192,6 +296,11 @@
             // Add guest token header if available
             if (this.config.guestToken) {
                 options.headers['X-SACGA-Guest-Token'] = this.config.guestToken;
+            }
+
+            // Add client ID header for auto-rejoin support
+            if (this.clientId) {
+                options.headers['X-SACGA-Client-ID'] = this.clientId;
             }
 
             if (data) {
@@ -896,6 +1005,9 @@
             // Show document cookies (for debugging)
             console.log('Document cookies:', document.cookie || '(empty)');
 
+            // Client ID for auto-rejoin
+            console.log('Client ID (for auto-rejoin):', this.clientId ? this.clientId.substring(0, 8) + '...' : 'Not set');
+
             console.groupEnd();
             return {
                 userId: this.config.userId,
@@ -903,6 +1015,7 @@
                 storageToken: storageToken,
                 guestId: this.config.guestId || storageGuestId,
                 activeToken: currentToken,
+                clientId: this.clientId,
                 status: currentToken ? 'OK' : 'ERROR'
             };
         }
