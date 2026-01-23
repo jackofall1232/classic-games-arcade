@@ -8,7 +8,7 @@
  * Core Principles:
  * - Turns are player-owned: A turn belongs to exactly one player (human or AI)
  * - Gates are flow controls: A gate is NOT a turn
- * - No turn during gate: When a gate is open, current_turn MUST be null
+ * - No turn during gate: When a gate is open, current_turn MUST be -1
  * - Engine never guesses: Frontend and AI must rely solely on state fields
  *
  * @package ShortcodeArcade
@@ -23,7 +23,7 @@ trait SACGA_Turn_Gate_Trait {
      * Effects:
      * - phase = 'waiting'
      * - awaiting_gate = $gate_type
-     * - current_turn = null (turn ownership suspended)
+     * - current_turn = -1 (turn ownership suspended; -1 used as DB may not allow NULL)
      * - gate populated with metadata
      *
      * @param array  &$state    Game state (passed by reference)
@@ -34,7 +34,7 @@ trait SACGA_Turn_Gate_Trait {
     protected function open_gate(array &$state, string $gate_type, array $data = []): void {
         $state['phase'] = 'waiting';
         $state['awaiting_gate'] = $gate_type;
-        $state['current_turn'] = null; // Suspend turn ownership
+        $state['current_turn'] = -1; // Suspend turn ownership (-1 as DB may not allow NULL)
 
         $state['gate'] = array_merge([
             'type' => $gate_type,
