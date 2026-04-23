@@ -226,7 +226,7 @@ class SACGA_REST_Controller {
         SACGA()->get_room_manager()->touch_room( (int) $room['id'] );
 
         // Update last_seen for the polling player (heartbeat)
-        $player_id = $this->get_player_id_in_room( $room );
+        $player_id = $this->get_player_id_in_room( $room, $request );
         if ( $player_id ) {
             SACGA()->get_room_manager()->touch_player( $player_id );
         }
@@ -328,7 +328,7 @@ class SACGA_REST_Controller {
         }
 
         $state_manager = new SACGA_Game_State();
-        $player_seat = $this->get_player_seat( $room_code );
+        $player_seat = $this->get_player_seat( $room_code, $request );
         $state = $state_manager->get_public_state( (int) $room['id'], (int) $player_seat );
 
         if ( ! $state ) {
@@ -355,10 +355,10 @@ class SACGA_REST_Controller {
         }
 
         $state_manager = new SACGA_Game_State();
-        $player_seat = $this->get_player_seat( $room_code );
+        $player_seat = $this->get_player_seat( $room_code, $request );
 
         // Update last_seen for the polling player (heartbeat)
-        $player_id = $this->get_player_id_in_room( $room );
+        $player_id = $this->get_player_id_in_room( $room, $request );
         if ( $player_id ) {
             SACGA()->get_room_manager()->touch_player( $player_id );
         }
@@ -444,7 +444,21 @@ class SACGA_REST_Controller {
             return $this->error_response( new WP_Error( 'not_active', __( 'Game is not active.', 'shortcode-arcade' ) ) );
         }
 
-        $player_seat = $this->get_player_seat( $room_code );
+        $player_seat = $this->get_player_seat( $room_code, $request );
+
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            $dbg_token = $request->get_header( 'X-SACGA-Guest-Token' );
+            if ( ! $dbg_token && isset( $_COOKIE['sacga_guest_token'] ) ) {
+                $dbg_token = wp_unslash( $_COOKIE['sacga_guest_token'] );
+            }
+            error_log( sprintf(
+                '[SACGA][make_move] room=%s seat=%s user_id=%d token_prefix=%s',
+                $room_code,
+                $player_seat === null ? 'null' : (string) $player_seat,
+                get_current_user_id(),
+                $dbg_token ? substr( $dbg_token, 0, 12 ) : 'none'
+            ) );
+        }
 
         if ( $player_seat === null ) {
             return $this->error_response( new WP_Error( 'not_in_room', __( 'You are not in this room.', 'shortcode-arcade' ) ) );
@@ -526,7 +540,7 @@ class SACGA_REST_Controller {
             return $this->error_response( new WP_Error( 'not_active', __( 'Game is not active.', 'shortcode-arcade' ) ) );
         }
 
-        $player_seat = $this->get_player_seat( $room_code );
+        $player_seat = $this->get_player_seat( $room_code, $request );
 
         if ( $player_seat === null ) {
             return $this->error_response( new WP_Error( 'not_in_room', __( 'You are not in this room.', 'shortcode-arcade' ) ) );
@@ -665,7 +679,7 @@ class SACGA_REST_Controller {
     /**
      * Get player's seat in room
      */
-    private function get_player_seat( string $room_code ): ?int {
+    private function get_player_seat( string $room_code, ?WP_REST_Request $request = null ): ?int {
         $room = SACGA()->get_room_manager()->get_room( $room_code );
 
         if ( ! $room ) {
@@ -673,21 +687,7 @@ class SACGA_REST_Controller {
         }
 
         $user_id = get_current_user_id();
-
-        $guest_token = null;
-        if ( isset( $_COOKIE['sacga_guest_token'] ) ) {
-            $guest_token = sanitize_text_field( $_COOKIE['sacga_guest_token'] );
-        } elseif ( isset( $_SERVER['HTTP_X_SACGA_GUEST_TOKEN'] ) ) {
-            $guest_token = sanitize_text_field( $_SERVER['HTTP_X_SACGA_GUEST_TOKEN'] );
-        }
-
-        $guest_id = null;
-        if ( $guest_token ) {
-            $validated = SACGA()->validate_guest_token( $guest_token, $room_code );
-            if ( ! is_wp_error( $validated ) ) {
-                $guest_id = $validated['guest_id'];
-            }
-        }
+        $guest_id = $this->resolve_guest_id( $request, $room_code );
 
         foreach ( $room['players'] as $player ) {
             if ( $user_id && (int) $player['user_id'] === $user_id ) {
@@ -699,7 +699,20 @@ class SACGA_REST_Controller {
         }
 
         if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-            error_log( sprintf( '[SACGA] Player not found in room %s (guest_token: %s)', $room_code, $guest_token ? substr( $guest_token, 0, 8 ) . '...' : 'null' ) );
+            error_log( sprintf(
+                '[SACGA] Player not found in room %s (user_id=%d, guest_id=%s, known_seats=%s)',
+                $room_code,
+                $user_id,
+                $guest_id ? substr( $guest_id, 0, 12 ) . '...' : 'null',
+                wp_json_encode( array_map( function( $p ) {
+                    return [
+                        'seat'     => (int) $p['seat_position'],
+                        'user_id'  => $p['user_id'] ? (int) $p['user_id'] : null,
+                        'guest_id' => $p['guest_token'] ? substr( $p['guest_token'], 0, 12 ) . '...' : null,
+                        'is_ai'    => (bool) $p['is_ai'],
+                    ];
+                }, $room['players'] ) )
+            ) );
         }
 
         return null;
@@ -708,27 +721,13 @@ class SACGA_REST_Controller {
     /**
      * Get player's database ID in a room
      */
-    private function get_player_id_in_room( array $room ): ?int {
+    private function get_player_id_in_room( array $room, ?WP_REST_Request $request = null ): ?int {
         if ( ! $room || empty( $room['players'] ) ) {
             return null;
         }
 
         $user_id = get_current_user_id();
-
-        $guest_token = null;
-        if ( isset( $_COOKIE['sacga_guest_token'] ) ) {
-            $guest_token = sanitize_text_field( $_COOKIE['sacga_guest_token'] );
-        } elseif ( isset( $_SERVER['HTTP_X_SACGA_GUEST_TOKEN'] ) ) {
-            $guest_token = sanitize_text_field( $_SERVER['HTTP_X_SACGA_GUEST_TOKEN'] );
-        }
-
-        $guest_id = null;
-        if ( $guest_token ) {
-            $validated = SACGA()->validate_guest_token( $guest_token );
-            if ( ! is_wp_error( $validated ) ) {
-                $guest_id = $validated['guest_id'];
-            }
-        }
+        $guest_id = $this->resolve_guest_id( $request );
 
         foreach ( $room['players'] as $player ) {
             if ( $user_id && (int) $player['user_id'] === $user_id ) {
@@ -742,6 +741,44 @@ class SACGA_REST_Controller {
         return null;
     }
 
+    /**
+     * Resolve the validated guest_id for the current request.
+     *
+     * The explicit X-SACGA-Guest-Token header is preferred over the cookie because
+     * the JS client always sends the fresh token it received from the server, while
+     * the cookie can be stale, missing, or out of sync (e.g. when headers_sent
+     * prevented setcookie, or a prior browser session expired). Using a consistent
+     * header-first order across the permission check and seat lookup prevents a
+     * request from being authorized under one guest_id but matched under another.
+     */
+    private function resolve_guest_id( ?WP_REST_Request $request = null, ?string $room_code = null ): ?string {
+        $guest_token = null;
+
+        if ( $request ) {
+            $header = $request->get_header( 'X-SACGA-Guest-Token' );
+            if ( $header ) {
+                $guest_token = sanitize_text_field( $header );
+            }
+        } elseif ( isset( $_SERVER['HTTP_X_SACGA_GUEST_TOKEN'] ) ) {
+            $guest_token = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_SACGA_GUEST_TOKEN'] ) );
+        }
+
+        if ( ! $guest_token && isset( $_COOKIE['sacga_guest_token'] ) ) {
+            $guest_token = sanitize_text_field( wp_unslash( $_COOKIE['sacga_guest_token'] ) );
+        }
+
+        if ( ! $guest_token ) {
+            return null;
+        }
+
+        $validated = SACGA()->validate_guest_token( $guest_token, $room_code );
+        if ( is_wp_error( $validated ) ) {
+            return null;
+        }
+
+        return $validated['guest_id'] ?? null;
+    }
+
     private function get_request_guest_token( WP_REST_Request $request ): ?string {
         $guest_token = $request->get_header( 'X-SACGA-Guest-Token' );
         if ( $guest_token ) {
@@ -749,7 +786,7 @@ class SACGA_REST_Controller {
         }
 
         if ( isset( $_COOKIE['sacga_guest_token'] ) ) {
-            return sanitize_text_field( $_COOKIE['sacga_guest_token'] );
+            return sanitize_text_field( wp_unslash( $_COOKIE['sacga_guest_token'] ) );
         }
 
         return null;
