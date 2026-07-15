@@ -1,0 +1,28 @@
+# OS / editor
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+
+# WordPress / local env
+wp-config.php
+.env
+.env.*
+vendor/
+node_modules/
+*.log
+
+# Build / release artifacts
+dist/
+*.zip
+
+# l00prite runtime (keep protocol; ignore local session noise if any)
+.l00prite/sessions/*
+!.l00prite/sessions/README.md
+.l00prite/events/pending/*
+!.l00prite/events/pending/README.md
+.l00prite/events/processing/*
+!.l00prite/events/processing/README.md
+.l00prite/events/completed/*
+!.l00prite/events/completed/README.md
