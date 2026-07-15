@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
   "project_name": "classic-games-arcade",
-  "current_goal": "Maintain and harden multiplayer WordPress classic games plugin on branch 1.2.2-build",
-  "current_phase": "scaffolded",
+  "current_goal": "Land P0 platform improvements from core audit (cleanup, room auth, multi-player forfeit, turn sentinel)",
+  "current_phase": "audited-core-backlog",
   "active_agent": null,
-  "last_agent": null,
-  "last_updated": null,
-  "status": "not_started",
+  "last_agent": "grok-audit",
+  "last_updated": "2026-07-15T23:24:06.170648Z",
+  "status": "in_progress",
   "blocked": false,
   "blocker_reason": null,
   "active_event_id": null,
@@ -16,5 +16,5 @@
   "ci_status": "unknown",
   "execution_active": false,
   "execution_stop_reason": null,
-  "next_recommended_action": "review CLAUDE.md and .l00prite/blueprint.md, then pick the first fix or feature unit on 1.2.2-build"
+  "next_recommended_action": "Human prioritizes P0 list; first unit: fix cleanup_expired_rooms to honor inactivity expires_at for lobby/active"
 }

@@ -104,6 +104,7 @@ cribbage, diamonds, rummy, war, pig, overcut, even-at-odds, odd-man-out.
 
 | Session | Date | Built | Tested | Status |
 |---------|------|-------|--------|--------|
+| core-audit | 2026-07-15 | Platform audit (excl. games) → .l00prite backlog | Static review of engine/REST/rooms | complete |
 
 <!-- This table is a living log. Each build session should append a row, not overwrite
      prior rows. -->
