@@ -21,6 +21,8 @@
         enableAnimations: true, // Can be disabled if causing issues
         guestTokenPromise: null,
         clientId: null, // Persistent client ID for auto-rejoin
+        audioCtx: null,
+        isMuted: localStorage.getItem('sacga_muted') === 'true',
 
         init: function() {
             const container = $('#sacga-game-container');
@@ -711,6 +713,7 @@
         showGameView: function() {
             this.showView('game');
             this.renderGame();
+            this.setupGameControls(); // Inject Emotes & Volume/Mute controls (P5.3/5.4)
         },
 
         renderGame: function() {
@@ -736,6 +739,12 @@
 
             if (this.state.state.game_over) {
                 this.showGameOver();
+                if (!this.playedVictorySound) {
+                    this.playSynthSound('victory');
+                    this.playedVictorySound = true;
+                }
+            } else {
+                this.playedVictorySound = false;
             }
 
             // Render Gemini bot comments if any are active (P2.17)
@@ -779,6 +788,19 @@
         },
 
         makeMove: function(move) {
+            if (this.isSpectating) return;
+
+            // Trigger sound effects based on actions (P5.4)
+            if (move && move.action) {
+                if (move.action === 'roll') {
+                    this.playSynthSound('dice_roll');
+                } else if (move.action === 'move' || move.action === 'slide') {
+                    this.playSynthSound('piece_slide');
+                } else if (move.action === 'discard' || move.action === 'play') {
+                    this.playSynthSound('card_deal');
+                }
+            }
+
             // Skip turn check for simultaneous move phases (e.g., Hearts passing, Cribbage discard, Overcut rolloff)
             const state = this.state.state;
             const isSimultaneousPhase = state.phase && ['passing', 'discard', 'rolloff'].includes(state.phase);
@@ -1244,6 +1266,174 @@
                 clientId: this.clientId,
                 status: currentToken ? 'OK' : 'ERROR'
             };
+        },
+
+        setupGameControls: function() {
+            // Check if already injected
+            if ($('.sacga-game-controls-wrap').length) {
+                return;
+            }
+
+            // Append Emote Board & Volume Mute toggle
+            const muteIcon = this.isMuted ? 'volume-off' : 'volume-alt';
+            const muteText = this.isMuted ? __( 'Unmute', 'shortcode-arcade' ) : __( 'Mute', 'shortcode-arcade' );
+
+            const controlsHtml = `
+                <div class="sacga-game-controls-wrap" style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                    <div class="sacga-audio-toggle" title="${muteText}" style="cursor: pointer; display: inline-flex; align-items: center; padding: 6px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px;">
+                        <span class="dashicons dashicons-${muteIcon}" style="font-size: 18px; width: 18px; height: 18px; color: #4b5563;"></span>
+                    </div>
+                    <div class="sacga-emote-board" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <span class="sacga-emotes-label" style="font-weight: 600; font-size: 0.9em; color: #4b5563;">${__( 'Say:', 'shortcode-arcade' )}</span>
+                        <button type="button" class="sacga-emote-btn sacga-btn-text" data-phrase="Good game!" style="padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: 600; background: #fff; border: 1px solid #d1d5db; cursor: pointer;">👋 GG!</button>
+                        <button type="button" class="sacga-emote-btn sacga-btn-text" data-phrase="Oops!" style="padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: 600; background: #fff; border: 1px solid #d1d5db; cursor: pointer;">😅 Oops!</button>
+                        <button type="button" class="sacga-emote-btn sacga-btn-text" data-phrase="Close one!" style="padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: 600; background: #fff; border: 1px solid #d1d5db; cursor: pointer;">🔥 Close!</button>
+                        <button type="button" class="sacga-emote-btn sacga-btn-text" data-phrase="Wow!" style="padding: 4px 10px; border-radius: 6px; font-size: 0.85em; font-weight: 600; background: #fff; border: 1px solid #d1d5db; cursor: pointer;">🤩 Wow!</button>
+                    </div>
+                </div>
+            `;
+
+            $('#sacga-game-container').append(controlsHtml);
+
+            // Bind Mute Toggle click
+            $('.sacga-audio-toggle').on('click', () => {
+                this.isMuted = !this.isMuted;
+                localStorage.setItem('sacga_muted', this.isMuted ? 'true' : 'false');
+                
+                const icon = this.isMuted ? 'volume-off' : 'volume-alt';
+                const text = this.isMuted ? __( 'Unmute', 'shortcode-arcade' ) : __( 'Mute', 'shortcode-arcade' );
+                
+                $('.sacga-audio-toggle .dashicons')
+                    .removeClass('dashicons-volume-off dashicons-volume-alt')
+                    .addClass('dashicons-' + icon);
+                $('.sacga-audio-toggle').attr('title', text);
+                
+                // Beep to acknowledge unmuting
+                if (!this.isMuted) {
+                    this.playSynthSound('card_deal');
+                }
+            });
+
+            // Bind Emote clicks
+            $('.sacga-emote-btn').on('click', (e) => {
+                const phrase = $(e.currentTarget).data('phrase');
+                this.sendEmote(phrase);
+            });
+        },
+
+        sendEmote: function(phrase) {
+            if (this.isSpectating) return;
+
+            // Submit emote move action (agnostically handled by server apply_move)
+            this.api('game/move/' + this.roomCode, 'POST', {
+                move: { action: 'emote', phrase: phrase },
+                etag: this.state?.etag
+            }).done((response) => {
+                if (response.changed && response.state) {
+                    this.state = response.state;
+                    this.renderGame();
+                }
+            });
+        },
+
+        initAudio: function() {
+            // Lazy-initialize audio context on first user interaction to comply with browser autoplay policies
+            if (!this.audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) {
+                    this.audioCtx = new AudioContext();
+                }
+            }
+        },
+
+        playSynthSound: function(type) {
+            this.initAudio();
+            if (this.isMuted || !this.audioCtx) return;
+
+            // Resume context if suspended
+            if (this.audioCtx.state === 'suspended') {
+                this.audioCtx.resume();
+            }
+
+            const ctx = this.audioCtx;
+            const now = ctx.currentTime;
+
+            if (type === 'card_deal') {
+                // Synthesize soft high-pass sweep (fast decay click)
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(150, now + 0.15);
+                
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'dice_roll') {
+                // Synthesize quick low clicking pulses (rattle)
+                for (let i = 0; i < 6; i++) {
+                    const clickTime = now + (i * 0.08);
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, clickTime);
+                    osc.frequency.exponentialRampToValueAtTime(40, clickTime + 0.05);
+                    
+                    gain.gain.setValueAtTime(0.12, clickTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, clickTime + 0.05);
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    
+                    osc.start(clickTime);
+                    osc.stop(clickTime + 0.05);
+                }
+            } else if (type === 'piece_slide') {
+                // Synthesize smooth sliding pitch frequency glide
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(320, now);
+                osc.frequency.linearRampToValueAtTime(220, now + 0.25);
+                
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'victory') {
+                // Synthesize major triad fan-fare (C4, E4, G4 notes)
+                const freqs = [261.63, 329.63, 392.00]; // C4, E4, G4
+                freqs.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    const noteTime = now + (idx * 0.15);
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, noteTime);
+                    
+                    gain.gain.setValueAtTime(0.0, now);
+                    gain.gain.linearRampToValueAtTime(0.1, noteTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.01, noteTime + 0.8);
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    
+                    osc.start(noteTime);
+                    osc.stop(noteTime + 0.85);
+                });
+            }
         }
     };
 

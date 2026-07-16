@@ -208,6 +208,21 @@ class SACGA_Game_State {
 
         $state = $current['state'];
 
+        // Agnostic handle for live player emotes (P5.3)
+        if ( isset( $move['action'] ) && $move['action'] === 'emote' ) {
+            $phrase = sanitize_text_field( $move['phrase'] ?? 'Hello!' );
+            $state = $current['state'];
+
+            if ( ! isset( $state['bot_comments'] ) || ! is_array( $state['bot_comments'] ) ) {
+                $state['bot_comments'] = [];
+            }
+            $state['bot_comments'][ $player_seat ] = $phrase;
+
+            // Save state and return
+            $this->update( $room_id, $state );
+            return $this->get( $room_id );
+        }
+
         // Validate move
         $valid = $game->validate_move( $state, $player_seat, $move );
 

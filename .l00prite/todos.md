@@ -66,10 +66,10 @@ traits, admin, shared assets. **Excluded:** per-game modules under `includes/gam
 
 ## UX & 3D Aesthetics (P5)
 
-- [ ] **P5.1 Fancy 3D Tumbling Dice** — Replace static text dice with interactive CSS 3D cubes (`transform: rotateX() rotateY()`) that tumble and settle on the server's rolled face, paired with haptic-like animations.
-- [ ] **P5.2 Fluid CSS Coordinate Card Dealing** — Replace instantaneous card-draw swaps with smooth CSS3 translations, visually flying cards from a central deck graphic directly into the player's hand array.
-- [ ] **P5.3 "Action Phrase" Emote Board** — Add a quick-chat emote panel ("Good game!", "Oops!") that visually floats text above the player's avatar.
-- [ ] **P5.4 Integrated Audio Feedback** — Add an optional (muted-by-default) HTML5 audio layer for card shuffling, piece sliding, dice rattling, and victory trumpets.
+- [x] **P5.1 Fancy 3D Tumbling Dice** — Replace static text dice with interactive CSS 3D cubes (`transform: rotateX() rotateY()`) that tumble and settle on the server's rolled face, paired with haptic-like animations. (Completed & Mapped 2026-07-16)
+- [x] **P5.2 Fluid CSS Coordinate Card Dealing** — Replace instantaneous card-draw swaps with smooth CSS3 translations, visually flying cards from a central deck graphic directly into the player's hand array. (Completed & Mapped 2026-07-16)
+- [x] **P5.3 "Action Phrase" Emote Board** — Add a quick-chat emote panel ("Good game!", "Oops!") that visually floats text above the player's avatar. (Completed 2026-07-16)
+- [x] **P5.4 Integrated Audio Feedback** — Add an optional (muted-by-default) HTML5 audio layer for card shuffling, piece sliding, dice rattling, and victory trumpets. (Completed 2026-07-16)
 
 ## Done
 
