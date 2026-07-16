@@ -54,10 +54,12 @@
     overflow: hidden;
 }
 
-/* Individual pip dots - base style */
+/* Individual pip dots - base style.
+   No `content` here: pseudo-elements are only created by the per-value rules
+   below. The old unconditional `content: ''` generated unpositioned pips on
+   values 1, 5, and 6, which floated outside the die as stray dots. */
 .sacga-die .die-face::before,
 .sacga-die .die-face::after {
-    content: '';
     width: 10px;
     height: 10px;
     background: radial-gradient(circle at 30% 30%, #2a2a2a, #000000);
@@ -68,6 +70,7 @@
 
 /* Value 1 - center pip */
 .sacga-die[data-value="1"] .die-face::before {
+    content: '';
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -75,27 +78,35 @@
 
 /* Value 2 - diagonal pips */
 .sacga-die[data-value="2"] .die-face::before {
+    content: '';
     top: 25%;
     left: 25%;
 }
 .sacga-die[data-value="2"] .die-face::after {
+    content: '';
     bottom: 25%;
     right: 25%;
 }
 
 /* Value 3 - diagonal pips + center */
 .sacga-die[data-value="3"] .die-face::before {
+    content: '';
     top: 25%;
     left: 25%;
 }
 .sacga-die[data-value="3"] .die-face::after {
+    content: '';
     bottom: 25%;
     right: 25%;
 }
 .sacga-die[data-value="3"] .die-face {
     position: relative;
 }
-.sacga-die[data-value="3"] .die-face:nth-child(1)::after {
+/* Center pip lives on the die itself: .die-face only has two pseudo-elements
+   (used for the diagonal pips). The old rule here targeted
+   .die-face:nth-child(1)::after, which IS the diagonal ::after, so it pulled
+   the bottom-right pip to the center and the die rendered only 2 pips. */
+.sacga-die[data-value="3"]::after {
     content: '';
     position: absolute;
     width: 10px;
@@ -108,11 +119,8 @@
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Value 4 - four corners */
-.sacga-die[data-value="4"] .die-face::before,
-.sacga-die[data-value="4"] .die-face::after {
-    content: '';
-}
+/* Value 4 - four corners (drawn by the background-image pattern below;
+   the pseudo-element pips previously double-drew two of the corners) */
 .sacga-die[data-value="4"] .die-face::before {
     width: 10px;
     height: 10px;
@@ -286,7 +294,8 @@
 .sacga-dice-small .sacga-die[data-value="2"] .die-face::before,
 .sacga-dice-small .sacga-die[data-value="2"] .die-face::after,
 .sacga-dice-small .sacga-die[data-value="3"] .die-face::before,
-.sacga-dice-small .sacga-die[data-value="3"] .die-face::after {
+.sacga-dice-small .sacga-die[data-value="3"] .die-face::after,
+.sacga-dice-small .sacga-die[data-value="3"]::after {
     width: 7px;
     height: 7px;
 }
@@ -311,7 +320,8 @@
 .sacga-dice-large .sacga-die[data-value="2"] .die-face::before,
 .sacga-dice-large .sacga-die[data-value="2"] .die-face::after,
 .sacga-dice-large .sacga-die[data-value="3"] .die-face::before,
-.sacga-dice-large .sacga-die[data-value="3"] .die-face::after {
+.sacga-dice-large .sacga-die[data-value="3"] .die-face::after,
+.sacga-dice-large .sacga-die[data-value="3"]::after {
     width: 13px;
     height: 13px;
 }

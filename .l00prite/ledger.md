@@ -501,3 +501,19 @@ Append one entry per agent run. Do not overwrite prior runs.
 - **Next action:** Human tests on their site after redeploying clean files from git (their deployed sacga-overcut.js is corrupted outside of git; must be replaced by this deploy).
 - **Do-not-retry notes:** Do not re-add multiple simultaneous transform animations on one element; they mask each other.
 - **Lock:** lock_claude_v123_refresh_20260716 acquired/released this run.
+
+### Run 2026-07-16T16:40:00Z — claude-dice-felt-polish
+- **Goal:** Address human visual QA feedback on the v1.2.3 preview (die pips wrong; felt invisible).
+- **Triggering event:** human review of screenshots.
+- **Decision:** Normal work — two surgical CSS fixes in dice-base.css and sacga-core.css.
+- **Completed work:** (1) Die value 3 rendered only 2 pips: the `.die-face:nth-child(1)::after` center-pip rule actually re-positioned the diagonal ::after pip to center; center pip moved to `.sacga-die[data-value="3"]::after` with small/large size variants. (2) Stray pips floated outside dice 1/5/6: the generic rule created `content:''` pseudo pips on every die but 1/5/6 never position them; `content` is now opt-in per value, and value 4's redundant double-drawn pseudo pips removed. (3) Felt was invisible on the dark backdrop: `.sacga-game-board` now has an opaque green radial felt with lamp hotspot, hairline border, and inset vignette.
+- **Changed files:** `assets/css/games/dice-base.css`, `assets/css/sacga-core.css`, `.l00prite/*`.
+- **Tests run / Verification:**
+  - command: headless chromium zoomed screenshots (all six die values) + full-page render
+    exit_code: 0
+    summary: all pip layouts correct, no stray dots, felt clearly visible
+    timestamp: 2026-07-16T16:38:00Z
+- **Event status:** completed.
+- **Failures:** none.
+- **Confidence:** high (visually verified at 3x zoom).
+- **Lock:** lock_claude_dice_felt_20260716 acquired/released this run.
