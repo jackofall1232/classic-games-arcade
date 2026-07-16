@@ -65,7 +65,7 @@ class SACGA_Game_Checkers extends SACGA_Game_Contract {
             'players'      => $this->format_players( $players ),
             'captured'     => [ 0 => 0, 1 => 0 ],
             'must_jump'    => false,
-            'jump_piece'   => null, // Position if in middle of multi-jump
+            'active_jumper'   => null, // Position if in middle of multi-jump
             'move_count'   => 0,
             'game_over'    => false,
             'last_move_at' => time(), // Timestamp of last move for timeout detection
@@ -151,14 +151,14 @@ class SACGA_Game_Checkers extends SACGA_Game_Contract {
         }
 
         // If in multi-jump, must continue with same piece - but check if piece still exists
-        if ( $state['jump_piece'] !== null ) {
-            $jump_row = $state['jump_piece']['row'];
-            $jump_col = $state['jump_piece']['col'];
+        if ( $state['active_jumper'] !== null ) {
+            $jump_row = $state['active_jumper']['row'];
+            $jump_col = $state['active_jumper']['col'];
             $jump_piece = $board[ $jump_row ][ $jump_col ];
 
             // If the jump piece was captured or is no longer ours, clear the jump state
             if ( ! $this->is_player_piece( $jump_piece, $player_seat ) ) {
-                $state['jump_piece'] = null;
+                $state['active_jumper'] = null;
                 $state['must_jump'] = $this->has_capture_available( $board, $player_seat );
             } elseif ( $jump_row !== $from_row || $jump_col !== $from_col ) {
                 // Jump piece still exists but player is trying to move a different piece
@@ -186,7 +186,7 @@ class SACGA_Game_Checkers extends SACGA_Game_Contract {
             }
 
             // Must capture if capture is available
-            if ( $state['must_jump'] || $state['jump_piece'] !== null ) {
+            if ( $state['must_jump'] || $state['active_jumper'] !== null ) {
                 return new WP_Error( 'must_capture', __( 'You must make a capture.', 'shortcode-arcade' ) );
             }
 
@@ -256,14 +256,14 @@ class SACGA_Game_Checkers extends SACGA_Game_Contract {
         if ( $was_capture ) {
             $can_continue = $this->get_jumps_from( $board, $to_row, $to_col, $player_seat );
             if ( ! empty( $can_continue ) ) {
-                $state['jump_piece'] = [ 'row' => $to_row, 'col' => $to_col ];
+                $state['active_jumper'] = [ 'row' => $to_row, 'col' => $to_col ];
                 $state['must_jump'] = true;
                 return $state; // Don't advance turn
             }
         }
 
         // Clear multi-jump state
-        $state['jump_piece'] = null;
+        $state['active_jumper'] = null;
 
         return $state;
     }
@@ -273,7 +273,7 @@ class SACGA_Game_Checkers extends SACGA_Game_Contract {
      */
     public function advance_turn( array $state ): array {
         $state['current_turn'] = $state['current_turn'] === 0 ? 1 : 0;
-        $state['jump_piece'] = null; // Clear multi-jump state when turn changes
+        $state['active_jumper'] = null; // Clear multi-jump state when turn changes
         $state['must_jump'] = $this->has_capture_available( $state['board'], $state['current_turn'] );
         return $state;
     }
@@ -362,9 +362,9 @@ class SACGA_Game_Checkers extends SACGA_Game_Contract {
         $captures = [];
 
         // If in multi-jump, only consider that piece
-        if ( ! empty( $state['jump_piece'] ) ) {
-            $row = $state['jump_piece']['row'];
-            $col = $state['jump_piece']['col'];
+        if ( ! empty( $state['active_jumper'] ) ) {
+            $row = $state['active_jumper']['row'];
+            $col = $state['active_jumper']['col'];
             return $this->get_jumps_from( $board, $row, $col, $player_seat );
         }
 

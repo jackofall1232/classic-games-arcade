@@ -18,7 +18,7 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
     protected $min_players = 2;
     protected $max_players = 2;
     protected $has_teams = false;
-    protected $ai_supported = false; // Human vs human only initially
+    protected $ai_supported = true; // AI support enabled
 
     /**
      * Board constants
@@ -79,6 +79,11 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
             'winner'       => null,
             'last_move'    => null,
             'last_move_at' => time(),
+            'has_moved'    => [
+                'w_k' => false, 'w_r_a' => false, 'w_r_h' => false,
+                'b_k' => false, 'b_r_a' => false, 'b_r_h' => false,
+            ],
+            'en_passant_target' => null,
         ];
     }
 
@@ -120,6 +125,44 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
             ];
         }
         return $formatted;
+    }
+
+    /**
+     * King Check-scanning
+     */
+    public function is_king_in_check( array $state, int $color_seat ) : bool {
+        $board = $state['board'];
+        $king_piece = $color_seat === 0 ? self::W_KING : self::B_KING;
+        $king_row = -1;
+        $king_col = -1;
+
+        // Find king
+        for ( $row = 0; $row < self::BOARD_SIZE; $row++ ) {
+            for ( $col = 0; $col < self::BOARD_SIZE; $col++ ) {
+                if ( $board[ $row ][ $col ] === $king_piece ) {
+                    $king_row = $row;
+                    $king_col = $col;
+                    break 2;
+                }
+            }
+        }
+        if ($king_row === -1) return false;
+
+        $opponent_seat = $color_seat === 0 ? 1 : 0;
+        
+        // Scan for opponent pieces that can attack king
+        for ( $row = 0; $row < self::BOARD_SIZE; $row++ ) {
+            for ( $col = 0; $col < self::BOARD_SIZE; $col++ ) {
+                $piece = $board[ $row ][ $col ];
+                if ( $this->is_player_piece( $piece, $opponent_seat ) ) {
+                    // Check if it can move to king pos
+                    if ( $this->is_valid_piece_move( $board, $piece, $row, $col, $king_row, $king_col, $opponent_seat, $state, true ) ) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -165,18 +208,73 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
             return new WP_Error( 'own_piece', __( 'Cannot capture your own piece.', 'shortcode-arcade' ) );
         }
 
-        // Validate piece-specific movement
-        if ( ! $this->is_valid_piece_move( $board, $piece, $from_row, $from_col, $to_row, $to_col, $player_seat ) ) {
+        // Handle Castling validation
+        $piece_type = abs($piece);
+        $row_delta = $to_row - $from_row;
+        $col_delta = $to_col - $from_col;
+        $abs_col = abs($col_delta);
+
+        if ($piece_type === 6 && $abs_col === 2 && $row_delta === 0) {
+            if (!$this->is_valid_castle_move($state, $player_seat, $from_col, $to_col)) {
+                return new WP_Error( 'invalid_move', __( 'Invalid castling move.', 'shortcode-arcade' ) );
+            }
+        } elseif ( ! $this->is_valid_piece_move( $board, $piece, $from_row, $from_col, $to_row, $to_col, $player_seat, $state ) ) {
             return new WP_Error( 'invalid_move', __( 'Invalid move for this piece.', 'shortcode-arcade' ) );
+        }
+
+        // Virtual board check for Check
+        $virtual_state = $this->apply_move( $state, $player_seat, $move );
+        if ( $this->is_king_in_check( $virtual_state, $player_seat ) ) {
+            return new WP_Error( 'illegal_move', __( 'Move leaves King in check.', 'shortcode-arcade' ) );
         }
 
         return true;
     }
 
+    private function is_valid_castle_move( array $state, int $player_seat, int $from_col, int $to_col ): bool {
+        $row = $player_seat === 0 ? 7 : 0;
+        $board = $state['board'];
+        $has_moved = $state['has_moved'] ?? [];
+
+        // Check if King is in check
+        if ($this->is_king_in_check($state, $player_seat)) return false;
+
+        $k_moved = $player_seat === 0 ? ($has_moved['w_k'] ?? false) : ($has_moved['b_k'] ?? false);
+        if ($k_moved) return false;
+
+        if ($to_col === 6) { // King side (e1 to g1)
+            $r_moved = $player_seat === 0 ? ($has_moved['w_r_h'] ?? false) : ($has_moved['b_r_h'] ?? false);
+            if ($r_moved) return false;
+            if ($board[$row][5] !== self::EMPTY || $board[$row][6] !== self::EMPTY) return false;
+            // Check if f1 or g1 is under attack
+            $v_state1 = $this->apply_virtual_move($state, $row, 4, $row, 5);
+            if ($this->is_king_in_check($v_state1, $player_seat)) return false;
+            $v_state2 = $this->apply_virtual_move($state, $row, 4, $row, 6);
+            if ($this->is_king_in_check($v_state2, $player_seat)) return false;
+            return true;
+        } elseif ($to_col === 2) { // Queen side (e1 to c1)
+            $r_moved = $player_seat === 0 ? ($has_moved['w_r_a'] ?? false) : ($has_moved['b_r_a'] ?? false);
+            if ($r_moved) return false;
+            if ($board[$row][1] !== self::EMPTY || $board[$row][2] !== self::EMPTY || $board[$row][3] !== self::EMPTY) return false;
+            $v_state1 = $this->apply_virtual_move($state, $row, 4, $row, 3);
+            if ($this->is_king_in_check($v_state1, $player_seat)) return false;
+            $v_state2 = $this->apply_virtual_move($state, $row, 4, $row, 2);
+            if ($this->is_king_in_check($v_state2, $player_seat)) return false;
+            return true;
+        }
+        return false;
+    }
+
+    private function apply_virtual_move(array $state, $fr, $fc, $tr, $tc) {
+        $state['board'][$tr][$tc] = $state['board'][$fr][$fc];
+        $state['board'][$fr][$fc] = self::EMPTY;
+        return $state;
+    }
+
     /**
      * Check if a move is valid for a specific piece type
      */
-    private function is_valid_piece_move( array $board, int $piece, int $from_row, int $from_col, int $to_row, int $to_col, int $player_seat ): bool {
+    private function is_valid_piece_move( array $board, int $piece, int $from_row, int $from_col, int $to_row, int $to_col, int $player_seat, array $state = [], bool $is_attack_check = false ): bool {
         $piece_type = abs( $piece );
         $row_delta = $to_row - $from_row;
         $col_delta = $to_col - $from_col;
@@ -187,7 +285,7 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
 
         switch ( $piece_type ) {
             case 1: // Pawn
-                return $this->is_valid_pawn_move( $board, $from_row, $from_col, $to_row, $to_col, $player_seat, $is_capture );
+                return $this->is_valid_pawn_move( $board, $from_row, $from_col, $to_row, $to_col, $player_seat, $is_capture, $state, $is_attack_check );
 
             case 2: // Rook
                 return $this->is_valid_rook_move( $board, $from_row, $from_col, $to_row, $to_col );
@@ -213,22 +311,25 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
     /**
      * Validate pawn movement
      */
-    private function is_valid_pawn_move( array $board, int $from_row, int $from_col, int $to_row, int $to_col, int $player_seat, bool $is_capture ): bool {
+    private function is_valid_pawn_move( array $board, int $from_row, int $from_col, int $to_row, int $to_col, int $player_seat, bool $is_capture, array $state, bool $is_attack_check ): bool {
         $row_delta = $to_row - $from_row;
         $col_delta = $to_col - $from_col;
         $abs_col = abs( $col_delta );
 
-        // White pawns move up (decreasing row), black pawns move down (increasing row)
         $forward = $player_seat === 0 ? -1 : 1;
         $start_row = $player_seat === 0 ? 6 : 1;
 
         // Capture move (diagonal)
-        if ( $is_capture ) {
-            return $row_delta === $forward && $abs_col === 1;
+        if ( $row_delta === $forward && $abs_col === 1 ) {
+            if ($is_capture || $is_attack_check) return true;
+            if (isset($state['en_passant_target']) && $state['en_passant_target'] === ['row' => $to_row, 'col' => $to_col]) {
+                return true;
+            }
+            return false;
         }
 
         // Forward move (straight)
-        if ( $col_delta !== 0 ) {
+        if ( $col_delta !== 0 || $is_attack_check ) {
             return false;
         }
 
@@ -317,10 +418,30 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
         $board = $state['board'];
         $piece = $board[ $from_row ][ $from_col ];
         $captured = $board[ $to_row ][ $to_col ];
+        
+        $piece_type = abs($piece);
+
+        // Handle En Passant Capture
+        if ($piece_type === 1 && $captured === self::EMPTY && abs($from_col - $to_col) === 1) {
+            $cap_row = $from_row;
+            $captured = $board[$cap_row][$to_col];
+            $board[$cap_row][$to_col] = self::EMPTY;
+        }
 
         // Track captured piece
         if ( $captured !== self::EMPTY ) {
             $state['captured'][ $player_seat ][] = $captured;
+        }
+
+        // Handle Castling Rook Move
+        if ($piece_type === 6 && abs($from_col - $to_col) === 2) {
+            if ($to_col === 6) { // Kingside
+                $board[$to_row][5] = $board[$to_row][7];
+                $board[$to_row][7] = self::EMPTY;
+            } elseif ($to_col === 2) { // Queenside
+                $board[$to_row][3] = $board[$to_row][0];
+                $board[$to_row][0] = self::EMPTY;
+            }
         }
 
         // Move the piece
@@ -328,12 +449,38 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
         $board[ $to_row ][ $to_col ] = $piece;
 
         // Pawn promotion (auto-promote to queen for simplicity)
-        $piece_type = abs( $piece );
         if ( $piece_type === 1 ) {
             $promotion_row = $player_seat === 0 ? 0 : 7;
             if ( $to_row === $promotion_row ) {
                 $board[ $to_row ][ $to_col ] = $player_seat === 0 ? self::W_QUEEN : self::B_QUEEN;
             }
+        }
+        
+        // Update has_moved
+        if (!isset($state['has_moved'])) {
+            $state['has_moved'] = [
+                'w_k' => false, 'w_r_a' => false, 'w_r_h' => false,
+                'b_k' => false, 'b_r_a' => false, 'b_r_h' => false,
+            ];
+        }
+        if ($piece === self::W_KING) $state['has_moved']['w_k'] = true;
+        if ($piece === self::B_KING) $state['has_moved']['b_k'] = true;
+        if ($piece === self::W_ROOK) {
+            if ($from_row === 7 && $from_col === 0) $state['has_moved']['w_r_a'] = true;
+            if ($from_row === 7 && $from_col === 7) $state['has_moved']['w_r_h'] = true;
+        }
+        if ($piece === self::B_ROOK) {
+            if ($from_row === 0 && $from_col === 0) $state['has_moved']['b_r_a'] = true;
+            if ($from_row === 0 && $from_col === 7) $state['has_moved']['b_r_h'] = true;
+        }
+
+        // Update En Passant Target
+        $state['en_passant_target'] = null;
+        if ($piece_type === 1 && abs($to_row - $from_row) === 2) {
+            $state['en_passant_target'] = [
+                'row' => ($from_row + $to_row) / 2,
+                'col' => $from_col
+            ];
         }
 
         $state['board'] = $board;
@@ -356,12 +503,31 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
     }
 
     /**
-     * Check end condition (king captured)
+     * Check end condition (checkmate)
      */
     public function check_end_condition( array $state ): array {
+        $current_player = $state['current_turn'];
+        $valid_moves = $this->get_valid_moves( $state, $current_player );
+        
+        if (empty($valid_moves)) {
+            if ($this->is_king_in_check($state, $current_player)) {
+                return [
+                    'ended'   => true,
+                    'reason'  => 'checkmate',
+                    'winners' => [ $current_player === 0 ? 1 : 0 ],
+                ];
+            } else {
+                return [
+                    'ended'   => true,
+                    'reason'  => 'stalemate',
+                    'winners' => [],
+                ];
+            }
+        }
+
         $board = $state['board'];
 
-        // Check if either king is missing (captured)
+        // Fallback: Check if either king is missing (captured)
         $white_king = false;
         $black_king = false;
 
@@ -407,11 +573,54 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
     }
 
     /**
-     * Get AI move (not supported in this version)
+     * Get AI move
      */
     public function ai_move( array $state, int $player_seat, string $difficulty = 'beginner' ): array {
-        // AI not supported for chess in v0.5.0
-        return [];
+        $valid_moves = $this->get_valid_moves($state, $player_seat);
+        if (empty($valid_moves)) return [];
+
+        $best_move = $valid_moves[0];
+        $best_score = PHP_INT_MIN;
+        
+        foreach ($valid_moves as $move) {
+            $v_state = $this->apply_move($state, $player_seat, $move);
+            $score = $this->evaluate_board($v_state['board'], $player_seat);
+            
+            // Check opponent's responses (1 ply lookahead)
+            $opponent = $player_seat === 0 ? 1 : 0;
+            if ($this->is_king_in_check($v_state, $opponent)) {
+                $score += 500; // Bonus for checking
+                $opp_moves = $this->get_valid_moves($v_state, $opponent);
+                if (empty($opp_moves)) {
+                    $score += 100000; // Checkmate bonus
+                }
+            }
+
+            if ($score > $best_score) {
+                $best_score = $score;
+                $best_move = $move;
+            }
+        }
+        return $best_move;
+    }
+
+    private function evaluate_board(array $board, int $player_seat): int {
+        $weights = [1 => 100, 2 => 500, 3 => 300, 4 => 300, 5 => 900, 6 => 10000];
+        $score = 0;
+        for ($r=0; $r<8; $r++) {
+            for ($c=0; $c<8; $c++) {
+                $p = $board[$r][$c];
+                if ($p !== self::EMPTY) {
+                    $val = $weights[abs($p)] ?? 0;
+                    if ($this->is_player_piece($p, $player_seat)) {
+                        $score += $val;
+                    } else {
+                        $score -= $val;
+                    }
+                }
+            }
+        }
+        return $score;
     }
 
     /**
@@ -442,12 +651,25 @@ class SACGA_Game_Chess extends SACGA_Game_Contract {
                         if ( $dest !== self::EMPTY && $this->is_player_piece( $dest, $player_seat ) ) {
                             continue;
                         }
+                        
+                        $move = [
+                            'from' => [ 'row' => $from_row, 'col' => $from_col ],
+                            'to'   => [ 'row' => $to_row, 'col' => $to_col ],
+                        ];
 
-                        if ( $this->is_valid_piece_move( $board, $piece, $from_row, $from_col, $to_row, $to_col, $player_seat ) ) {
-                            $moves[] = [
-                                'from' => [ 'row' => $from_row, 'col' => $from_col ],
-                                'to'   => [ 'row' => $to_row, 'col' => $to_col ],
-                            ];
+                        $piece_type = abs($piece);
+                        if ($piece_type === 6 && abs($to_col - $from_col) === 2 && ($to_row - $from_row) === 0) {
+                            if (!$this->is_valid_castle_move($state, $player_seat, $from_col, $to_col)) {
+                                continue;
+                            }
+                        } elseif ( ! $this->is_valid_piece_move( $board, $piece, $from_row, $from_col, $to_row, $to_col, $player_seat, $state ) ) {
+                            continue;
+                        }
+
+                        // Virtual board check for Check
+                        $v_state = $this->apply_move($state, $player_seat, $move);
+                        if (!$this->is_king_in_check($v_state, $player_seat)) {
+                            $moves[] = $move;
                         }
                     }
                 }

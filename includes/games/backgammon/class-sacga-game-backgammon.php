@@ -164,6 +164,19 @@ class SACGA_Game_Backgammon extends SACGA_Game_Contract {
             return $this->validate_checker_move( $state, $player_seat, $from, $to, $die_value );
         }
 
+        // Doubling cube actions
+        if ( $action === 'propose_double' ) {
+            if ( $state['phase'] !== 'roll' ) return new WP_Error( 'invalid_phase', __( 'Can only propose double before rolling.', 'shortcode-arcade' ) );
+            if ( isset( $state['doubling_owner'] ) && $state['doubling_owner'] !== $player_seat ) return new WP_Error( 'not_owner', __( 'You do not own the doubling cube.', 'shortcode-arcade' ) );
+            return true;
+        }
+
+        if ( $action === 'accept_double' || $action === 'reject_double' ) {
+            if ( $state['phase'] !== 'doubling' ) return new WP_Error( 'invalid_phase', __( 'No double proposed.', 'shortcode-arcade' ) );
+            if ( $state['current_turn'] === $player_seat ) return new WP_Error( 'not_your_turn', __( 'You cannot respond to your own double.', 'shortcode-arcade' ) );
+            return true;
+        }
+
         // End turn (when no moves possible or all dice used)
         if ( $action === 'end_turn' ) {
             if ( $state['phase'] !== 'move' ) {
@@ -356,6 +369,24 @@ class SACGA_Game_Backgammon extends SACGA_Game_Contract {
     public function apply_move( array $state, int $player_seat, array $move ): array {
         $action = $move['action'];
 
+        if ( $action === 'propose_double' ) {
+            $state['phase'] = 'doubling';
+            return $state;
+        }
+
+        if ( $action === 'accept_double' ) {
+            $state['doubling_cube'] *= 2;
+            $state['doubling_owner'] = $player_seat;
+            $state['phase'] = 'roll';
+            return $state;
+        }
+
+        if ( $action === 'reject_double' ) {
+            $state['game_over'] = true;
+            $state['winner'] = $state['current_turn']; // The one who proposed wins
+            return $state;
+        }
+
         if ( $action === 'roll' ) {
             $die1 = wp_rand( 1, 6 );
             $die2 = wp_rand( 1, 6 );
@@ -503,8 +534,19 @@ class SACGA_Game_Backgammon extends SACGA_Game_Contract {
      * Get all valid moves for a player
      */
     public function get_valid_moves( array $state, int $player_seat ): array {
+        if ( $state['phase'] === 'doubling' ) {
+            if ( $state['current_turn'] !== $player_seat ) {
+                return [ [ 'action' => 'accept_double' ], [ 'action' => 'reject_double' ] ];
+            }
+            return [];
+        }
+
         if ( $state['phase'] === 'roll' ) {
-            return [ [ 'action' => 'roll' ] ];
+            $moves = [ [ 'action' => 'roll' ] ];
+            if ( ! isset( $state['doubling_owner'] ) || $state['doubling_owner'] === $player_seat ) {
+                $moves[] = [ 'action' => 'propose_double' ];
+            }
+            return $moves;
         }
 
         if ( $state['phase'] !== 'move' ) {

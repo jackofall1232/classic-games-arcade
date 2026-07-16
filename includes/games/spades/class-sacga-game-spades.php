@@ -89,8 +89,10 @@ class SACGA_Game_Spades extends SACGA_Game_Contract {
             $state['hands'][ $seat ] = $this->sort_hand( $hand );
         }
 
-        $state['phase'] = 'bidding';
+        $state['phase'] = 'blind_bidding';
         $state['bids'] = [ null, null, null, null ];
+        $state['blind_nils'] = [ false, false, false, false ];
+        $state['swap_cards'] = [ [], [], [], [] ];
         $state['tricks_won'] = [ 0, 0, 0, 0 ];
         $state['trick'] = [];
         $state['spades_broken'] = false;
@@ -109,6 +111,29 @@ class SACGA_Game_Spades extends SACGA_Game_Contract {
 
         if ( $state['current_turn'] !== $player_seat ) {
             return new WP_Error( 'not_your_turn', __( 'It is not your turn.', 'shortcode-arcade' ) );
+        }
+
+        if ( $state['phase'] === 'blind_bidding' ) {
+            $bid = $move['bid'] ?? null;
+            if ( $bid === 'blind_nil' || $bid === 'pass' ) {
+                return true;
+            }
+            return new WP_Error( 'invalid_bid', __( 'Bid must be blind_nil or pass.', 'shortcode-arcade' ) );
+        }
+
+        if ( $state['phase'] === 'blind_nil_swap' ) {
+            // Only participants in blind nil and their partners should submit
+            $cards = $move['cards'] ?? [];
+            if ( count( $cards ) !== 2 ) {
+                return new WP_Error( 'invalid_swap', __( 'You must swap exactly 2 cards.', 'shortcode-arcade' ) );
+            }
+            $hand = $state['hands'][ $player_seat ];
+            foreach ( $cards as $card_id ) {
+                if ( ! $this->find_card( $hand, sanitize_text_field( $card_id ) ) ) {
+                    return new WP_Error( 'invalid_card', __( 'You do not have one of those cards.', 'shortcode-arcade' ) );
+                }
+            }
+            return true;
         }
 
         if ( $state['phase'] === 'bidding' ) {
@@ -143,7 +168,7 @@ class SACGA_Game_Spades extends SACGA_Game_Contract {
             if ( ! empty( $state['trick'] ) ) {
                 $lead_suit = $state['trick'][0]['card']['suit'];
                 if ( $this->has_suit( $hand, $lead_suit ) && $card['suit'] !== $lead_suit ) {
-                    return new WP_Error( 'must_follow', __( 'You must follow suit.', 'shortcode-arcade' ) );
+                    return new WP_Error( 'renege', __( 'You must follow suit.', 'shortcode-arcade' ) );
                 }
             }
 
@@ -168,9 +193,92 @@ class SACGA_Game_Spades extends SACGA_Game_Contract {
             return $this->deal_or_setup( $state );
         }
 
+        if ( $state['phase'] === 'blind_bidding' ) {
+            $bid = $move['bid'];
+            if ( $bid === 'blind_nil' ) {
+                $state['blind_nils'][ $player_seat ] = true;
+                $state['bids'][ $player_seat ] = 0; // Lock in nil bid
+            }
+            
+            $state['blind_bidding_done'][ $player_seat ] = true;
+            
+            // Advance turn for blind bidding
+            $state['current_turn'] = ( $state['current_turn'] + 1 ) % 4;
+
+            if ( count( array_filter( $state['blind_bidding_done'] ?? [] ) ) === 4 ) {
+                if ( in_array( true, $state['blind_nils'], true ) ) {
+                    $state['phase'] = 'blind_nil_swap';
+                    // Current turn doesn't matter for swap, everyone submits at once
+                    $state['current_turn'] = null;
+                } else {
+                    $state['phase'] = 'bidding';
+                    $state['current_turn'] = ( $state['dealer'] + 1 ) % 4;
+                }
+            }
+            return $state;
+        }
+
+        if ( $state['phase'] === 'blind_nil_swap' ) {
+            $cards = array_map( 'sanitize_text_field', $move['cards'] );
+            $state['swap_cards'][ $player_seat ] = $cards;
+
+            // Check if all needed players have submitted swap cards
+            // Only teams that have a blind nil need to swap
+            $all_swapped = true;
+            foreach ( $state['teams'] as $team ) {
+                $needs_swap = false;
+                foreach ( $team as $seat ) {
+                    if ( $state['blind_nils'][ $seat ] ) {
+                        $needs_swap = true;
+                        break;
+                    }
+                }
+                if ( $needs_swap ) {
+                    foreach ( $team as $seat ) {
+                        if ( empty( $state['swap_cards'][ $seat ] ) ) {
+                            $all_swapped = false;
+                            break 2;
+                        }
+                    }
+                }
+            }
+
+            if ( $all_swapped ) {
+                // Perform the swaps
+                foreach ( $state['teams'] as $team ) {
+                    $seat1 = $team[0];
+                    $seat2 = $team[1];
+                    
+                    if ( ! empty( $state['swap_cards'][ $seat1 ] ) && ! empty( $state['swap_cards'][ $seat2 ] ) ) {
+                        // Exchange cards
+                        foreach ( $state['swap_cards'][ $seat1 ] as $card_id ) {
+                            $card = $this->find_card( $state['hands'][ $seat1 ], $card_id );
+                            $state['hands'][ $seat1 ] = $this->remove_card( $state['hands'][ $seat1 ], $card_id );
+                            $state['hands'][ $seat2 ][] = $card;
+                        }
+                        foreach ( $state['swap_cards'][ $seat2 ] as $card_id ) {
+                            $card = $this->find_card( $state['hands'][ $seat2 ], $card_id );
+                            $state['hands'][ $seat2 ] = $this->remove_card( $state['hands'][ $seat2 ], $card_id );
+                            $state['hands'][ $seat1 ][] = $card;
+                        }
+                        
+                        $state['hands'][ $seat1 ] = $this->sort_hand( $state['hands'][ $seat1 ] );
+                        $state['hands'][ $seat2 ] = $this->sort_hand( $state['hands'][ $seat2 ] );
+                    }
+                }
+                
+                $state['phase'] = 'bidding';
+                $state['current_turn'] = ( $state['dealer'] + 1 ) % 4;
+            }
+            return $state;
+        }
+
         if ( $state['phase'] === 'bidding' ) {
             $bid = $move['bid'];
-            $state['bids'][ $player_seat ] = $bid === 'nil' ? 0 : absint( $bid );
+            // If bid was already set by blind nil, don't overwrite
+            if ( ! isset($state['blind_nils'][ $player_seat ]) || ! $state['blind_nils'][ $player_seat ] ) {
+                $state['bids'][ $player_seat ] = $bid === 'nil' ? 0 : absint( $bid );
+            }
 
             // Check if all bids are in
             if ( ! in_array( null, $state['bids'], true ) ) {
@@ -291,7 +399,12 @@ class SACGA_Game_Spades extends SACGA_Game_Contract {
                 $tricks = $state['tricks_won'][ $seat ];
 
                 if ( $bid === 0 ) {
-                    $nil_results[] = $tricks === 0 ? 100 : -100;
+                    $is_blind = !empty($state['blind_nils'][$seat]);
+                    if ($is_blind) {
+                        $nil_results[] = $tricks === 0 ? 200 : -200;
+                    } else {
+                        $nil_results[] = $tricks === 0 ? 100 : -100;
+                    }
                 } else {
                     $team_bid += $bid;
                     $team_tricks += $tricks;
@@ -330,6 +443,19 @@ class SACGA_Game_Spades extends SACGA_Game_Contract {
     public function ai_move( array $state, int $player_seat, string $difficulty = 'beginner' ): array {
         if ( $state['phase'] === 'round_end' ) {
             return [ 'action' => 'next_round' ];
+        }
+
+        if ( $state['phase'] === 'blind_bidding' ) {
+            // AI never bids blind nil
+            return [ 'bid' => 'pass' ];
+        }
+
+        if ( $state['phase'] === 'blind_nil_swap' ) {
+            $hand = $state['hands'][ $player_seat ];
+            // Just pass the two highest value cards
+            $sorted = $hand;
+            usort( $sorted, fn( $a, $b ) => $this->get_card_value( $b ) - $this->get_card_value( $a ) );
+            return [ 'cards' => [ $sorted[0]['id'], $sorted[1]['id'] ] ];
         }
 
         if ( $state['phase'] === 'bidding' ) {
@@ -413,6 +539,29 @@ class SACGA_Game_Spades extends SACGA_Game_Contract {
             return [ [ 'action' => 'next_round' ] ];
         }
 
+        if ( $state['phase'] === 'blind_bidding' && $state['current_turn'] === $player_seat ) {
+            return [ [ 'bid' => 'blind_nil' ], [ 'bid' => 'pass' ] ];
+        }
+
+        if ( $state['phase'] === 'blind_nil_swap' ) {
+            // Check if player's team needs a swap
+            $needs_swap = false;
+            foreach ( $state['teams'] as $team ) {
+                if ( in_array( $player_seat, $team, true ) ) {
+                    foreach ( $team as $seat ) {
+                        if ( !empty($state['blind_nils'][$seat]) ) {
+                            $needs_swap = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if ( $needs_swap && empty( $state['swap_cards'][ $player_seat ] ) ) {
+                return [ [ 'action' => 'swap_cards' ] ];
+            }
+            return [];
+        }
+
         if ( $state['phase'] === 'bidding' && $state['current_turn'] === $player_seat ) {
             $bids = [ [ 'bid' => 'nil' ] ];
             for ( $i = 1; $i <= 13; $i++ ) {
@@ -443,7 +592,11 @@ class SACGA_Game_Spades extends SACGA_Game_Contract {
         $public['hands'] = [];
 
         foreach ( $state['hands'] as $seat => $hand ) {
-            $public['hands'][ $seat ] = $seat === $player_seat ? $hand : count( $hand );
+            if ($state['phase'] === 'blind_bidding' || $state['phase'] === 'blind_nil_swap') {
+                $public['hands'][ $seat ] = count( $hand ); // Hide all hands
+            } else {
+                $public['hands'][ $seat ] = $seat === $player_seat ? $hand : count( $hand );
+            }
         }
 
         return $public;
