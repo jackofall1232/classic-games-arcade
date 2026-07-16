@@ -37,6 +37,12 @@
 
             this.bindEvents();
 
+            // Load persistent nickname from local storage if any
+            const savedNickname = localStorage.getItem('sacga_nickname');
+            if (savedNickname) {
+                $('#sacga-nickname-input').val(savedNickname);
+            }
+
             const initialRoomCode = this.normalizeRoomCode(this.roomCode);
             if (initialRoomCode) {
                 this.roomCode = initialRoomCode;
@@ -264,6 +270,19 @@
             $('#sacga-back-to-arcade').on('click', () => this.backToArcade());
             $('#sacga-exit-to-arcade').on('click', () => this.backToArcade());
             $('#sacga-forfeit-game').on('click', () => this.forfeitGame());
+
+            // Visibility-aware catch-up polling when returning to tab
+            $(document).on('visibilitychange', () => {
+                if (!document.hidden && this.roomCode) {
+                    if (this.room && this.room.status === 'active') {
+                        this.pollDelay = 800; // Reset to snappy base
+                        this.pollGameState();
+                    } else {
+                        this.pollDelay = this.config.pollInterval || 2000;
+                        this.pollRoom();
+                    }
+                }
+            });
         },
 
         showView: function(view) {
@@ -310,11 +329,24 @@
             return $.ajax(options);
         },
 
+        getNickname: function() {
+            const nickname = $('#sacga-nickname-input').val()?.trim() || '';
+            if (nickname) {
+                localStorage.setItem('sacga_nickname', nickname);
+            }
+            return nickname;
+        },
+
         createRoom: function() {
+            const nickname = this.getNickname();
             this.showLoading();
             this.waitForGuestToken()
                 .done(() => {
-                    this.api('room', 'POST', { game_id: this.gameId })
+                    const postData = { game_id: this.gameId };
+                    if (nickname) {
+                        postData.display_name = nickname;
+                    }
+                    this.api('room', 'POST', postData)
                         .done((response) => {
                             if (response.success) {
                                 this.room = response.room;
@@ -344,10 +376,15 @@
         },
 
         joinRoom: function(code) {
+            const nickname = this.getNickname();
             this.showLoading();
             this.waitForGuestToken()
                 .done(() => {
-                    this.api('room/' + code + '/join', 'POST')
+                    const postData = {};
+                    if (nickname) {
+                        postData.display_name = nickname;
+                    }
+                    this.api('room/' + code + '/join', 'POST', postData)
                         .done((response) => {
                             if (response.success) {
                                 this.roomCode = code;
@@ -357,6 +394,17 @@
                             }
                         })
                         .fail((xhr) => {
+                            const errCode = xhr.responseJSON?.code;
+                            if (errCode === 'room_full' || errCode === 'game_started') {
+                                if (confirm(xhr.responseJSON?.message + '\n\n' + __( 'Would you like to spectate the match live instead?', 'shortcode-arcade' ))) {
+                                    this.roomCode = code;
+                                    this.mySeat = null;
+                                    this.isSpectating = true;
+                                    this.loadRoomForSpectator();
+                                    this.updateURL();
+                                    return;
+                                }
+                            }
                             this.showError(xhr.responseJSON?.message || __( 'Failed to join room', 'shortcode-arcade' ));
                             this.showView('lobby');
                         })
@@ -373,6 +421,14 @@
                 .done((response) => {
                     this.room = response;
                     this.findMySeat();
+
+                    if (this.mySeat === null) {
+                        this.stopPolling();
+                        this.showError(__( 'You have been kicked from this room by the host.', 'shortcode-arcade' ));
+                        this.backToLobby();
+                        return;
+                    }
+
                     if (this.room.status === 'active') {
                         this.loadGameState();
                     } else if (this.room.status === 'completed') {
@@ -385,6 +441,28 @@
                 .fail(() => {
                     this.showError(__( 'Room not found', 'shortcode-arcade' ));
                     this.showView('lobby');
+                });
+        },
+
+        loadRoomForSpectator: function() {
+            this.api('room/' + this.roomCode)
+                .done((response) => {
+                    this.room = response;
+                    this.mySeat = null; // Ensure null seat for spectator
+                    this.isSpectating = true;
+
+                    if (this.room.status === 'active') {
+                        this.loadGameState();
+                    } else if (this.room.status === 'completed') {
+                        this.showGameOver();
+                    } else {
+                        this.showRoomView();
+                        this.startRoomPolling();
+                    }
+                })
+                .fail(() => {
+                    this.showError(__( 'Room not found', 'shortcode-arcade' ));
+                    this.backToLobby();
                 });
         },
 
@@ -411,22 +489,50 @@
             this.showView('room');
         },
 
+        getHostSeat: function() {
+            if (!this.room?.players || this.room.players.length === 0) {
+                return 0;
+            }
+            const seats = this.room.players.map(p => parseInt(p.seat_position));
+            return Math.min(...seats);
+        },
+
+        isHost: function() {
+            return this.mySeat === this.getHostSeat();
+        },
+
         updatePlayersList: function() {
             const list = $('#sacga-players');
             list.empty();
             if (!this.room?.players) return;
             const maxPlayers = this.room.game_meta?.max_players || 2;
+            const isHost = this.isHost();
+
             for (let i = 0; i < maxPlayers; i++) {
                 const player = this.room.players.find(p => parseInt(p.seat_position) === i);
                 if (player) {
                     const isMe = parseInt(player.seat_position) === this.mySeat;
                     const aiTag = player.is_ai == 1 ? ' <span class="sacga-ai-tag">[AI]</span>' : '';
                     const youTag = isMe ? ' <span class="sacga-you-tag">' + __( '(You)', 'shortcode-arcade' ) + '</span>' : '';
-                    list.append('<li class="sacga-player-slot sacga-player-filled"><span class="sacga-seat">' + __( 'Seat', 'shortcode-arcade' ) + ' ' + (i + 1) + ':</span> ' + this.escapeHtml(player.display_name) + aiTag + youTag + '</li>');
+                    const isDisconnected = parseInt(player.connected) === 0 && !player.is_ai;
+                    const disconnectTag = isDisconnected ? ' <span class="sacga-disconnected-badge">' + __( 'Offline', 'shortcode-arcade' ) + '</span>' : '';
+                    
+                    let kickBtn = '';
+                    if (isHost && !isMe) {
+                        kickBtn = ' <button type="button" class="sacga-kick-btn sacga-btn-text sacga-btn-danger" data-seat="' + i + '">' + __( 'Kick', 'shortcode-arcade' ) + '</button>';
+                    }
+
+                    list.append('<li class="sacga-player-slot sacga-player-filled"><span class="sacga-seat">' + __( 'Seat', 'shortcode-arcade' ) + ' ' + (i + 1) + ':</span> ' + this.escapeHtml(player.display_name) + aiTag + youTag + disconnectTag + kickBtn + '</li>');
                 } else {
                     list.append('<li class="sacga-player-slot sacga-player-empty"><span class="sacga-seat">' + __( 'Seat', 'shortcode-arcade' ) + ' ' + (i + 1) + ':</span> <em>' + __( 'Empty', 'shortcode-arcade' ) + '</em></li>');
                 }
             }
+
+            // Bind kick actions
+            list.find('.sacga-kick-btn').on('click', (e) => {
+                const seat = $(e.target).data('seat');
+                this.kickPlayer(seat);
+            });
         },
 
         updateStartButton: function() {
@@ -434,7 +540,19 @@
             const minPlayers = this.room.game_meta.min_players || 2;
             const currentPlayers = this.room.players?.length || 0;
             const canStart = currentPlayers >= minPlayers;
-            $('#sacga-start-game').prop('disabled', !canStart).text(canStart ? __( 'Start Game', 'shortcode-arcade' ) : __( 'Need', 'shortcode-arcade' ) + ' ' + (minPlayers - currentPlayers) + ' ' + __( 'more player(s)', 'shortcode-arcade' ));
+            
+            if (this.isSpectating) {
+                // Spectating view: hide add AI and show spectating label
+                $('#sacga-start-game').show().prop('disabled', true).text(__( 'Spectating match live...', 'shortcode-arcade' ));
+                $('#sacga-add-ai').hide();
+            } else if (this.isHost()) {
+                $('#sacga-start-game').show().prop('disabled', !canStart).text(canStart ? __( 'Start Game', 'shortcode-arcade' ) : __( 'Need', 'shortcode-arcade' ) + ' ' + (minPlayers - currentPlayers) + ' ' + __( 'more player(s)', 'shortcode-arcade' ));
+                $('#sacga-add-ai').show();
+            } else {
+                // Non-host: disable button and inform them to wait
+                $('#sacga-start-game').show().prop('disabled', true).text(__( 'Waiting for host to start...', 'shortcode-arcade' ));
+                $('#sacga-add-ai').hide();
+            }
         },
 
         addAI: function() {
@@ -443,6 +561,16 @@
                     this.api('room/' + this.roomCode + '/ai', 'POST', { difficulty: 'beginner' })
                         .done(() => this.loadRoom())
                         .fail((xhr) => this.showError(xhr.responseJSON?.message || __( 'Failed to add AI', 'shortcode-arcade' )));
+                })
+                .fail(() => this.showError(__( 'Unable to verify guest identity.', 'shortcode-arcade' )));
+        },
+
+        kickPlayer: function(seat) {
+            this.waitForGuestToken()
+                .done(() => {
+                    this.api('room/' + this.roomCode + '/kick/' + seat, 'POST')
+                        .done(() => this.loadRoom())
+                        .fail((xhr) => this.showError(xhr.responseJSON?.message || __( 'Failed to kick player', 'shortcode-arcade' )));
                 })
                 .fail(() => this.showError(__( 'Unable to verify guest identity.', 'shortcode-arcade' )));
         },
@@ -475,6 +603,7 @@
             this.roomCode = null;
             this.mySeat = null;
             this.state = null;
+            this.isSpectating = false;
             this.clearURL();
             this.showView('lobby');
         },
@@ -592,7 +721,11 @@
             const playerName = this.room?.players?.find(p => parseInt(p.seat_position) === currentTurn)?.display_name || __( 'Player', 'shortcode-arcade' ) + ' ' + (currentTurn + 1);
             const safePlayerName = this.escapeHtml(playerName);
 
-            $('#sacga-current-turn').html(isMyTurn ? '<strong>' + __( 'Your turn!', 'shortcode-arcade' ) + '</strong>' : __( 'Waiting for', 'shortcode-arcade' ) + ' ' + safePlayerName + '...');
+            if (this.isSpectating) {
+                $('#sacga-current-turn').html('<span class="sacga-spectator-badge"><span class="dashicons dashicons-visibility"></span> ' + __( 'Spectating Match Live', 'shortcode-arcade' ) + '</span> — ' + __( 'Turn:', 'shortcode-arcade' ) + ' ' + safePlayerName);
+            } else {
+                $('#sacga-current-turn').html(isMyTurn ? '<strong>' + __( 'Your turn!', 'shortcode-arcade' ) + '</strong>' : __( 'Waiting for', 'shortcode-arcade' ) + ' ' + safePlayerName + '...');
+            }
 
             // Use game-specific renderer
             if (window.SACGAGames && window.SACGAGames[this.gameId]) {
@@ -603,6 +736,45 @@
 
             if (this.state.state.game_over) {
                 this.showGameOver();
+            }
+
+            // Render Gemini bot comments if any are active (P2.17)
+            this.renderBotComments();
+        },
+
+        renderBotComments: function() {
+            // Clear any existing comments bubbles first
+            $('.sacga-bot-bubble').remove();
+
+            if (!this.state?.state?.bot_comments) return;
+
+            const comments = this.state.state.bot_comments;
+            for (const seat in comments) {
+                const commentText = comments[seat];
+                if (!commentText) continue;
+
+                const player = this.room?.players?.find(p => parseInt(p.seat_position) === parseInt(seat));
+                const displayName = player ? player.display_name : __( 'AI Bot', 'shortcode-arcade' );
+
+                // Create modern speech bubble HTML overlay
+                const bubbleHtml = `
+                    <div class="sacga-bot-bubble sacga-bubble-seat-${seat}" style="display: none;">
+                        <div class="sacga-bubble-header">
+                            <span class="dashicons dashicons-admin-generic"></span>
+                            <strong>${this.escapeHtml(displayName)}</strong>
+                        </div>
+                        <div class="sacga-bubble-content">"${this.escapeHtml(commentText)}"</div>
+                    </div>
+                `;
+
+                $('#sacga-game-container').append(bubbleHtml);
+                
+                // Animate showing and auto-fading after 6 seconds
+                const bubble = $(`.sacga-bubble-seat-${seat}`);
+                bubble.fadeIn(400);
+                setTimeout(() => {
+                    bubble.fadeOut(400, () => bubble.remove());
+                }, 6000);
             }
         },
 
@@ -699,23 +871,43 @@
         // Polling
         startRoomPolling: function() {
             this.stopPolling();
-            this.pollTimer = setInterval(() => this.pollRoom(), this.config.pollInterval || 2000);
+            this.pollDelay = this.config.pollInterval || 2000;
+            this.scheduleNextRoomPoll();
+        },
+
+        scheduleNextRoomPoll: function() {
+            if (this.pollTimer) clearTimeout(this.pollTimer);
+            this.pollTimer = setTimeout(() => {
+                this.pollRoom();
+            }, this.pollDelay);
         },
 
         startGamePolling: function() {
             this.stopPolling();
-            // Poll every 800ms during active game to catch AI move animations
-            this.pollTimer = setInterval(() => this.pollGameState(), 800);
+            this.pollDelay = 800; // Snappy default active game interval
+            this.scheduleNextGamePoll();
+        },
+
+        scheduleNextGamePoll: function() {
+            if (this.pollTimer) clearTimeout(this.pollTimer);
+            this.pollTimer = setTimeout(() => {
+                this.pollGameState();
+            }, this.pollDelay);
         },
 
         stopPolling: function() {
             if (this.pollTimer) {
-                clearInterval(this.pollTimer);
+                clearTimeout(this.pollTimer);
                 this.pollTimer = null;
             }
         },
 
         pollRoom: function() {
+            if (document.hidden) {
+                this.scheduleNextRoomPoll();
+                return;
+            }
+
             this.api('room/' + this.roomCode)
                 .done((response) => {
                     this.room = response;
@@ -723,26 +915,60 @@
                         this.stopPolling();
                         this.loadGameState();
                     } else {
+                        // Check if players count changed
+                        const oldPlayersCount = this.room?.players?.length || 0;
+                        const newPlayersCount = response.players?.length || 0;
+
+                        if (oldPlayersCount !== newPlayersCount) {
+                            // Players changed! Reset delay
+                            this.pollDelay = this.config.pollInterval || 2000;
+                        } else {
+                            // No change - scale up to 8000ms
+                            this.pollDelay = Math.min(this.pollDelay * 1.3, 8000);
+                        }
+
                         this.updatePlayersList();
                         this.updateStartButton();
+                        this.scheduleNextRoomPoll();
                     }
+                })
+                .fail(() => {
+                    this.pollDelay = Math.min(this.pollDelay * 1.3, 8000);
+                    this.scheduleNextRoomPoll();
                 });
         },
 
         pollGameState: function() {
+            if (document.hidden) {
+                this.scheduleNextGamePoll();
+                return;
+            }
+
             const etag = this.state?.etag || '';
 
             this.api('game/state/' + this.roomCode + '?etag=' + etag)
                 .done((response) => {
                     if (response.changed && response.state) {
+                        // Reset poll delay on state change!
+                        this.pollDelay = 800;
+
                         // If animation is in progress, store as pending update
                         if (this.isAnimating) {
                             this.pendingStateUpdate = response;
+                            this.scheduleNextGamePoll();
                             return;
                         }
 
                         this.applyStateUpdate(response);
+                    } else {
+                        // No change! Exponentially increase poll delay up to a max (e.g. 5000ms)
+                        this.pollDelay = Math.min(this.pollDelay * 1.5, 5000);
                     }
+                    this.scheduleNextGamePoll();
+                })
+                .fail(() => {
+                    this.pollDelay = Math.min(this.pollDelay * 1.5, 5000);
+                    this.scheduleNextGamePoll();
                 });
         },
 

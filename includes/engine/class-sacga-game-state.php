@@ -23,7 +23,11 @@ class SACGA_Game_State {
 
         // Handle current_turn: preserve NULL during gates, use 0 as fallback for non-gate states
         $current_turn = array_key_exists( 'current_turn', $state ) ? $state['current_turn'] : 0;
-        $current_turn_format = is_null( $current_turn ) ? '%s' : '%d';
+        if ( is_null( $current_turn ) ) {
+            $current_turn = -1;
+        }
+        // ensure current_turn_format handles integers:
+        $current_turn_format = '%d';
 
         $inserted = $wpdb->insert(
             $wpdb->prefix . 'sacga_game_state',
@@ -73,7 +77,7 @@ class SACGA_Game_State {
         }
 
         // Preserve NULL for current_turn during gates (don't cast to int if NULL)
-        $current_turn = is_null( $row['current_turn'] ) ? null : (int) $row['current_turn'];
+        $current_turn = is_null( $row['current_turn'] ) ? -1 : (int) $row['current_turn'];
 
         return [
             'id'            => (int) $row['id'],
@@ -104,6 +108,8 @@ class SACGA_Game_State {
             return new WP_Error( 'not_found', __( 'Game state not found.', 'shortcode-arcade' ) );
         }
 
+        $expected_version = (int) $current['state_version'];
+
         // Optimistic locking check
         if ( $expected_etag !== null && $current['etag'] !== $expected_etag ) {
             return new WP_Error(
@@ -113,12 +119,16 @@ class SACGA_Game_State {
             );
         }
 
-        $new_version = $current['state_version'] + 1;
+        $new_version = $expected_version + 1;
         $new_etag = $this->generate_etag( $state );
 
         // Handle current_turn: preserve NULL during gates, use 0 as fallback for non-gate states
         $current_turn = array_key_exists( 'current_turn', $state ) ? $state['current_turn'] : 0;
-        $current_turn_format = is_null( $current_turn ) ? '%s' : '%d';
+        if ( is_null( $current_turn ) ) {
+            $current_turn = -1;
+        }
+        // ensure current_turn_format handles integers:
+        $current_turn_format = '%d';
 
         $updated = $wpdb->update(
             $wpdb->prefix . 'sacga_game_state',
@@ -128,10 +138,22 @@ class SACGA_Game_State {
                 'game_data'     => wp_json_encode( $state ),
                 'etag'          => $new_etag,
             ],
-            [ 'room_id' => $room_id ],
+            [ 
+                'room_id'       => $room_id,
+                'state_version' => $expected_version, // Atomic CAS condition!
+            ],
             [ '%d', $current_turn_format, '%s', '%s' ],
-            [ '%d' ]
+            [ '%d', '%d' ]
         );
+
+        // If the update affected 0 rows, it means state_version in the DB has already changed!
+        if ( $updated === 0 ) {
+            return new WP_Error(
+                'stale_state',
+                __( 'Game state has been updated by another player. Please try again.', 'shortcode-arcade' ),
+                [ 'current_etag' => $current['etag'] ]
+            );
+        }
 
         if ( $updated === false ) {
             return new WP_Error( 'db_error', __( 'Failed to update game state.', 'shortcode-arcade' ) );
@@ -162,6 +184,15 @@ class SACGA_Game_State {
             return new WP_Error( 'not_found', __( 'Game state not found.', 'shortcode-arcade' ) );
         }
 
+        // Early check for stale state if etag is provided
+        if ( $expected_etag !== null && $current['etag'] !== $expected_etag ) {
+            return new WP_Error(
+                'stale_state',
+                __( 'Game state has changed. Please refresh.', 'shortcode-arcade' ),
+                [ 'current_etag' => $current['etag'] ]
+            );
+        }
+
         // Get room to find game
         $room = SACGA()->get_room_manager()->get_room_by_id( $room_id );
 
@@ -190,6 +221,11 @@ class SACGA_Game_State {
 
         // Apply move
         $state = $game->apply_move( $state, $player_seat, $move );
+
+        // Clear stale bot comments on a new move
+        if ( isset( $state['bot_comments'] ) ) {
+            unset( $state['bot_comments'] );
+        }
 
         // Update last move timestamp
         $state['last_move_at'] = time();

@@ -102,26 +102,30 @@ class SACGA_Game_Cribbage extends SACGA_Game_Contract {
 		$state['current_turn'] = ( $state['dealer'] + 1 ) % 2;
 		$state['last_move_at'] = time();
 
-		error_log( sprintf(
-			'[Cribbage] Round %d setup complete. Dealer: %d, Current turn: %d, Hands dealt: [%d, %d]',
-			$state['round_number'] ?? 1,
-			$state['dealer'],
-			$state['current_turn'],
-			count( $state['hands'][0] ),
-			count( $state['hands'][1] )
-		) );
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( sprintf(
+				'[Cribbage] Round %d setup complete. Dealer: %d, Current turn: %d, Hands dealt: [%d, %d]',
+				$state['round_number'] ?? 1,
+				$state['dealer'],
+				$state['current_turn'],
+				count( $state['hands'][0] ),
+				count( $state['hands'][1] )
+			) );
+		}
 
 		return $state;
 	}
 
 	public function validate_move( array $state, int $player_seat, array $move ) {
 		// Debug logging
-		error_log( sprintf(
-			'[Cribbage validate_move] player_seat: %d, phase: %s, move: %s',
-			$player_seat,
-			$state['phase'] ?? 'null',
-			json_encode( $move )
-		) );
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			error_log( sprintf(
+				'[Cribbage validate_move] player_seat: %d, phase: %s, move: %s',
+				$player_seat,
+				$state['phase'] ?? 'null',
+				json_encode( $move )
+			) );
+		}
 
 		// Handle round continuation
 		if ( $state['phase'] === 'round_end' ) {
@@ -211,15 +215,19 @@ class SACGA_Game_Cribbage extends SACGA_Game_Contract {
 			$discards_0 = is_array( $state['discards'][0] ?? null ) ? count( $state['discards'][0] ) : 0;
 			$discards_1 = is_array( $state['discards'][1] ?? null ) ? count( $state['discards'][1] ) : 0;
 
-			error_log( sprintf(
-				'[Cribbage] Discard phase: Player %d discarded. Discards status: [%d, %d]',
-				$player_seat,
-				$discards_0,
-				$discards_1
-			) );
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( sprintf(
+					'[Cribbage] Discard phase: Player %d discarded. Discards status: [%d, %d]',
+					$player_seat,
+					$discards_0,
+					$discards_1
+				) );
+			}
 
 			if ( $discards_0 === 2 && $discards_1 === 2 ) {
-				error_log( '[Cribbage] Both players discarded. Advancing to pegging phase.' );
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					error_log( '[Cribbage] Both players discarded. Advancing to pegging phase.' );
+				}
 				$state['starter'] = array_shift( $state['deck'] );
 				if ( $state['starter']['rank'] === 'J' ) {
 					$state['prev_scores'] = $state['scores'];

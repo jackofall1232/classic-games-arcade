@@ -675,7 +675,7 @@ class SACGA_Room_Manager {
         $hard_cap = gmdate( 'Y-m-d H:i:s', time() - $this->get_hard_cap_seconds() );
         $expired_rooms = $wpdb->get_col(
             $wpdb->prepare(
-                "SELECT id FROM {$wpdb->prefix}sacga_rooms WHERE (status = 'completed' AND expires_at < %s) OR (status != 'completed' AND created_at < %s)",
+                "SELECT id FROM {$wpdb->prefix}sacga_rooms WHERE (expires_at < %s) OR (created_at < %s)",
                 $now,
                 $hard_cap
             )

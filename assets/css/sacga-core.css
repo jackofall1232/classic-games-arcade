@@ -945,3 +945,91 @@
         border: 1px solid #000;
     }
 }
+
+/* ============================================
+   Modern Speech Bubbles for Gemini AI Bot Commentary
+   ============================================ */
+.sacga-bot-bubble {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    padding: 15px;
+    max-width: 280px;
+    z-index: 1000;
+    font-family: inherit;
+    animation: sacga-bounce 0.3s ease-out;
+}
+
+.sacga-bubble-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85em;
+    color: #4f46e5;
+    margin-bottom: 6px;
+}
+
+.sacga-bubble-header .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.sacga-bubble-content {
+    font-size: 0.95em;
+    color: #374151;
+    line-height: 1.4;
+    font-style: italic;
+}
+
+@keyframes sacga-bounce {
+    0% { transform: translateY(10px) scale(0.95); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Spectator Badge Styling */
+.sacga-spectator-badge {
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 0.85em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle;
+    border: 1px solid #c7d2fe;
+}
+
+.sacga-spectator-badge .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+}
+
+/* Offline Disconnected Player Badge Styling */
+.sacga-disconnected-badge {
+    background: #ffedd5;
+    color: #c2410c;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 0.8em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle;
+    border: 1px solid #fed7aa;
+    margin-left: 6px;
+    animation: sacga-pulse 2s infinite;
+}
+
+@keyframes sacga-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}

@@ -64,7 +64,9 @@ class SACGA_AI_Engine {
 
                 // If this AI hasn't discarded yet, return true
                 if ( ! is_array( $discards ) || count( $discards ) !== 2 ) {
-                    error_log( "[SACGA AI Engine] Cribbage discard phase: AI at seat $seat needs to discard" );
+                    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( "[SACGA AI Engine] Cribbage discard phase: AI at seat $seat needs to discard" );
+                    }
                     return true;
                 }
             }
@@ -115,8 +117,8 @@ class SACGA_AI_Engine {
         // Standard turn-based check
         $current_turn = $state['current_turn'];
 
-        // current_turn can be null when trick is complete
-        if ( $current_turn === null ) {
+        // current_turn can be null or -1 when trick is complete or turn is suspended
+        if ( $current_turn === null || $current_turn === -1 ) {
             return false;
         }
 
@@ -165,7 +167,7 @@ class SACGA_AI_Engine {
         }
 
         // Check if trick is complete and waiting for resolution
-        if ( ! empty( $state['trick_complete'] ) && $state['current_turn'] === null ) {
+        if ( ! empty( $state['trick_complete'] ) && ( $state['current_turn'] === null || $state['current_turn'] === -1 ) ) {
             // Resolve the trick using the game's public method
             if ( method_exists( $game, 'resolve_completed_trick' ) ) {
                 $state = $game->resolve_completed_trick( $state );
@@ -181,7 +183,7 @@ class SACGA_AI_Engine {
 
                 // Check if it's an AI's turn after resolution
                 $current_turn = $state['current_turn'];
-                if ( $current_turn === null ) {
+                if ( $current_turn === null || $current_turn === -1 ) {
                     return $state_data;
                 }
 
@@ -228,7 +230,9 @@ class SACGA_AI_Engine {
 
         // Special handling for discard phase (Cribbage) - all players discard simultaneously
         if ( isset( $state['phase'] ) && $state['phase'] === 'discard' ) {
-            error_log( '[SACGA AI Engine] Processing Cribbage discard phase' );
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( '[SACGA AI Engine] Processing Cribbage discard phase' );
+            }
             // Process all AI players in discard phase (simultaneous moves)
             foreach ( $room['players'] as $player ) {
                 if ( ! $player['is_ai'] ) {
@@ -243,20 +247,28 @@ class SACGA_AI_Engine {
                     continue;
                 }
 
-                error_log( "[SACGA AI Engine] AI at seat $seat discarding..." );
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                    error_log( "[SACGA AI Engine] AI at seat $seat discarding..." );
+                }
                 $difficulty = $player['ai_difficulty'] ?? 'beginner';
                 $move = $game->ai_move( $state, $seat, $difficulty );
 
                 if ( ! empty( $move ) ) {
-                    error_log( "[SACGA AI Engine] AI move: " . json_encode( $move ) );
+                    if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                        error_log( "[SACGA AI Engine] AI move: " . json_encode( $move ) );
+                    }
                     $result = $state_manager->apply_move( $room_id, $seat, $move );
                     if ( ! is_wp_error( $result ) ) {
-                        error_log( '[SACGA AI Engine] AI move applied successfully' );
+                        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                            error_log( '[SACGA AI Engine] AI move applied successfully' );
+                        }
                         // Refresh state after move
                         $state_data = $state_manager->get( $room_id );
                         $state = $state_data['state'];
                     } else {
-                        error_log( '[SACGA AI Engine] AI move failed: ' . $result->get_error_message() );
+                        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                            error_log( '[SACGA AI Engine] AI move failed: ' . $result->get_error_message() );
+                        }
                     }
                 }
             }
@@ -367,6 +379,14 @@ class SACGA_AI_Engine {
             return $state_data;
         }
 
+        // Generate Gemini bot commentary (P2.16)
+        $updated_state = $result['state'];
+        $commentary_state = $this->generate_bot_commentary( $updated_state, $current_turn, $move, $room['game_id'], $difficulty );
+        if ( isset( $commentary_state['bot_comments'] ) ) {
+            // Save updated state with bot comments
+            $state_manager->update( $room_id, $commentary_state );
+        }
+
         // Return updated state after ONE AI move
         return $state_manager->get( $room_id ) ?: [];
     }
@@ -417,5 +437,104 @@ class SACGA_AI_Engine {
             'difficulty'     => $difficulty,
             'is_ai'          => true,
         ];
+    }
+
+    /**
+     * Generate context-aware Gemini bot commentary (P2.16)
+     *
+     * @param array  $state Current game state
+     * @param int    $bot_seat Seat index of the AI player
+     * @param array  $move Last move played by the AI
+     * @param string $game_id The game ID
+     * @param string $difficulty AI difficulty level
+     * @return array Updated game state with comments array
+     */
+    public function generate_bot_commentary( array $state, int $bot_seat, array $move, string $game_id, string $difficulty ): array {
+        // 1. Check if Gemini features are enabled globally
+        $enabled = (int) get_option( 'sacga_enable_gemini_chat', 0 );
+        $api_key = get_option( 'sacga_gemini_api_key', '' );
+
+        if ( ! $enabled || empty( $api_key ) ) {
+            return $state;
+        }
+
+        // 2. Manage and increment moves counter to honor frequency
+        $state['comment_moves_count'] = ( $state['comment_moves_count'] ?? 0 ) + 1;
+        $frequency = (int) get_option( 'sacga_gemini_chat_frequency', 3 );
+
+        if ( $state['comment_moves_count'] % $frequency !== 0 ) {
+            return $state;
+        }
+
+        // 3. Construct contextual prompt
+        $player_names = [];
+        if ( isset( $state['players'] ) && is_array( $state['players'] ) ) {
+            foreach ( $state['players'] as $s => $p ) {
+                $player_names[ $s ] = $p['name'] ?? 'Player ' . ($s + 1);
+            }
+        }
+        $my_name = $player_names[ $bot_seat ] ?? 'AI Bot';
+
+        $prompt = sprintf(
+            "You are playing the classic game '%s' as an AI bot named '%s' (difficulty: %s) seated at seat index %d.
+            Active players: %s.
+            Current game state: %s.
+            You just made this move: %s.
+            Generate a short, witty, highly context-aware, in-character in-game dialogue (trash-talk, boasting, strategic advice, or simple greeting).
+            Keep it extremely brief (under 15 words) and highly relevant to this specific move/state.
+            Avoid any preambles or quoting yourself. Output only the plain text speech.",
+            $game_id,
+            $my_name,
+            $difficulty,
+            $bot_seat,
+            wp_json_encode( $player_names ),
+            wp_json_encode( $state ),
+            wp_json_encode( $move )
+        );
+
+        // 4. Dispatch the HTTP POST request to Google Gemini API (Gemini 1.5 Flash)
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $api_key;
+        $response = wp_remote_post( $url, [
+            'headers'     => [ 'Content-Type' => 'application/json' ],
+            'body'        => wp_json_encode( [
+                'contents' => [
+                    [
+                        'parts' => [
+                            [ 'text' => $prompt ]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'maxOutputTokens' => 30,
+                    'temperature'     => 1.0,
+                ]
+            ] ),
+            'timeout'     => 5, // Snappy timeout
+            'data_format' => 'body',
+        ] );
+
+        if ( is_wp_error( $response ) ) {
+            return $state;
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        $comment = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+        $comment = trim( sanitize_text_field( $comment ) );
+
+        // Strip quotes if Gemini wrapped them
+        $comment = trim( $comment, '"\'' );
+
+        if ( ! empty( $comment ) ) {
+            // Initialize bot comments container
+            if ( ! isset( $state['bot_comments'] ) || ! is_array( $state['bot_comments'] ) ) {
+                $state['bot_comments'] = [];
+            }
+            // Store comment mapped to the seat
+            $state['bot_comments'][ $bot_seat ] = $comment;
+        }
+
+        return $state;
     }
 }

@@ -24,6 +24,10 @@ class SACGA_Shortcodes {
      * Usage: [sacga_game game="checkers"]
      */
     public static function render_game( array $atts ): string {
+        // Force assets enqueueing for shortcode-driven safety
+        SACGA()->force_enqueue_assets = true;
+        SACGA()->enqueue_scripts();
+
         $atts = shortcode_atts( [
             'game' => 'checkers',
         ], $atts );
@@ -91,6 +95,14 @@ class SACGA_Shortcodes {
                 </div>
 
                 <div class="sacga-lobby-actions">
+                    <div class="sacga-nickname-container" style="margin-bottom: 20px; text-align: left;">
+                        <label for="sacga-nickname-input" style="display: block; font-weight: 600; margin-bottom: 6px; color: #374151;">
+                            <span class="dashicons dashicons-admin-users" style="vertical-align: middle; color: #4f46e5; margin-right: 4px;"></span>
+                            <?php echo esc_html__( 'Your Nickname', 'shortcode-arcade' ); ?>
+                        </label>
+                        <input type="text" id="sacga-nickname-input" class="sacga-input" placeholder="<?php echo esc_attr__( 'Enter your name...', 'shortcode-arcade' ); ?>" maxlength="20" style="width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95em;">
+                    </div>
+
                     <button id="sacga-create-room" class="sacga-btn sacga-btn-primary">
                         <span class="dashicons dashicons-plus-alt2"></span>
                         <?php echo esc_html__( 'Create Room', 'shortcode-arcade' ); ?>
@@ -204,6 +216,10 @@ class SACGA_Shortcodes {
      * Usage: [classic_games_arcade]
      */
     public static function render_arcade( array $atts ): string {
+        // Force assets enqueueing for shortcode-driven safety
+        SACGA()->force_enqueue_assets = true;
+        SACGA()->enqueue_scripts();
+
         if ( isset( $_GET['game'] ) ) {
             $game_id = sanitize_text_field( $_GET['game'] );
             $registry = SACGA()->get_game_registry();
@@ -254,6 +270,10 @@ class SACGA_Shortcodes {
      * Usage: [sacga_available_rooms game="checkers" limit="10" show_players="true" show_created="true" refresh="30"]
      */
     public static function render_available_rooms( array $atts ): string {
+        // Force assets enqueueing for shortcode-driven safety
+        SACGA()->force_enqueue_assets = true;
+        SACGA()->enqueue_scripts();
+
         $atts = shortcode_atts( [
             'game'         => '',
             'limit'        => 10,
@@ -496,8 +516,10 @@ class SACGA_Shortcodes {
         $base_css = '';
 
         if ( $game_type === 'card' ) {
+            wp_enqueue_script( 'sacga-cards' );
             $base_css = SACGA_PLUGIN_DIR . 'assets/css/games/cards-base.css';
         } elseif ( $game_type === 'dice' ) {
+            wp_enqueue_script( 'sacga-dice' );
             $base_css = SACGA_PLUGIN_DIR . 'assets/css/games/dice-base.css';
         }
 
@@ -550,6 +572,10 @@ class SACGA_Shortcodes {
      * @return string Rendered HTML.
      */
     public static function render_rules( array $atts ): string {
+        // Force assets enqueueing for shortcode-driven safety
+        SACGA()->force_enqueue_assets = true;
+        SACGA()->enqueue_scripts();
+
         $atts = shortcode_atts( [
             'game'       => '',
             'layout'     => 'sections',

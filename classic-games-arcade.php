@@ -3,10 +3,10 @@
  * Plugin Name: Classic Games Arcade
  * Plugin URI: https://shortcodearcade.com/classic-games-arcade
  * Description: A modular WordPress arcade for classic card and board games with room-based multiplayer and AI opponents.
- * Version: 0.1.0
+ * Version: 1.2.2
  * Author: Shortcode Arcade
  * Author URI: https://shortcodearcade.com
- * License: GPL-2.0+
+ * License: GPLv3
  * Text Domain: shortcode-arcade
  * Domain Path: /languages
  */
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'SACGA_VERSION', '0.1.0' );
+define( 'SACGA_VERSION', '1.2.2' );
 define( 'SACGA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SACGA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
@@ -34,6 +34,7 @@ final class SACGA_Classic_Games_Arcade {
     private static $instance = null;
     private $game_registry = null;
     private $room_manager = null;
+    public $force_enqueue_assets = false;
 
     public static function instance() {
         if ( null === self::$instance ) {
@@ -132,8 +133,8 @@ final class SACGA_Classic_Games_Arcade {
         // Dashicons for icons
         wp_enqueue_style( 'dashicons' );
 
-        // Card utilities (shared for card games)
-        wp_enqueue_script(
+        // Card utilities (shared for card games) - Register only for split loading
+        wp_register_script(
             'sacga-cards',
             SACGA_PLUGIN_URL . 'assets/js/sacga-cards.js',
             [ 'jquery', 'wp-i18n' ],
@@ -141,8 +142,8 @@ final class SACGA_Classic_Games_Arcade {
             true
         );
 
-        // Dice utilities (shared for dice games)
-        wp_enqueue_script(
+        // Dice utilities (shared for dice games) - Register only for split loading
+        wp_register_script(
             'sacga-dice',
             SACGA_PLUGIN_URL . 'assets/js/sacga-dice.js',
             [ 'jquery', 'wp-i18n' ],
@@ -150,14 +151,20 @@ final class SACGA_Classic_Games_Arcade {
             true
         );
 
-        // Core engine
+        // Core engine - Depend only on jquery and i18n globally
         wp_enqueue_script(
             'sacga-engine',
             SACGA_PLUGIN_URL . 'assets/js/sacga-engine.js',
-            [ 'jquery', 'wp-i18n', 'sacga-cards', 'sacga-dice' ],
+            [ 'jquery', 'wp-i18n' ],
             SACGA_VERSION,
             true
         );
+
+        // Force-enqueue card/dice assets for master views if force_enqueue_assets is enabled
+        if ( $this->force_enqueue_assets ) {
+            wp_enqueue_script( 'sacga-cards' );
+            wp_enqueue_script( 'sacga-dice' );
+        }
 
         // Set script translations for i18n
         wp_set_script_translations( 'sacga-engine', 'shortcode-arcade', SACGA_PLUGIN_DIR . 'languages' );
@@ -178,12 +185,17 @@ final class SACGA_Classic_Games_Arcade {
     }
 
     private function should_load_assets() {
+        if ( $this->force_enqueue_assets ) {
+            return true;
+        }
+
         global $post;
         if ( ! $post ) {
             return false;
         }
         return has_shortcode( $post->post_content, 'sacga_game' ) ||
                has_shortcode( $post->post_content, 'classic_games_arcade' ) ||
+               has_shortcode( $post->post_content, 'sacga_available_rooms' ) ||
                has_shortcode( $post->post_content, 'sacga_rules' );
     }
 
@@ -434,7 +446,7 @@ final class SACGA_Classic_Games_Arcade {
 
         // Check if migration already completed (cached in WordPress options)
         $migration_version = get_option( 'sacga_schema_version', 0 );
-        $current_version = 4; // Increment this when adding new migrations
+        $current_version = 5; // Increment this when adding new migrations (aligned with Migration 5)
 
         if ( $migration_version >= $current_version ) {
             return; // Already migrated to current version

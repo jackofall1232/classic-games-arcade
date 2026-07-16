@@ -76,6 +76,13 @@ class SACGA_REST_Controller {
             'permission_callback' => [ $this, 'can_write_room_action' ],
         ] );
 
+        // Kick player (Host-only)
+        register_rest_route( self::NAMESPACE, '/room/(?P<room_code>[A-Z0-9]{6})/kick/(?P<seat_position>[0-9])', [
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => [ $this, 'kick_player' ],
+            'permission_callback' => [ $this, 'can_write_room_action' ],
+        ] );
+
         // Get game state
         register_rest_route( self::NAMESPACE, '/game/state/(?P<room_code>[A-Z0-9]{6})', [
             'methods'             => WP_REST_Server::READABLE,
@@ -162,20 +169,30 @@ class SACGA_REST_Controller {
             if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
                 return new WP_Error( 'invalid_nonce', __( 'Invalid or missing nonce.', 'shortcode-arcade' ), [ 'status' => 403 ] );
             }
+        } else {
+            $guest_token = $this->get_request_guest_token( $request );
+            if ( ! $guest_token ) {
+                return new WP_Error( 'guest_token_missing', __( 'Guest token is required.', 'shortcode-arcade' ), [ 'status' => 401 ] );
+            }
 
-            return true;
-        }
+            $room_code = $request->get_param( 'room_code' );
+            $validated = SACGA()->validate_guest_token( $guest_token, $room_code ? (string) $room_code : null );
 
-        $guest_token = $this->get_request_guest_token( $request );
-        if ( ! $guest_token ) {
-            return new WP_Error( 'guest_token_missing', __( 'Guest token is required.', 'shortcode-arcade' ), [ 'status' => 401 ] );
+            if ( is_wp_error( $validated ) ) {
+                return $validated;
+            }
         }
 
         $room_code = $request->get_param( 'room_code' );
-        $validated = SACGA()->validate_guest_token( $guest_token, $room_code ? (string) $room_code : null );
-
-        if ( is_wp_error( $validated ) ) {
-            return $validated;
+        if ( $room_code ) {
+            $route = $request->get_route();
+            // Exclude join route from membership check
+            if ( strpos( $route, '/join' ) === false ) {
+                $seat = $this->get_player_seat( $room_code, $request );
+                if ( null === $seat ) {
+                    return new WP_Error( 'not_a_member', __( 'You must be a member of the room to perform this action.', 'shortcode-arcade' ), [ 'status' => 403 ] );
+                }
+            }
         }
 
         return true;
@@ -200,6 +217,9 @@ class SACGA_REST_Controller {
 
         // Auto-join creator
         $player_data = $this->get_current_player_data( $request );
+        if ( $request->get_param( 'display_name' ) ) {
+            $player_data['display_name'] = sanitize_text_field( $request->get_param( 'display_name' ) );
+        }
         SACGA()->get_room_manager()->join_room( $result['room_code'], $player_data );
 
         return rest_ensure_response( [
@@ -279,6 +299,64 @@ class SACGA_REST_Controller {
     }
 
     /**
+     * Kick player from room (Host-only)
+     */
+    public function kick_player( WP_REST_Request $request ) {
+        $room_code = $request->get_param( 'room_code' );
+        $seat_position = (int) $request->get_param( 'seat_position' );
+
+        $room = SACGA()->get_room_manager()->get_room( $room_code );
+
+        if ( ! $room ) {
+            return $this->error_response( new WP_Error( 'not_found', __( 'Room not found.', 'shortcode-arcade' ) ) );
+        }
+
+        // Only host can kick players
+        $player_seat = $this->get_player_seat( $room_code, $request );
+        $host_seat = $this->get_room_host_seat( $room );
+
+        if ( $player_seat !== $host_seat ) {
+            return $this->error_response( new WP_Error( 'not_host', __( 'Only the room host can kick players.', 'shortcode-arcade' ), [ 'status' => 403 ] ) );
+        }
+
+        // Find the player being kicked
+        $target_player = null;
+        foreach ( $room['players'] as $player ) {
+            if ( (int) $player['seat_position'] === $seat_position ) {
+                $target_player = $player;
+                break;
+            }
+        }
+
+        if ( ! $target_player ) {
+            return $this->error_response( new WP_Error( 'player_not_found', __( 'Player not found in this room.', 'shortcode-arcade' ) ) );
+        }
+
+        // Restrict kicking the host themselves
+        if ( $seat_position === $host_seat ) {
+            return $this->error_response( new WP_Error( 'cannot_kick_host', __( 'The host cannot be kicked.', 'shortcode-arcade' ) ) );
+        }
+
+        // Kick the player (delete them from room players table)
+        global $wpdb;
+        $wpdb->delete(
+            $wpdb->prefix . 'sacga_room_players',
+            [ 'id' => $target_player['id'] ],
+            [ '%d' ]
+        );
+
+        SACGA()->get_room_manager()->touch_room( (int) $room['id'] );
+
+        // Get updated room data
+        $room = SACGA()->get_room_manager()->get_room( $room_code );
+
+        return rest_ensure_response( [
+            'success' => true,
+            'room'    => $this->sanitize_room_for_response( $room ),
+        ] );
+    }
+
+    /**
      * Add AI player
      */
     public function add_ai( WP_REST_Request $request ) {
@@ -289,6 +367,14 @@ class SACGA_REST_Controller {
 
         if ( ! $room ) {
             return $this->error_response( new WP_Error( 'not_found', __( 'Room not found.', 'shortcode-arcade' ) ) );
+        }
+
+        // Only host can add AI
+        $player_seat = $this->get_player_seat( $room_code, $request );
+        $host_seat = $this->get_room_host_seat( $room );
+
+        if ( $player_seat !== $host_seat ) {
+            return $this->error_response( new WP_Error( 'not_host', __( 'Only the room host can add AI players.', 'shortcode-arcade' ), [ 'status' => 403 ] ) );
         }
 
         $result = SACGA()->get_room_manager()->add_ai_player( $room['id'], $difficulty );
@@ -308,6 +394,20 @@ class SACGA_REST_Controller {
      */
     public function start_game( WP_REST_Request $request ) {
         $room_code = $request->get_param( 'room_code' );
+
+        $room = SACGA()->get_room_manager()->get_room( $room_code );
+
+        if ( ! $room ) {
+            return $this->error_response( new WP_Error( 'not_found', __( 'Room not found.', 'shortcode-arcade' ) ) );
+        }
+
+        // Only host can start game
+        $player_seat = $this->get_player_seat( $room_code, $request );
+        $host_seat = $this->get_room_host_seat( $room );
+
+        if ( $player_seat !== $host_seat ) {
+            return $this->error_response( new WP_Error( 'not_host', __( 'Only the room host can start the game.', 'shortcode-arcade' ), [ 'status' => 403 ] ) );
+        }
 
         $result = SACGA()->get_room_manager()->start_game( $room_code );
 
@@ -375,12 +475,12 @@ class SACGA_REST_Controller {
                 // Check if current player has timed out (3 minutes)
                 if ( $elapsed > 180 && empty( $state_data['game_over'] ) ) {
                     $current_turn = $state_data['current_turn'];
-                    $opponent_seat = $current_turn === 0 ? 1 : 0;
+                    $winners = $this->calculate_forfeit_winners( $room, $state_data, $current_turn );
 
                     // Auto-forfeit the player who timed out
                     $state_data['game_over'] = true;
                     $state_data['end_reason'] = 'timeout';
-                    $state_data['winners'] = [ $opponent_seat ];
+                    $state_data['winners'] = $winners;
 
                     $state_manager->update( $room['id'], $state_data );
                     SACGA()->get_room_manager()->update_status( $room['id'], 'completed' );
@@ -464,12 +564,18 @@ class SACGA_REST_Controller {
             return $this->error_response( new WP_Error( 'not_in_room', __( 'You are not in this room.', 'shortcode-arcade' ) ) );
         }
 
+        // Enforce rate limit for move application
+        $rate_limit = $this->enforce_rate_limit( 'move', $request );
+        if ( is_wp_error( $rate_limit ) ) {
+            return $this->error_response( $rate_limit );
+        }
+
         // Check if it's the player's turn (skip for simultaneous phases like Hearts passing)
         $state_manager = new SACGA_Game_State();
         $current = $state_manager->get( $room['id'] );
 
         // Debug logging for cribbage discard issues
-        if ( $room['game_id'] === 'cribbage' ) {
+        if ( $room['game_id'] === 'cribbage' && defined( 'WP_DEBUG' ) && WP_DEBUG ) {
             error_log( sprintf(
                 '[Make Move] Cribbage - player_seat: %d, phase: %s, current_turn: %s, discards: %s',
                 $player_seat,
@@ -490,13 +596,15 @@ class SACGA_REST_Controller {
         $is_simultaneous_action = ! empty( $current['state']['simultaneous'] );
 
         if ( ! $is_gate_action && ! $is_simultaneous_phase && ! $is_simultaneous_action && $current['state']['current_turn'] !== $player_seat ) {
-            error_log( sprintf(
-                '[REST] Turn check failed: phase=%s, is_simultaneous=%s, current_turn=%s, player_seat=%d',
-                $current['state']['phase'] ?? 'null',
-                $is_simultaneous_phase ? 'true' : 'false',
-                $current['state']['current_turn'] ?? 'null',
-                $player_seat
-            ) );
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( sprintf(
+                    '[REST] Turn check failed: phase=%s, is_simultaneous=%s, current_turn=%s, player_seat=%d',
+                    $current['state']['phase'] ?? 'null',
+                    $is_simultaneous_phase ? 'true' : 'false',
+                    $current['state']['current_turn'] ?? 'null',
+                    $player_seat
+                ) );
+            }
             return $this->error_response( new WP_Error( 'not_your_turn', __( 'It is not your turn.', 'shortcode-arcade' ) ) );
         }
 
@@ -556,13 +664,13 @@ class SACGA_REST_Controller {
 
         $state = $current['state'];
 
-        // Determine winner (opponent of forfeiting player)
-        $opponent_seat = $player_seat === 0 ? 1 : 0;
+        // Determine winners dynamically
+        $winners = $this->calculate_forfeit_winners( $room, $state, $player_seat );
 
         // Mark game as over
         $state['game_over'] = true;
         $state['end_reason'] = 'forfeit';
-        $state['winners'] = [ $opponent_seat ];
+        $state['winners'] = $winners;
 
         // Update state and room status
         $state_manager->update( $room['id'], $state );
@@ -603,6 +711,30 @@ class SACGA_REST_Controller {
         $player = SACGA()->get_room_manager()->find_player_by_client_id( $client_id, $game_id );
 
         if ( ! $player ) {
+            return rest_ensure_response( [ 'status' => 'none' ] );
+        }
+
+        // Validate that caller owns the seat (possesses the same user_id or guest_token)
+        $current_player = $this->get_current_player_data( $request );
+        $is_owner = false;
+
+        if ( ! empty( $player['user_id'] ) && ! empty( $current_player['user_id'] ) ) {
+            $is_owner = (int) $player['user_id'] === (int) $current_player['user_id'];
+        } elseif ( ! empty( $player['guest_token'] ) && ! empty( $current_player['guest_token'] ) ) {
+            $is_owner = $player['guest_token'] === $current_player['guest_token'];
+        }
+
+        if ( ! $is_owner ) {
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( sprintf(
+                    '[SACGA][rejoin_check] Auth fail for client_id=%s (current user=%s/guest=%s, db seat user=%s/guest=%s)',
+                    $client_id,
+                    $current_player['user_id'] ?? 'none',
+                    $current_player['guest_token'] ?? 'none',
+                    $player['user_id'] ?? 'none',
+                    $player['guest_token'] ?? 'none'
+                ) );
+            }
             return rest_ensure_response( [ 'status' => 'none' ] );
         }
 
@@ -719,6 +851,20 @@ class SACGA_REST_Controller {
     }
 
     /**
+     * Get the seat index of the current room host
+     * 
+     * The host is defined as the active player with the lowest seat position.
+     * Usually seat 0, but if seat 0 leaves, the next lowest seat becomes host.
+     */
+    private function get_room_host_seat( array $room ): int {
+        if ( empty( $room['players'] ) ) {
+            return 0; // Default
+        }
+        $seats = array_map( 'intval', array_column( $room['players'], 'seat_position' ) );
+        return min( $seats );
+    }
+
+    /**
      * Get player's database ID in a room
      */
     private function get_player_id_in_room( array $room, ?WP_REST_Request $request = null ): ?int {
@@ -806,6 +952,9 @@ class SACGA_REST_Controller {
                 $player['guest_id'] = $player['guest_token'];
                 unset( $player['guest_token'] );
             }
+            if ( isset( $player['client_id'] ) ) {
+                unset( $player['client_id'] );
+            }
             return $player;
         }, $players );
     }
@@ -813,6 +962,11 @@ class SACGA_REST_Controller {
     private function enforce_rate_limit( string $action, WP_REST_Request $request ) {
         $limit = 10;
         $window = 5 * MINUTE_IN_SECONDS;
+
+        if ( $action === 'move' ) {
+            $limit = 60;
+            $window = 1 * MINUTE_IN_SECONDS;
+        }
 
         $identifier = $this->get_rate_limit_identifier( $request );
         $key = 'sacga_rate_' . $action . '_' . md5( $identifier );
@@ -854,6 +1008,48 @@ class SACGA_REST_Controller {
 
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         return 'ip_' . $ip;
+    }
+
+    /**
+     * Determine winners when a player forfeits or times out
+     *
+     * @param array $room The room data
+     * @param array $state The current game state
+     * @param int $forfeiting_seat The seat index of the forfeiting/timing out player
+     * @return array Array of winner seat positions
+     */
+    private function calculate_forfeit_winners( array $room, array $state, int $forfeiting_seat ): array {
+        // 1. Check if game has teams
+        if ( ! empty( $state['teams'] ) && is_array( $state['teams'] ) && count( $state['teams'] ) === 2 ) {
+            foreach ( $state['teams'] as $team_index => $members ) {
+                if ( in_array( $forfeiting_seat, $members, true ) ) {
+                    // The other team wins
+                    $opponent_team_index = 1 - $team_index;
+                    return array_map( 'intval', $state['teams'][ $opponent_team_index ] );
+                }
+            }
+        }
+
+        // 2. Fallback: all other seats in the room win
+        $winners = [];
+        $players = ! empty( $state['players'] ) ? $state['players'] : ( ! empty( $room['players'] ) ? $room['players'] : [] );
+        foreach ( $players as $seat => $player_info ) {
+            $seat_index = (int) $seat;
+            // Handle array formats (either associative by seat or sequential with seat_position key)
+            if ( isset( $player_info['seat_position'] ) ) {
+                $seat_index = (int) $player_info['seat_position'];
+            }
+            if ( $seat_index !== $forfeiting_seat ) {
+                $winners[] = $seat_index;
+            }
+        }
+
+        // If no players found, fallback to the classic binary opponent calculation
+        if ( empty( $winners ) ) {
+            $winners = [ $forfeiting_seat === 0 ? 1 : 0 ];
+        }
+
+        return $winners;
     }
 
     /**

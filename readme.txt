@@ -4,7 +4,7 @@ Tags: games, arcade, multiplayer, shortcodes, card games, board games, dice game
 Requires at least: 6.3
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 0.1.0
+Stable tag: 1.2.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
