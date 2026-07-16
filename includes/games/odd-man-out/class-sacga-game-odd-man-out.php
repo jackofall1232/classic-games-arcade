@@ -78,12 +78,19 @@ class SACGA_Game_Odd_Man_Out extends SACGA_Game_Contract {
 		$player_data = $this->format_players( $players );
 		$scores      = $this->init_scores( $players );
 
+		$chips = [];
+		foreach ( array_keys( $player_data ) as $seat ) {
+			$chips[ (int) $seat ] = 100;
+		}
+
 		return [
 			'phase'         => self::PHASE_WAITING,
 			'current_turn'  => -1, // -1 during gate phases (DB column may not allow NULL)
 			'round'         => 0,
 			'players'       => $player_data,
 			'scores'        => $scores,
+			'chips'         => $chips,
+			'wagers'        => [], // seat => chips wagered
 			'coins'         => [], // seat => 'heads' | 'tails'
 			'target_score'  => $target_score,
 			'odd_player'    => null, // Seat of the odd player, or null if no odd
@@ -134,6 +141,27 @@ class SACGA_Game_Odd_Man_Out extends SACGA_Game_Contract {
 			$scores[ (int) $player['seat_position'] ] = 0;
 		}
 		return $scores;
+	}
+
+	/**
+	 * Deduct flat wager of 5 chips from all players at start of round
+	 */
+	private function deduct_round_wagers( array $state ): array {
+		if ( ! isset( $state['chips'] ) ) {
+			$state['chips'] = [];
+		}
+
+		foreach ( array_keys( $state['players'] ) as $seat ) {
+			if ( ! isset( $state['chips'][ $seat ] ) ) {
+				$state['chips'][ $seat ] = 100;
+			}
+
+			// Flat 5-chip wager
+			$state['chips'][ $seat ] -= 5;
+			$state['wagers'][ $seat ] = 5;
+		}
+
+		return $state;
 	}
 
 	/**
@@ -201,6 +229,9 @@ class SACGA_Game_Odd_Man_Out extends SACGA_Game_Contract {
 	private function apply_begin_game( array $state ): array {
 		$state['game_started'] = true;
 		$state['round']        = 1;
+
+		// Deduct wagers (P4.11)
+		$state = $this->deduct_round_wagers( $state );
 
 		// Flip coins immediately
 		$state = $this->flip_all_coins( $state );
@@ -277,9 +308,27 @@ class SACGA_Game_Odd_Man_Out extends SACGA_Game_Contract {
 	private function apply_resolve_round( array $state ): array {
 		$state['phase'] = self::PHASE_SCORING;
 
-		// Award point to odd player if applicable
+		$players_count = count( $state['players'] );
+		$total_pot = $players_count * 5;
+
+		// Award point and chips (P4.11)
 		if ( $state['odd_player'] !== null ) {
 			$state['scores'][ $state['odd_player'] ]++;
+
+			// The single Odd Man wins the entire round's wager pot!
+			$state['chips'][ $state['odd_player'] ] += $total_pot;
+		} else {
+			// No score / tie: Refund everyone their 5-chip wager
+			foreach ( array_keys( $state['players'] ) as $seat ) {
+				$state['chips'][ $seat ] += 5;
+			}
+		}
+
+		// Automatic bankruptcy rebuy safety net
+		foreach ( array_keys( $state['players'] ) as $seat ) {
+			if ( $state['chips'][ $seat ] <= 0 ) {
+				$state['chips'][ $seat ] = 50; // Bankrupt rebuy!
+			}
 		}
 
 		// Store result for display
@@ -328,6 +377,9 @@ class SACGA_Game_Odd_Man_Out extends SACGA_Game_Contract {
 		$state['coins']      = [];
 		$state['odd_player'] = null;
 		$state['no_score']   = false;
+
+		// Deduct wagers (P4.11)
+		$state = $this->deduct_round_wagers( $state );
 
 		// Flip coins
 		$state = $this->flip_all_coins( $state );

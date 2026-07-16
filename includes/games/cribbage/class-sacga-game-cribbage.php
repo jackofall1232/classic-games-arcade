@@ -358,7 +358,36 @@ class SACGA_Game_Cribbage extends SACGA_Game_Contract {
 		$cards = array_merge( $hand, [ $starter ] );
 		$points = 0;
 
-		// 15s
+		$points += $this->check_fifteen_twos( $cards );
+		$points += $this->check_pairs( $cards );
+		$points += $this->check_runs( $cards );
+		$points += $this->check_flush( $hand, $starter, $is_crib );
+		$points += $this->check_his_knobs( $hand, $starter );
+
+		return $points;
+	}
+
+	private function get_rank_sequence_value( string $rank ): int {
+		$values = [
+			'A'  => 1,
+			'2'  => 2,
+			'3'  => 3,
+			'4'  => 4,
+			'5'  => 5,
+			'6'  => 6,
+			'7'  => 7,
+			'8'  => 8,
+			'9'  => 9,
+			'10' => 10,
+			'J'  => 11,
+			'Q'  => 12,
+			'K'  => 13,
+		];
+		return $values[ $rank ] ?? 0;
+	}
+
+	public function check_fifteen_twos( array $cards ): int {
+		$points = 0;
 		$n = count( $cards );
 		for ( $mask = 1; $mask < ( 1 << $n ); $mask++ ) {
 			$sum = 0;
@@ -371,8 +400,12 @@ class SACGA_Game_Cribbage extends SACGA_Game_Contract {
 				$points += 2;
 			}
 		}
+		return $points;
+	}
 
-		// Pairs
+	public function check_pairs( array $cards ): int {
+		$points = 0;
+		$n = count( $cards );
 		for ( $i = 0; $i < $n; $i++ ) {
 			for ( $j = $i + 1; $j < $n; $j++ ) {
 				if ( $cards[ $i ]['rank'] === $cards[ $j ]['rank'] ) {
@@ -380,26 +413,83 @@ class SACGA_Game_Cribbage extends SACGA_Game_Contract {
 				}
 			}
 		}
+		return $points;
+	}
 
-		// Flush
+	public function check_runs( array $cards ): int {
+		$n = count( $cards );
+		for ( $len = 5; $len >= 3; $len-- ) {
+			if ( $n < $len ) {
+				continue;
+			}
+			$run_points = 0;
+			$found_runs = 0;
+			$combinations = $this->get_combinations( $cards, $len );
+			foreach ( $combinations as $combo ) {
+				if ( $this->is_consecutive( $combo ) ) {
+					$run_points += $len;
+					$found_runs++;
+				}
+			}
+			if ( $found_runs > 0 ) {
+				return $run_points;
+			}
+		}
+		return 0;
+	}
+
+	private function get_combinations( array $arr, int $k ): array {
+		$combos = [];
+		$this->generate_combinations_recursive( $arr, $k, 0, [], $combos );
+		return $combos;
+	}
+
+	private function generate_combinations_recursive( array $arr, int $k, int $start, array $current, array &$results ) {
+		if ( count( $current ) === $k ) {
+			$results[] = $current;
+			return;
+		}
+		$n = count( $arr );
+		for ( $i = $start; $i < $n; $i++ ) {
+			$current[] = $arr[ $i ];
+			$this->generate_combinations_recursive( $arr, $k, $i + 1, $current, $results );
+			array_pop( $current );
+		}
+	}
+
+	private function is_consecutive( array $combo ): bool {
+		$values = [];
+		foreach ( $combo as $card ) {
+			$values[] = $this->get_rank_sequence_value( $card['rank'] );
+		}
+		sort( $values );
+		for ( $i = 0; $i < count( $values ) - 1; $i++ ) {
+			if ( $values[ $i + 1 ] !== $values[ $i ] + 1 ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public function check_flush( array $hand, array $starter, bool $is_crib = false ): int {
 		$hand_suits = array_unique( array_column( $hand, 'suit' ) );
 		if ( count( $hand_suits ) === 1 ) {
 			if ( $starter['suit'] === $hand_suits[0] ) {
-				$points += 5;
+				return 5;
 			} elseif ( ! $is_crib ) {
-				$points += 4;
+				return 4;
 			}
 		}
+		return 0;
+	}
 
-		// Nobs
+	public function check_his_knobs( array $hand, array $starter ): int {
 		foreach ( $hand as $card ) {
 			if ( $card['rank'] === 'J' && $card['suit'] === $starter['suit'] ) {
-				$points += 1;
-				break;
+				return 1;
 			}
 		}
-
-		return $points;
+		return 0;
 	}
 
 	private function resolve_go_reset( array $state ): array {

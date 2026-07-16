@@ -66,6 +66,9 @@ class SACGA_Game_Pig extends SACGA_Game_Contract {
             'turn_complete' => false,
             'game_over'     => false,
             'move_history'  => [],
+            'settings'      => [
+                'two_dice' => ! empty( $settings['two_dice'] ),
+            ],
         ];
     }
 
@@ -107,24 +110,57 @@ class SACGA_Game_Pig extends SACGA_Game_Contract {
         $action = $move['action'] ?? '';
 
         if ( $action === 'roll' ) {
-            $roll = wp_rand( 1, 6 );
-            $state['last_roll'] = $roll;
-            $state['last_action'] = 'roll';
-            $state['last_player'] = $player_seat;
+            $two_dice = ! empty( $state['settings']['two_dice'] );
+            if ( $two_dice ) {
+                $die1 = wp_rand( 1, 6 );
+                $die2 = wp_rand( 1, 6 );
+                $state['last_roll'] = [ $die1, $die2 ];
+                $state['last_action'] = 'roll';
+                $state['last_player'] = $player_seat;
 
-            if ( $roll === 1 ) {
-                $state['round_total'] = 0;
-                $state['turn_complete'] = true;
+                if ( $die1 === 1 && $die2 === 1 ) {
+                    // Double 1s: Reset total score and complete turn
+                    $state['scores'][ $player_seat ] = 0;
+                    $state['round_total'] = 0;
+                    $state['turn_complete'] = true;
+                } elseif ( $die1 === 1 || $die2 === 1 ) {
+                    // Single 1: Reset round total and complete turn
+                    $state['round_total'] = 0;
+                    $state['turn_complete'] = true;
+                } elseif ( $die1 === $die2 ) {
+                    // Other doubles: score double value and force another roll (turn not complete)
+                    $state['round_total'] += ( $die1 + $die2 ) * 2;
+                    $state['turn_complete'] = false;
+                } else {
+                    $state['round_total'] += $die1 + $die2;
+                    $state['turn_complete'] = false;
+                }
+
+                $state['move_history'][] = [
+                    'player' => $player_seat,
+                    'action' => 'roll',
+                    'roll'   => [ $die1, $die2 ],
+                ];
             } else {
-                $state['round_total'] += $roll;
-                $state['turn_complete'] = false;
-            }
+                $roll = wp_rand( 1, 6 );
+                $state['last_roll'] = $roll;
+                $state['last_action'] = 'roll';
+                $state['last_player'] = $player_seat;
 
-            $state['move_history'][] = [
-                'player' => $player_seat,
-                'action' => 'roll',
-                'roll'   => $roll,
-            ];
+                if ( $roll === 1 ) {
+                    $state['round_total'] = 0;
+                    $state['turn_complete'] = true;
+                } else {
+                    $state['round_total'] += $roll;
+                    $state['turn_complete'] = false;
+                }
+
+                $state['move_history'][] = [
+                    'player' => $player_seat,
+                    'action' => 'roll',
+                    'roll'   => $roll,
+                ];
+            }
 
             return $state;
         }

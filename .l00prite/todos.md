@@ -59,10 +59,10 @@ traits, admin, shared assets. **Excluded:** per-game modules under `includes/gam
 - [x] **P4.5 Backgammon Bear-Off Validation** — Enforce that checkers can only be borne off when all 15 are in the home quadrant. Add doubling cube mechanics. (Completed 2026-07-16)
 - [x] **P4.6 Spades Strict Reneging** — Validate that players follow the led suit if they possess it in their hand. Add Overtrick (bag) penalty tracking and Blind Nil bidding. (Completed 2026-07-16)
 - [x] **P4.7 Hearts "Shoot the Moon"** — Detect if a player captures all 26 points and invert the score penalty to opponents. (Completed 2026-07-16)
-- [ ] **P4.8 Cribbage Server-Side Scoring** — Implement auto-scoring algorithms for combinations (fifteen-twos, runs, pairs, flushes, his knobs) for both the pegging phase and hand counting.
-- [ ] **P4.9 Rummy Lay-offs & Discard Pulls** — Allow players to extend existing melds on the board and implement the traditional "Rummy!" call for deep discard pile pulls.
-- [ ] **P4.10 Pig "Double Pig" 2-Dice Variant** — Implement a room setting for 2 dice, penalizing single 1s, bankrupting on double 1s, and forcing re-rolls on other doubles.
-- [ ] **P4.11 Probability Games Virtual Wagers** — Add a 100-chip starting bank to "Even at Odds" and "Odd Man Out", requiring wager commitments per round.
+- [x] **P4.8 Cribbage Server-Side Scoring** — Implement auto-scoring algorithms for combinations (fifteen-twos, runs, pairs, flushes, his knobs) for both the pegging phase and hand counting. (Completed 2026-07-16)
+- [x] **P4.9 Rummy Lay-offs & Discard Pulls** — Allow players to extend existing melds on the board and implement the traditional "Rummy!" call for deep discard pile pulls. (Completed 2026-07-16)
+- [x] **P4.10 Pig "Double Pig" 2-Dice Variant** — Implement a room setting for 2 dice, penalizing single 1s, bankrupting on double 1s, and forcing re-rolls on other doubles. (Completed 2026-07-16)
+- [x] **P4.11 Probability Games Virtual Wagers** — Add a 100-chip starting bank to "Even at Odds" and "Odd Man Out", requiring wager commitments per round. (Completed 2026-07-16)
 
 ## UX & 3D Aesthetics (P5)
 

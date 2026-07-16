@@ -80,12 +80,19 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 		$player_data = $this->format_players( $players );
 		$scores      = $this->init_scores( $players );
 
+		$chips = [];
+		foreach ( array_keys( $player_data ) as $seat ) {
+			$chips[ (int) $seat ] = 100;
+		}
+
 		return [
 			'phase'         => self::PHASE_WAITING,
 			'current_turn'  => -1, // -1 during gate phases (DB column may not allow NULL)
 			'round'         => 0,
 			'players'       => $player_data,
 			'scores'        => $scores,
+			'chips'         => $chips,
+			'wagers'        => [], // seat => chips wagered
 			'bids'          => [], // seat => 'even' | 'odd' | null
 			'coins'         => [], // seat => 'heads' | 'tails' | null
 			'target_score'  => $target_score,
@@ -187,6 +194,17 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 				if ( isset( $state['bids'][ $player_seat ] ) && $state['bids'][ $player_seat ] !== null ) {
 					return new WP_Error( 'already_bid', __( 'You have already placed your bid.', 'shortcode-arcade' ) );
 				}
+
+				// Verify and validate wager (P4.11)
+				$wager = isset( $move['wager'] ) ? (int) $move['wager'] : 5; // Default 5 chip wager
+				$current_chips = isset( $state['chips'][ $player_seat ] ) ? (int) $state['chips'][ $player_seat ] : 100;
+				if ( $wager <= 0 ) {
+					return new WP_Error( 'invalid_wager', __( 'Wager must be at least 1 chip.', 'shortcode-arcade' ) );
+				}
+				if ( $wager > $current_chips ) {
+					return new WP_Error( 'insufficient_chips', __( 'You do not have enough chips.', 'shortcode-arcade' ) );
+				}
+
 				return true;
 
 			case self::PHASE_WAITING:
@@ -227,16 +245,17 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 
 		// Handle bid action
 		if ( $action === 'bid' ) {
-			return $this->apply_bid( $state, $player_seat, $move['value'] );
+			$wager = isset( $move['wager'] ) ? (int) $move['wager'] : 5;
+			return $this->apply_bid( $state, $player_seat, $move['value'], $wager );
 		}
 
 		return $state;
-	}
+		}
 
-	/**
-	 * Apply begin_game gate action
-	 */
-	private function apply_begin_game( array $state ): array {
+		/**
+		* Apply begin_game gate action
+		*/
+		private function apply_begin_game( array $state ): array {
 		$state['game_started'] = true;
 		$state['round']        = 1;
 		$state['phase']        = self::PHASE_BIDDING;
@@ -244,21 +263,34 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 
 		// Reset bids for new round
 		$state['bids'] = [];
+		$state['wagers'] = [];
 		foreach ( array_keys( $state['players'] ) as $seat ) {
 			$state['bids'][ $seat ] = null;
 		}
 
 		$this->close_gate( $state );
 		return $state;
-	}
+		}
 
-	/**
-	 * Apply bid move
-	 */
-	private function apply_bid( array $state, int $player_seat, string $value ): array {
+		/**
+		* Apply bid move
+		*/
+		private function apply_bid( array $state, int $player_seat, string $value, int $wager = 5 ): array {
 		$state['bids'][ $player_seat ] = $value;
+		$state['wagers'][ $player_seat ] = $wager;
 
-		// Record in history
+		// Initialize chips bankroll array if missing (defensive)
+		if ( ! isset( $state['chips'] ) ) {
+			$state['chips'] = [];
+		}
+		if ( ! isset( $state['chips'][ $player_seat ] ) ) {
+			$state['chips'][ $player_seat ] = 100;
+		}
+
+		// Deduct wagered chips
+		$state['chips'][ $player_seat ] -= $wager;
+
+		// Check if all players have placed bids
 		$state['move_history'][] = [
 			'round'  => $state['round'],
 			'player' => $player_seat,
@@ -326,11 +358,22 @@ class SACGA_Game_Even_At_Odds extends SACGA_Game_Contract {
 		$parity         = $state['result']['parity'];
 		$round_winners  = [];
 
-		// Award points to correct bidders
+		// Award points and wagers (P4.11)
 		foreach ( array_keys( $state['players'] ) as $seat ) {
+			$wager = isset( $state['wagers'][ $seat ] ) ? (int) $state['wagers'][ $seat ] : 5;
 			if ( isset( $state['bids'][ $seat ] ) && $state['bids'][ $seat ] === $parity ) {
 				$state['scores'][ $seat ]++;
 				$round_winners[] = $seat;
+
+				// Win! Refund the wager + award matching win chips (net gain: +wager)
+				$state['chips'][ $seat ] += $wager * 2;
+			} else {
+				// Loss! Wager is lost (already deducted on bid)
+			}
+
+			// Automatic bankruptcy rebuy safety net
+			if ( $state['chips'][ $seat ] <= 0 ) {
+				$state['chips'][ $seat ] = 50; // Bankrupt rebuy!
 			}
 		}
 
