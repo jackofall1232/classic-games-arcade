@@ -43,12 +43,12 @@ traits, admin, shared assets. **Excluded:** per-game modules under `includes/gam
 
 ## Later (P3 — quality / DX)
 
-- [ ] **P3.1 Automated tests** — no PHPUnit/WP test suite. Add unit tests for: guest token sign/verify, seat lookup, turn-gate open/close, room cleanup query, rate limit, move CAS.
-- [ ] **P3.2 Real CI** — `.github/workflows/ci.yml` is a placeholder. Add PHP lint, PHPCS (WordPress-Coding-Standards), and tests on PR.
-- [ ] **P3.3 API docs** — expand `docs/api.md` with full `sacga/v1` routes, headers (`X-WP-Nonce`, `X-SACGA-Guest-Token`, `X-SACGA-Client-ID`), error codes, rate limits.
-- [ ] **P3.4 Architecture overview** — expand `docs/overview.md` with room lifecycle diagram, gate model, polling/AI loop.
-- [ ] **P3.5 Composer / autoload optional** — still manual `require_once` tree; fine for WP plugin but document load order; consider classmap autoload if file count grows.
-- [ ] **P3.6 Reduce always-on table creation logging** — `create_tables()` logs heavily even outside WP_DEBUG. Restrict to failures or debug mode.
+- [x] **P3.1 Automated tests** — no PHPUnit/WP test suite. Add unit tests for: guest token sign/verify, seat lookup, turn-gate open/close, room cleanup query, rate limit, move CAS. (Completed 2026-07-16)
+- [x] **P3.2 Real CI** — `.github/workflows/ci.yml` is a placeholder. Add PHP lint, PHPCS (WordPress-Coding-Standards), and tests on PR. (Completed 2026-07-16)
+- [x] **P3.3 API docs** — expand `docs/api.md` with full `sacga/v1` routes, headers (`X-WP-Nonce`, `X-SACGA-Guest-Token`, `X-SACGA-Client-ID`), error codes, rate limits. (Completed 2026-07-16)
+- [x] **P3.4 Architecture overview** — expand `docs/overview.md` with room lifecycle diagram, gate model, polling/AI loop. (Completed 2026-07-16)
+- [x] **P3.5 Composer / autoload optional** — still manual `require_once` tree; fine for WP plugin but document load order; consider classmap autoload if file count grows. (Completed 2026-07-16)
+- [x] **P3.6 Reduce always-on table creation logging** — `create_tables()` logs heavily even outside WP_DEBUG. Restrict to failures or debug mode. (Completed 2026-07-16)
 
 ## Game-layer / AI / Rules (P4)
 

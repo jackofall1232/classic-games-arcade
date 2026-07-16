@@ -1,12 +1,33 @@
-# Stub CI workflow — replace with real PHP lint / WP tests when ready.
-name: ci
+name: Classic Games Arcade — Quality & DX CI
+
 on:
   push:
+    branches: [ '**' ]
   pull_request:
+    branches: [ '**' ]
+
 jobs:
-  placeholder:
+  validate:
+    name: PHP Syntax Linting & Local Unit Assertions
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Placeholder
-        run: echo "Add PHP lint / plugin tests here"
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: json, pdo, mysqli
+          coverage: none
+
+      - name: PHP Syntax Lint (php -l)
+        run: |
+          echo "Lints all PHP file syntax in the repository..."
+          find . -type f -name "*.php" -not -path "*/vendor/*" -print0 | xargs -0 -n 1 -P 4 php -l
+
+      - name: Run Local CLI Test Suite Assertions
+        run: |
+          echo "Executing zero-dependency unit assertion suite..."
+          php tests/run-tests.php

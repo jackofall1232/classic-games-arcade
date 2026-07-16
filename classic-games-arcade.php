@@ -539,9 +539,11 @@ final class SACGA_Classic_Games_Arcade {
         // CRITICAL: Must be loaded inside the function that calls dbDelta
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-        error_log( '[SACGA] Starting table creation process' );
-        error_log( '[SACGA] Table prefix: ' . $wpdb->prefix );
-        error_log( '[SACGA] Charset collate: ' . $charset_collate );
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( '[SACGA] Starting table creation process' );
+            error_log( '[SACGA] Table prefix: ' . $wpdb->prefix );
+            error_log( '[SACGA] Charset collate: ' . $charset_collate );
+        }
 
         // dbDelta is EXTREMELY picky about SQL formatting:
         // - Two spaces between column name and data type
@@ -602,7 +604,9 @@ final class SACGA_Classic_Games_Arcade {
         $all_success = true;
 
         foreach ( $tables as $table_name => $sql ) {
-            error_log( "[SACGA] Attempting to create table: {$wpdb->prefix}{$table_name}" );
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( "[SACGA] Attempting to create table: {$wpdb->prefix}{$table_name}" );
+            }
 
             // Log the exact SQL being used
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -612,7 +616,9 @@ final class SACGA_Classic_Games_Arcade {
             $result = dbDelta( $sql );
 
             // Log dbDelta result
-            error_log( "[SACGA] dbDelta result for {$table_name}: " . print_r( $result, true ) );
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                error_log( "[SACGA] dbDelta result for {$table_name}: " . print_r( $result, true ) );
+            }
 
             // Verify table was created
             $table_exists = $wpdb->get_var( $wpdb->prepare(
@@ -626,7 +632,9 @@ final class SACGA_Classic_Games_Arcade {
                 $all_success = false;
                 update_option( 'sacga_table_creation_failed', true );
             } else {
-                error_log( "[SACGA] Successfully verified table {$wpdb->prefix}{$table_name}" );
+                if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+                    error_log( "[SACGA] Successfully verified table {$wpdb->prefix}{$table_name}" );
+                }
             }
         }
 
