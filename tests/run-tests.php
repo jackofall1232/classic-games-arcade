@@ -47,12 +47,15 @@ echo "=============================================\n\n";
 $all_pass = true;
 
 // Test 1: ETag Generation Hashing
+// generate_etag() is private on SACGA_Game_State, so invoke it via reflection.
 $state_manager = new SACGA_Game_State();
+$etag_method   = new ReflectionMethod( 'SACGA_Game_State', 'generate_etag' );
+$etag_method->setAccessible( true );
 $sample_state = [ 'phase' => 'pegging', 'scores' => [ 0 => 12, 1 => 4 ] ];
-$etag1 = $state_manager->generate_etag( $sample_state );
-$etag2 = $state_manager->generate_etag( $sample_state );
+$etag1 = $etag_method->invoke( $state_manager, $sample_state );
+$etag2 = $etag_method->invoke( $state_manager, $sample_state );
 $sample_state['scores'][0] = 13;
-$etag3 = $state_manager->generate_etag( $sample_state );
+$etag3 = $etag_method->invoke( $state_manager, $sample_state );
 
 $all_pass &= assert_test(
     "ETag generation is deterministic",
