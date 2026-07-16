@@ -172,3 +172,113 @@
         font-size: 16px;
     }
 }
+
+/* ============================================================
+   MIDNIGHT ARCADE — Chess modern layer (v1.2.3)
+   Additive overrides per docs/design-spec.md. Original rules
+   above are preserved; these win by cascade order.
+   ============================================================ */
+
+.chess-board {
+    border: 0;
+    padding: 10px;
+    border-radius: 14px;
+    background:
+        linear-gradient(145deg, #3d2b1f 0%, #241811 55%, #33241a 100%);
+    box-shadow:
+        0 24px 50px -18px rgba(0, 0, 0, 0.75),
+        inset 0 2px 3px rgba(255, 255, 255, 0.08),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.5);
+}
+
+.chess-cell-light {
+    background: linear-gradient(160deg, #f2e0bd 0%, #e6d0a8 100%);
+}
+
+.chess-cell-dark {
+    background: linear-gradient(160deg, #b2895f 0%, #9c7550 100%);
+}
+
+.chess-piece {
+    filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.45));
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.chess-piece:hover {
+    transform: translateY(-3px) scale(1.08);
+    filter: drop-shadow(0 7px 7px rgba(0, 0, 0, 0.5));
+}
+
+.chess-white-piece {
+    color: #fdfaf3;
+    text-shadow:
+        0 1px 1px rgba(0, 0, 0, 0.65),
+        0 0 1px rgba(0, 0, 0, 0.9);
+}
+
+.chess-black-piece {
+    color: #141414;
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.22);
+}
+
+.chess-selected {
+    background: linear-gradient(160deg, #7c88f8 0%, #5865e8 100%) !important;
+    box-shadow:
+        inset 0 0 0 3px rgba(199, 210, 254, 0.9),
+        0 0 18px rgba(99, 102, 241, 0.55);
+}
+
+.chess-valid-move::after {
+    background: radial-gradient(circle at 35% 35%, rgba(129, 140, 248, 0.95), rgba(79, 70, 229, 0.75));
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.75);
+}
+
+.chess-capture-move::after {
+    border-color: rgba(248, 113, 113, 0.85);
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
+    animation: chess-capture-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes chess-capture-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(0.92); opacity: 0.6; }
+}
+
+.chess-last-move {
+    background: linear-gradient(160deg, #e8d27a 0%, #d4b954 100%) !important;
+}
+
+.chess-cell-dark.chess-last-move {
+    background: linear-gradient(160deg, #bfa23e 0%, #a4882e 100%) !important;
+}
+
+.chess-info {
+    background: linear-gradient(180deg, #131a30 0%, #0b1020 100%);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 14px;
+    color: #e7ecf7;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.chess-captured-label {
+    color: #9aa7c7;
+}
+
+.chess-status {
+    border-top-color: rgba(148, 163, 184, 0.18);
+    color: #e7ecf7;
+}
+
+.chess-your-turn {
+    color: #4ade80;
+    text-shadow: 0 0 12px rgba(74, 222, 128, 0.45);
+}
+
+.chess-waiting {
+    color: #9aa7c7;
+}
+
+.chess-winner {
+    color: #fbbf24;
+    text-shadow: 0 0 16px rgba(251, 191, 36, 0.5);
+}

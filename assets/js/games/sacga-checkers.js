@@ -64,7 +64,7 @@
             html += '<span class="capture-count">' + __( 'Opponent:', 'shortcode-arcade' ) + ' ' + (this.state.captured[mySeat === 0 ? 1 : 0] || 0) + '</span>';
             html += '</div>';
 
-            if (this.state.must_jump && this.state.jump_piece) {
+            if (this.state.must_jump && this.state.active_jumper) {
                 html += '<div class="checkers-notice">' + __( 'Continue your jump!', 'shortcode-arcade' ) + '</div>';
             }
             html += '</div>';
@@ -132,8 +132,8 @@
             $('.checkers-cell').removeClass('checkers-selected checkers-valid-move');
 
             // If must continue jumping, can only select that piece
-            if (this.state.must_jump && this.state.jump_piece) {
-                if (this.state.jump_piece.row !== row || this.state.jump_piece.col !== col) {
+            if (this.state.must_jump && this.state.active_jumper) {
+                if (this.state.active_jumper.row !== row || this.state.active_jumper.col !== col) {
                     return;
                 }
             }

@@ -1,11 +1,11 @@
 {
   "schema_version": 2,
   "project_name": "classic-games-arcade",
-  "current_goal": "Land P0 platform improvements from core audit (cleanup, room auth, multi-player forfeit, turn sentinel)",
-  "current_phase": "audited-core-backlog",
+  "current_goal": "v1.2.3 shipped to 1.2.2-build: audit fixes + Midnight Arcade Phase A; Phase B/C in docs/design-spec.md",
+  "current_phase": "v1.2.3-visual-refresh-phase-a",
   "active_agent": null,
-  "last_agent": "grok-audit",
-  "last_updated": "2026-07-15T23:24:06.170648Z",
+  "last_agent": "claude-v123-refresh",
+  "last_updated": "2026-07-16T15:47:07.610785+00:00",
   "status": "in_progress",
   "blocked": false,
   "blocker_reason": null,
@@ -16,5 +16,5 @@
   "ci_status": "unknown",
   "execution_active": false,
   "execution_stop_reason": null,
-  "next_recommended_action": "Human prioritizes P0 list; first unit: fix cleanup_expired_rooms to honor inactivity expires_at for lobby/active"
+  "next_recommended_action": "Human redeploys clean files from git (deployed sacga-overcut.js is corrupted outside git), hard-refreshes, and reviews the new look; then Phase B per design-spec"
 }

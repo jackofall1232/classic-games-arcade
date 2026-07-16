@@ -26,9 +26,11 @@
             const isGameOver = !!state.game_over;
             const lastMessage = this.getLastActionMessage(state);
             const scoresHtml = this.renderScores(state);
-            const dieHtml = state.last_roll ? window.SACGADice.renderDice([state.last_roll], { size: 'large' }) : '';
+            // Double Pig (two_dice) stores last_roll as an array; classic Pig stores a single int.
+            const rolls = this.getRollsArray(state.last_roll);
+            const dieHtml = rolls.length ? window.SACGADice.renderDice(rolls, { size: 'large' }) : '';
             const lastAction = state.last_action;
-            const isBust = lastAction === 'roll' && state.last_roll === 1;
+            const isBust = lastAction === 'roll' && rolls.indexOf(1) !== -1;
             const isHold = lastAction === 'hold';
             const rollAnimationClass = lastAction === 'roll' ? ' pig-roll-animate' : '';
             const bustClass = isBust ? ' pig-bust' : '';
@@ -73,6 +75,23 @@
             html += '</div>';
 
             $('#sacga-game-board').html(html);
+
+            // Trigger the 3D tumble (.sacga-die.rolling, dice-base.css) on fresh rolls,
+            // then drop the class so bust/settle styles can take over.
+            if (lastAction === 'roll' && rolls.length) {
+                const $dice = $('#sacga-game-board .pig-last-roll .sacga-die');
+                $dice.addClass('rolling');
+                setTimeout(function() {
+                    $dice.removeClass('rolling');
+                }, 850);
+            }
+        },
+
+        getRollsArray: function(lastRoll) {
+            if (lastRoll === null || lastRoll === undefined) {
+                return [];
+            }
+            return Array.isArray(lastRoll) ? lastRoll : [lastRoll];
         },
 
         renderScores: function(state) {
@@ -122,10 +141,21 @@
             const name = player.name || sprintf( __( 'Player %d', 'shortcode-arcade' ), state.last_player + 1 );
 
             if (state.last_action === 'roll') {
-                if (state.last_roll === 1) {
+                const rolls = this.getRollsArray(state.last_roll);
+                if (rolls.length > 1) {
+                    // Double Pig: report both dice.
+                    if (rolls[0] === 1 && rolls[1] === 1) {
+                        return sprintf( __( '%s rolled snake eyes! Total score reset.', 'shortcode-arcade' ), this.escapeHtml(name) );
+                    }
+                    if (rolls.indexOf(1) !== -1) {
+                        return sprintf( __( '%s rolled a 1 and busted.', 'shortcode-arcade' ), this.escapeHtml(name) );
+                    }
+                    return sprintf( __( '%1$s rolled %2$d and %3$d.', 'shortcode-arcade' ), this.escapeHtml(name), rolls[0], rolls[1] );
+                }
+                if (rolls[0] === 1) {
                     return sprintf( __( '%s rolled a 1 and busted.', 'shortcode-arcade' ), this.escapeHtml(name) );
                 }
-                return sprintf( __( '%s rolled a %d.', 'shortcode-arcade' ), this.escapeHtml(name), state.last_roll );
+                return sprintf( __( '%s rolled a %d.', 'shortcode-arcade' ), this.escapeHtml(name), rolls[0] );
             }
 
             if (state.last_action === 'hold') {

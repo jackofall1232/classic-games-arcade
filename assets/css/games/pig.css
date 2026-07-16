@@ -99,18 +99,23 @@
     font-weight: 700;
 }
 
-/* Dice animation */
-.pig-roll-animate .sacga-die {
-    animation: pigDiceBounce 0.45s ease-out,
-               pigDiceSpin 0.55s ease-in-out,
-               pigDiceShake 0.2s ease-in-out;
+/* Dice animation
+   The 3D tumble itself is .sacga-die.rolling (dice-base.css), applied by
+   sacga-pig.js on fresh rolls. The rules below only run once the tumble
+   class is removed, so the animations never fight over `transform`
+   (concurrent CSS animations on the same property do not compose). */
+.pig-roll-animate .sacga-die:not(.rolling) {
+    animation: pigDiceSettle 0.45s ease-out;
 }
 
 .pig-bust .sacga-die {
-    animation: pigBustShake 0.18s ease-in-out 2;
     background: linear-gradient(145deg, #ffe3e7 0%, #ffd1d8 100%);
     border-color: var(--pig-accent);
     box-shadow: 0 0 18px rgba(216, 106, 120, 0.45);
+}
+
+.pig-bust .sacga-die:not(.rolling) {
+    animation: pigBustShake 0.18s ease-in-out 2;
 }
 
 /* =========================
@@ -221,21 +226,13 @@
 /* =========================
    ANIMATIONS
    ========================= */
-@keyframes pigDiceBounce {
-    0% { transform: scale(0.85); }
-    60% { transform: scale(1.08); }
-    100% { transform: scale(1); }
-}
-
-@keyframes pigDiceSpin {
-    0% { transform: rotate(-12deg); }
-    100% { transform: rotate(0deg); }
-}
-
-@keyframes pigDiceShake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-3px); }
-    75% { transform: translateX(3px); }
+/* Single combined settle keyframe — replaces the old pigDiceBounce/Spin/Shake
+   trio, which all animated `transform` simultaneously and masked each other. */
+@keyframes pigDiceSettle {
+    0%   { transform: scale(0.85) rotate(-12deg) translateX(-3px); }
+    40%  { transform: scale(1.08) rotate(-4deg) translateX(3px); }
+    70%  { transform: scale(0.98) rotate(2deg) translateX(-1px); }
+    100% { transform: scale(1) rotate(0deg) translateX(0); }
 }
 
 @keyframes pigBustShake {

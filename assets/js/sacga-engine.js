@@ -714,6 +714,12 @@
             this.showView('game');
             this.renderGame();
             this.setupGameControls(); // Inject Emotes & Volume/Mute controls (P5.3/5.4)
+
+            // Deal-in animation: only on entering the game view (start/rejoin),
+            // never on poll re-renders (cards-base.css .sacga-dealing).
+            const $container = $('#sacga-game-container');
+            $container.addClass('sacga-dealing');
+            setTimeout(() => $container.removeClass('sacga-dealing'), 1800);
         },
 
         renderGame: function() {
@@ -821,6 +827,18 @@
                             if (response.success) {
                                 this.state = response.state;
                                 this.renderGame();
+
+                                // Pop-in for the player's own card play, mirroring the
+                                // default AI play animation (cards-base.css).
+                                if (move && (move.action === 'play' || move.action === 'discard')) {
+                                    const lastCard = $('.sacga-play-area .sacga-card').last();
+                                    if (lastCard.length) {
+                                        lastCard.addClass('sacga-card-animating sacga-card-just-played');
+                                        setTimeout(() => {
+                                            lastCard.removeClass('sacga-card-animating sacga-card-just-played');
+                                        }, 1000);
+                                    }
+                                }
                             }
                         })
                         .fail((xhr) => {

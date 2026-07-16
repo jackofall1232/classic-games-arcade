@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "lock_id": "lock_claude_gemini_phase_debug_20260716",
+  "lock_id": "lock_claude_v123_refresh_20260716",
   "owner_agent": "claude",
   "owner_session": "claude/gemini-game-phases-debug-87juj7",
-  "acquired_at": "2026-07-16T13:28:39.665585+00:00",
-  "expires_at": "2026-07-16T13:58:39.665585+00:00",
+  "acquired_at": "2026-07-16T15:46:39.275984+00:00",
+  "expires_at": "2026-07-16T16:16:39.275984+00:00",
   "ttl_seconds": 1800,
-  "purpose": "record gemini 5-phase debug diagnosis in ledger",
+  "purpose": "record v1.2.3 bugfix + Midnight Arcade visual refresh",
   "protected_paths": [
     "ledger.md",
     "memory.md",

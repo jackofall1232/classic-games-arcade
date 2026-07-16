@@ -462,3 +462,42 @@ Append one entry per agent run. Do not overwrite prior runs.
 - **Event status:** completed.
 - **Confidence:** high on repo-side findings; deploy-side (what code the human's site actually runs) unverifiable from here.
 - **Lock:** lock_claude_gemini_phase_debug_20260716 acquired/released this run.
+
+### Run 2026-07-16T16:00:00Z — claude-v123-refresh
+- **Goal:** Human-approved fix plan from the forensic audit: repair real defects, bump version to 1.2.3, and ship Phase A of the "Midnight Arcade" visual modernization (docs/design-spec.md).
+- **Triggering event:** human approval — "go ahead with your plan. I want an amazing looking plugin.. very modern looking."
+- **Decision:** Normal work. Human is deleting the stale `1.2.3` branch; all edits land on `1.2.2-build` (version string bumped to 1.2.3).
+- **Completed work:**
+  - Bug fixes: `sacga-checkers.js` now reads `active_jumper` (was `jump_piece`, a desync introduced by the P4 rename); `sacga-pig.js` is Double-Pig array-aware and wires the previously orphaned `.rolling` 3D dice tumble; `pig.css` competing transform animations collapsed into `pigDiceSettle`; test harness reflection fix (previous run).
+  - Version: plugin header, `SACGA_VERSION`, readme Stable tag → 1.2.3 + changelog entry.
+  - Design: `docs/design-spec.md` (Midnight Arcade direction, tokens, phased plan).
+  - Visual refresh (additive override layers, no markup/logic changes): `sacga-core.css` dark theme layer with scoped token remap; modern layers appended to `sacga-chess.css`, `sacga-checkers.css`, `sacga-fourfall.css`, `sacga-rummy.css`; card deal-in stagger in `cards-base.css`; engine hooks for deal-in on game start and human play pop-in.
+- **Changed files:** `classic-games-arcade.php`, `readme.txt`, `docs/design-spec.md`, `assets/css/sacga-core.css`, `assets/css/games/{sacga-chess,sacga-checkers,sacga-fourfall,sacga-rummy,pig,cards-base}.css`, `assets/js/sacga-engine.js`, `assets/js/games/{sacga-pig,sacga-checkers}.js`, `.l00prite/*`.
+- **Tests run / Verification:**
+  - command: php -l (all files)
+    exit_code: 0
+    summary: clean
+    timestamp: 2026-07-16T15:55:00Z
+  - command: node --check (all JS)
+    exit_code: 0
+    summary: clean
+    timestamp: 2026-07-16T15:55:00Z
+  - command: php tests/run-tests.php
+    exit_code: 0
+    summary: 4/4 assertions pass
+    timestamp: 2026-07-16T15:55:00Z
+  - command: php scratchpad/smoke-test.php (runtime: all 15 games init+deal, chess/checkers AI, pig roll)
+    exit_code: 0
+    summary: 25/25 pass
+    timestamp: 2026-07-16T15:55:00Z
+  - command: headless chromium screenshots of real CSS + representative markup (lobby chrome, chess, checkers, dice, cards)
+    exit_code: 0
+    summary: dark theme, board layers, dice, and card colors verified visually; two mock bugs found and fixed during QA (suit class names, animation capture timing)
+    timestamp: 2026-07-16T15:58:00Z
+- **Event status:** completed.
+- **Failures:** none. Note: engine-injected emote bar uses inline styles requiring !important overrides (design-spec Phase B removes them).
+- **Decisions:** Theme is scoped to .sacga-container/.sacga-arcade via CSS custom-property remap so legacy panels retint without per-selector overrides and the host theme is untouched. War/rummy/cribbage bespoke play areas deferred to Phase B; true 3D cube dice to Phase C.
+- **Confidence:** high (lint + runtime smoke + visual screenshots).
+- **Next action:** Human tests on their site after redeploying clean files from git (their deployed sacga-overcut.js is corrupted outside of git; must be replaced by this deploy).
+- **Do-not-retry notes:** Do not re-add multiple simultaneous transform animations on one element; they mask each other.
+- **Lock:** lock_claude_v123_refresh_20260716 acquired/released this run.

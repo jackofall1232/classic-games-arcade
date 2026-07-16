@@ -4,7 +4,7 @@ Tags: games, arcade, multiplayer, shortcodes, card games, board games, dice game
 Requires at least: 6.3
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -136,6 +136,16 @@ Games run in server-authoritative rooms with validated state transitions and aut
 6. Admin dashboard
 
 == Changelog ==
+
+= 1.2.3 =
+* Modern visual refresh: dark game-table theme, depth and motion across lobby, rooms, and boards
+* 3D tumbling dice animation now triggers on every roll (Pig and shared dice renderer)
+* Card play/deal animations extended to Euchre, War, Rummy, and Cribbage
+* Modernized Chess, Checkers, Four Fall, and Rummy board styling
+* Fixed Checkers multi-jump client desync (active_jumper state key)
+* Fixed Pig dice animation conflict and Double Pig two-dice rendering
+* Fixed CLI test harness fatal error; CI is green again
+* Version bump busts stale browser/CDN asset caches
 
 = 0.1.0 =
 * Initial public release under the Shortcode Arcade name

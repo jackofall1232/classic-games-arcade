@@ -3,7 +3,7 @@
  * Plugin Name: Classic Games Arcade
  * Plugin URI: https://shortcodearcade.com/classic-games-arcade
  * Description: A modular WordPress arcade for classic card and board games with room-based multiplayer and AI opponents.
- * Version: 1.2.2
+ * Version: 1.2.3
  * Author: Shortcode Arcade
  * Author URI: https://shortcodearcade.com
  * License: GPLv3
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'SACGA_VERSION', '1.2.2' );
+define( 'SACGA_VERSION', '1.2.3' );
 define( 'SACGA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SACGA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
