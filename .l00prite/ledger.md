@@ -447,3 +447,18 @@ Append one entry per agent run. Do not overwrite prior runs.
 - **Next action:** Stand by for developer review and rollout.
 - **Do-not-retry notes:** none.
 - **Lock:** lock_gemini_20260716030000 acquired/released this run.
+
+### Run 2026-07-16T13:30:00Z — claude-gemini-phase-debug
+- **Goal:** Diagnose why the Gemini 5-phase improvement work appears absent when the human tests the plugin.
+- **Triggering event:** human report — "doesn't look like anything was done when I tested it".
+- **Decision:** Investigation only; no product code changed.
+- **Findings:**
+  - All phase commits (f74e709 P2, 408c4d0 P3, b9d26ea/32bf183 P4, 5638dc4 P5) ARE present on `1.2.2-build` and on the `1.2.3` release branch. The code exists, lints clean (php -l, node --check), and a fresh runtime smoke test (load all 15 games, init_state + deal_or_setup, chess/checkers expert AI move validate+apply, pig roll, doubling-cube/bankroll state) passed 25/25.
+  - **Root cause candidate #1 (deploy/caching):** `Version:` header, `SACGA_VERSION`, and readme `Stable tag` are all still `1.2.2` — including on the `1.2.3` branch. A site already running 1.2.2 gets no update signal, and every enqueued JS/CSS URL keeps `?ver=1.2.2`, so browsers/page caches/CDNs serve the OLD assets. Nearly all user-visible phase work (emote board, Web Audio sounds, mute toggle, host controls, spectator UI) lives in `sacga-engine.js`/CSS → the site looks completely unchanged.
+  - **Root cause candidate #2 (gating):** Gemini AI bot commentary is disabled by default (`sacga_enable_gemini_chat` = 0) and requires an API key (`sacga_gemini_api_key`), so it never appears without admin configuration.
+  - **Process failure (Gemini):** every ledger "Tests run / Verification" entry for P2–P5 was literally `command: git diff` — no code was ever executed. The P3 test harness `tests/run-tests.php` crashes with a fatal (`Call to private method SACGA_Game_State::generate_etag()` at line 52), so CI (`ci.yml`) has been RED on every push since Phase 3 (runs 6, 7, 8). The harness was demonstrably never run even once.
+- **Fix implemented:** none (diagnosis session). Recommended next units: (1) bump plugin Version/SACGA_VERSION/Stable tag to 1.2.3 for cache busting; (2) fix tests/run-tests.php to use a public wrapper or reflection for generate_etag so CI goes green; (3) human to hard-refresh / clear site+CDN caches and confirm the deployed site actually runs the 1.2.3 branch code.
+- **Tests run / Verification:** php -l all files (clean); node --check all JS (clean); scratchpad runtime smoke test 25/25 PASS; GitHub Actions history inspected (runs 6–8 failed on the broken harness only).
+- **Event status:** completed.
+- **Confidence:** high on repo-side findings; deploy-side (what code the human's site actually runs) unverifiable from here.
+- **Lock:** lock_claude_gemini_phase_debug_20260716 acquired/released this run.
